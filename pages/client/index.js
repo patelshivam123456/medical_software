@@ -281,6 +281,7 @@ const Index = () => {
               className="border px-3 py-2 rounded w-64"
             />
           </div>
+          <div className="overflow-x-auto overflow-y-auto max-h-[70vh] ">
           <table className="w-full border mt-4">
             <thead className="bg-gray-100">
               <tr>
@@ -330,6 +331,7 @@ const Index = () => {
               ))}
             </tbody>
           </table>
+          </div>
           {totalPages > 1 && (
             <div className="flex justify-center items-center mt-4 gap-2">
               <button

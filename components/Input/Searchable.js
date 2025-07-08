@@ -23,7 +23,7 @@ const Searchable=({ clientNames, onSelect,setInputValue,inputValue,showOptions,s
         required
       />
       {showOptions && filteredOptions.length > 0 && (
-        <ul className="absolute z-10 w-[25%] max-h-40 overflow-y-auto bg-white text-black border border-gray-300 rounded shadow-md mt-1">
+        <ul className="absolute z-10 w-[75%] lg:w-[25%] max-h-40 overflow-y-auto bg-white text-black border border-gray-300 rounded shadow-md mt-1">
           {filteredOptions.map((c, i) => (
             <li
               key={i}
