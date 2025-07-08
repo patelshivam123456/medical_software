@@ -5,6 +5,7 @@ import InputModal from '@/components/Modal/InputModal';
 import { toast } from 'react-toastify';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 import * as XLSX from "xlsx";
+import LoadingBtn from '@/components/Buttons/LoadingBtn';
 
 const  ManageStockPage=()=> {
   const categoryDropdownRef = useRef(null);
@@ -46,6 +47,7 @@ const  ManageStockPage=()=> {
   const [mg,setMg] = useState('')
   const [batch,setBatch] = useState('')
   const [expiry,setExpiry] = useState('')
+  const [isLoading,setIsLoading] = useState(false)
   const tabletsPerPage = 5;
 
   const [filters, setFilters] = useState({
@@ -225,6 +227,7 @@ const  ManageStockPage=()=> {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true)
     try {
       const payload = {
         name: name.trim(),
@@ -243,10 +246,12 @@ const  ManageStockPage=()=> {
       if (editId) {
         await axios.put('/api/tablets/update', { id: editId, ...payload });
         setEditId(null);
+        setIsLoading(false)
         toast.success("Product Update SuccessFully")
       } else {
         await axios.post('/api/tablets/create', payload);
         toast.success("Product Add SuccessFully")
+        setIsLoading(false)
       }
 
       setName('');
@@ -266,6 +271,7 @@ const  ManageStockPage=()=> {
       setExpiry("")
     } catch (err) {
       console.error(err);
+      setIsLoading(false)
       // alert(err.response?.data?.message || 'Server Error');
       toast.error(err.response?.data?.message || 'Server Error')
     }
@@ -314,6 +320,7 @@ const  ManageStockPage=()=> {
   };
 
   const submitCompany = async () => {
+    setIsLoading(true)
     const trimmedName = newCompanyName.trim();
   
     if (!trimmedName) {
@@ -328,15 +335,17 @@ const  ManageStockPage=()=> {
       setCompanyError('');
       fetchCompanies();
       toast.success('Company added successfully')
+      setIsLoading(false)
     } catch (err) {
       const msg = err.response?.data?.message || 'Failed to add company';
     setCompanyError(msg);
     toast.error(msg);
+    setIsLoading(false)
     }
   };
 
   const submitSalt = async () => {
-    
+    setIsLoading(true)
     const trimmedName = newSaltName.trim();
   
     if (!trimmedName) {
@@ -353,10 +362,12 @@ const  ManageStockPage=()=> {
       fetchCompanies();
       fetchSalt();
       toast.success('Salt added successfully')
+      setIsLoading(false)
     } catch (err) {
       const msg = err.response?.data?.message || 'Failed to add Salt';
     setSaltError(msg);
     toast.error(msg);
+    setIsLoading(false)
     }
   };
   // const handleExport = () => {
@@ -590,7 +601,8 @@ const  ManageStockPage=()=> {
           </div>
         </div>
         <div className='flex justify-end items-center gap-4'>
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer">{editId ? 'Update' : 'Add'}</button>
+        {isLoading?<LoadingBtn/>
+        :<button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer">{editId ? 'Update' : 'Add'}</button>}
         <div className='text-green-600 text-base cursor-pointer' onClick={handleReset}>Reset</div>
         </div>
       </form>
@@ -734,7 +746,7 @@ const  ManageStockPage=()=> {
         <>
         <InputModal value={newCompanyName} onChange={(e)=>{setNewCompanyName(e.target.value);setCompanyError(false)}}
         onClose={()=>{setShowCompanyModal(false);setCompanyError(false)}} onSubmit={submitCompany}
-        label={"Add New Company"} Error={companyError}/>
+        label={"Add New Company"} Error={companyError} isLoading={isLoading}/>
         </>
       )}
 
@@ -742,7 +754,7 @@ const  ManageStockPage=()=> {
         <>
         <InputModal value={newSaltName} onChange={(e)=>{setNewSaltName(e.target.value);setSaltError(false)}}
         onClose={()=>{setShowSaltModal(false);setSaltError(false)}} onSubmit={submitSalt}
-        label={"Add New Salt"} Error={saltError}/>
+        label={"Add New Salt"} Error={saltError} isLoading={isLoading}/>
         </>
       )}
     </div>

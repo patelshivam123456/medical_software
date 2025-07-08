@@ -2,23 +2,28 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
 import Cookies from 'js-cookie'
+import LoadingBtn from '@/components/Buttons/LoadingBtn'
 
 const Login=()=> {
   const router = useRouter()
   const [mobile, setMobile] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [isLoading,setIsLoading] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsLoading(true)
     try {
       const res = await axios.post('/api/login', { mobile, password })
       if (res.data.success) {
         Cookies.set('loggedIn', 'true')
         router.push('/')
+        setIsLoading(false)
       }
     } catch (err) {
       setError('Invalid mobile number or password')
+      setIsLoading(false)
     }
   }
 
@@ -49,9 +54,13 @@ const Login=()=> {
             className="border p-2 rounded w-full"
           />
         </div>
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer">
+       {isLoading?
+       <div className='flex justify-end'>
+       <LoadingBtn/>
+   </div>
+       :<div className='flex justify-end'> <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer">
           Login
-        </button>
+        </button></div>}
       </form>
       </div>
     </div>

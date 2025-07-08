@@ -1,4 +1,5 @@
 import React from 'react'
+import LoadingBtn from '../Buttons/LoadingBtn'
 
 const InputModal = (props) => {
   return (
@@ -17,7 +18,8 @@ const InputModal = (props) => {
       )}
       <div className="flex justify-end gap-2">
         <button onClick={props.onClose} className="px-4 py-2 bg-gray-400 text-white rounded">Cancel</button>
-        <button onClick={props.onSubmit} className="px-4 py-2 bg-blue-600 text-white rounded">Submit</button>
+        {props.isLoading?<LoadingBtn/>
+        :<button onClick={props.onSubmit} className="px-4 py-2 bg-blue-600 text-white rounded">Submit</button>}
       </div>
     </div>
   </div>
