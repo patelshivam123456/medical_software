@@ -1,0 +1,675 @@
+"use client";
+import { useRouter } from "next/router";
+import useSWR from "swr";
+import axios from "axios";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { useEffect, useState } from "react";
+import { toWords } from 'number-to-words';
+
+const fetcher = (url) => axios.get(url).then((res) => res.data);
+
+const BillDetailPage=()=> {
+  const router = useRouter();
+  const { id } = router.query;
+  const [grandTotal, setGrandTotal] = useState(0);
+
+  const { data, error } = useSWR(
+    () => (id ? `/api/bills/${id}` : null),
+    fetcher
+  );
+  const billdata = data?.bill;
+  useEffect(() => {
+    if (billdata?.tablets?.length) {
+      const total = billdata.tablets.reduce(
+        (sum, item) => sum + (parseFloat(item.total) || 0),
+        0
+      );
+      setGrandTotal(total);
+    }
+  }, [billdata]);
+
+  if (error) return <div className="p-6">❌ Failed to load bill</div>;
+  if (!data) return <div className="p-6">Loading...</div>;
+
+  console.log(billdata);
+  const discountAmount = billdata.discount ? (grandTotal * billdata.discount) / 100 : 0;
+const subTotal = grandTotal - discountAmount;
+
+const sgstAmount = billdata.gst ? (subTotal * billdata.sgst) / 100 : 0;
+const cgstAmount = billdata.gst ? (subTotal * billdata.cgst) / 100 : 0;
+
+const grandTotalWithTax = subTotal + sgstAmount + cgstAmount;
+
+const roundedGrandTotal = Math.ceil(grandTotalWithTax);
+const totalInWords = toWords(roundedGrandTotal);
+
+  const handleDownloadPDF = () => {
+    const input = document.getElementById("bill-content");
+
+    html2canvas(input, {
+      backgroundColor: "#00000",
+      scale: 2,
+      ignoreElements: (el) => el.classList?.contains("no-print"),
+    }).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF();
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Invoice-${data.bill.billNo}.pdf`);
+    });
+  };
+
+  return (
+    <div
+      id="bill-content"
+      className="relative p-6 max-w-6xl mx-auto bg-white "
+      style={{
+        width: "1050px",
+        minHeight: '700px',
+        padding: "40px",
+        boxSizing: "border-box",
+        position: "relative",
+      }}
+    >
+      {/* ✅ Watermark logo */}
+      <img
+        src="/sriji.png"
+        alt="Watermark"
+        className="absolute top-[52%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none select-none w-[300px]"
+        style={{ zIndex: 0 }}
+      />
+ <div className="mb-6 no-print relative z-10 flex justify-end">
+        <button
+          onClick={handleDownloadPDF}
+          className="bg-green-600 text-white px-4 py-2 rounded"
+        >
+          📥 Download PDF
+        </button>
+      </div>
+      {/* ✅ Bill content */}
+      <div className="relative z-10 border px-2 py-2">
+        <div className="flex">
+          <div className="w-1/2">
+            <div className="font-semibold text-lg">SHRI JI ENTERPRISE</div>
+            <div className="text-xs font-semibold italic">
+              Under Composition, not eligible to collect GST
+            </div>
+            <div>Aminabad,Kesarbhag,Lucknow</div>
+            <div>122001,Uttar Pradesh</div>
+            <div className="text-base">Mobile Number: +91-8707868591</div>
+          </div>
+          <div className="w-1/2">
+            <div className="font-semibold text-lg">
+              {billdata.title + " " + billdata.clientName}
+            </div>
+            <div className="">{billdata.address1}</div>
+            <div>{billdata.address2 || ""}</div>
+            <div>{billdata.state + "," + billdata.pinCode}</div>
+            <div className="text-base">
+              Mobile Number: +91-{billdata.mobile}
+            </div>
+            <div>GST:</div>
+          </div>
+        </div>
+        <div className="flex  gap-2 border mt-2 px-3">
+          <div className="w-[40%]"></div>
+          <div className="w-[60%] flex gap-4 ">
+            <div
+              className="w-[40%] text-xl font-semibold text-center pb-4 pt-2 px-2"
+              style={{ backgroundColor: "lightgray" }}
+            >
+              GST INVOICE
+            </div>
+            <div className="w-[70%] flex  justify-between pb-4 ">
+              <div>
+                <div className="text-sm">
+                  Invoice No.: SJ000{billdata.billNo}
+                </div>
+                <div className="text-sm">Sales man: </div>
+              </div>
+              <div>
+                <div className="text-sm">
+                  Date:{" "}
+                  {billdata?.createdAt
+                    ? new Date(billdata.createdAt).toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
+                    : ""}
+                </div>
+                <div className="text-sm">
+                  Due Date:{" "}
+                  {billdata?.createdAt
+                    ? new Date(billdata.createdAt).toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        // hour: "2-digit",
+                        // minute: "2-digit",
+                        // hour12: true,
+                      })
+                    : ""}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="relative border"
+          style={{
+            minHeight: "220px", // adjust as needed
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+          }}
+        >
+          <table className=" min-w-full pb-60 text-sm">
+            <thead className="">
+              <tr>
+                <th className="border px-3 py-2 text-left">Sn.</th>
+                <th className="border px-3 py-2 text-left">Qty.</th>
+                <th className="border px-3 py-2 text-left">Free</th>
+                <th className="border px-3 py-2 text-left">Pack</th>
+                <th className="border px-3 py-2 text-left">Product</th>
+                <th className="border px-3 py-2 text-left">Batch</th>
+                <th className="border px-3 py-2 text-left">Exp.</th>
+                <th className="border px-3 py-2 text-left">HSN</th>
+                <th className="border px-3 py-2 text-left">MRP</th>
+                <th className="border px-3 py-2 text-left">Rate</th>
+                <th className="border px-3 py-2 text-left">Dis.</th>
+                <th className="border px-3 py-2 text-left">SGST</th>
+                <th className="border px-3 py-2 text-left">CGST</th>
+                <th className="border px-3 py-2 text-left">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {billdata.tablets.map((t, i) => (
+                <tr key={t._id || i} className="">
+                  <td className=" px-3 pt-1 pb-4">{i + 1}</td>
+                  <td className=" px-3 pt-1 pb-4">{t.quantity}</td>
+                  <td className=" px-3 pt-1 pb-4">{t.free}</td>
+                  <td className=" px-3 pt-1 pb-4">{t.packing}</td>
+                  <td className=" px-3 pt-1 pb-4">{t.name}</td>
+                  <td className=" px-3 pt-1 pb-4">{t.batch}</td>
+                  <td className=" px-3 pt-1 pb-4">{t.expiry}</td>
+                  <td className=" px-3 pt-1 pb-4">{t.hsm}</td>
+                  <td className=" px-3 pt-1 pb-4">{t.price}</td>
+                  <td className=" px-3 pt-1 pb-4">₹{t.rate}</td>
+                  <td className=" px-3 pt-1 pb-4">{t.discount}</td>
+                  <td className=" px-3 pt-1 pb-4">{t.sgst}</td>
+                  <td className=" px-3 pt-1 pb-4">{t.cgst}</td>
+                  <td className=" px-3 pt-1 pb-4">{t.total}</td>
+                </tr>
+              ))}
+            </tbody>
+            
+          </table>
+        </div>
+        <div className="flex items-center mb-2">
+          <div
+            className="w-[60%]"
+            // style={{
+            //   minHeight: "220px", // adjust as needed
+            //   display: "flex",
+            //   flexDirection: "column",
+            //   justifyContent: "flex-start",
+            // }}
+          >
+            <table className=" min-w-full border pb-60 text-sm mt-3">
+              <thead className="">
+                <tr>
+                  <th className="border px-3 py-2 text-left">CLASS</th>
+                  <th className="border px-3 py-2 text-left">TOTAL</th>
+                  <th className="border px-3 py-2 text-left">SCH.</th>
+                  <th className="border px-3 py-2 text-left">DISC.</th>
+                  <th className="border px-3 py-2 text-left">CGST</th>
+                  <th className="border px-3 py-2 text-left">SGST</th>
+                  <th className="border px-3 py-2 text-left">TOTAL GST</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr key={1} className="">
+                  <td className="border px-3 pt-1 pb-2">{"GST 5.00"}</td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 5
+                      ? billdata.discount
+                        ? grandTotal.toFixed(2)
+                        : grandTotal.toFixed(2)
+                      : ""}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">{"00"}</td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 5
+                      ? billdata.discount
+                        ? ((grandTotal * billdata.discount) / 100).toFixed(2)
+                        : "00"
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 5
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.cgst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 5
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.sgst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 5
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.gst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                </tr>
+                <tr key={2} className="">
+                  <td className="border px-3 pt-1 pb-2">{"GST 12.00"}</td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 12
+                      ? billdata.discount
+                        ? grandTotal.toFixed(2)
+                        : grandTotal.toFixed(2)
+                      : ""}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">{"00"}</td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 12
+                      ? billdata.discount
+                        ? ((grandTotal * billdata.discount) / 100).toFixed(2)
+                        : "00"
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 12
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.cgst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 12
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.sgst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 12
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.gst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                </tr>
+                <tr key={3} className="">
+                  <td className="border px-3 pt-1 pb-2">{"GST 18.00"}</td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 18
+                      ? billdata.discount
+                        ? grandTotal.toFixed(2)
+                        : grandTotal.toFixed(2)
+                      : ""}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">{"00"}</td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 18
+                      ? billdata.discount
+                        ? ((grandTotal * billdata.discount) / 100).toFixed(2)
+                        : "00"
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 18
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.cgst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 18
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.sgst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 18
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.gst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                </tr>
+                <tr key={4} className="">
+                  <td className="border px-3 pt-1 pb-2">{"GST 28.00"}</td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 28
+                      ? billdata.discount
+                        ? grandTotal.toFixed(2)
+                        : grandTotal.toFixed(2)
+                      : ""}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">{"00"}</td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 28
+                      ? billdata.discount
+                        ? ((grandTotal * billdata.discount) / 100).toFixed(2)
+                        : "00"
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 28
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.sgst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 28
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.cgst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 28
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.gst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                </tr>
+                <tr key={5} className="">
+                  <td className="border px-3 pt-1 pb-2">{"TOTAL"}</td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 5 ||
+                    billdata.gst === 12 ||
+                    billdata.gst === 18 ||
+                    billdata.gst === 28
+                      ? billdata.discount
+                        ? grandTotal.toFixed(2)
+                        : grandTotal.toFixed(2)
+                      : ""}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">{"00"}</td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 5 ||
+                    billdata.gst === 12 ||
+                    billdata.gst === 18 ||
+                    billdata.gst === 28
+                      ? billdata.discount
+                        ? ((grandTotal * billdata.discount) / 100).toFixed(2)
+                        : "00"
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 5 ||
+                    billdata.gst === 12 ||
+                    billdata.gst === 18 ||
+                    billdata.gst === 28
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.sgst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 5 ||
+                    billdata.gst === 12 ||
+                    billdata.gst === 18 ||
+                    billdata.gst === 28
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.cgst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                  <td className="border px-3 pt-1 pb-2">
+                    {billdata.gst === 5 ||
+                    billdata.gst === 12 ||
+                    billdata.gst === 18 ||
+                    billdata.gst === 28
+                      ? (
+                          ((grandTotal -
+                            ((grandTotal * billdata.discount) / 100).toFixed(
+                              2
+                            )) *
+                            billdata.gst) /
+                          100
+                        ).toFixed(2)
+                      : "00"}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="w-[40%] pt-3">
+            <div className="flex justify-between  pb-2 px-7">
+              <div className="font-medium">SUB TOTAL</div>
+              <div>
+                {billdata.gst === 5 ||
+                billdata.gst === 12 ||
+                billdata.gst === 18 ||
+                billdata.gst === 28
+                  ? billdata.discount
+                    ? (
+                        grandTotal -
+                        ((grandTotal * billdata.discount) / 100).toFixed(2)
+                      ).toFixed(2)
+                    : grandTotal.toFixed(2)
+                  : grandTotal.toFixed(2)}
+              </div>
+            </div>
+            <div className="flex justify-between pt-1 pb-3 px-7">
+              <div className="font-medium">SGST PAYBLE</div>
+              <div>
+                {billdata.gst === 5 ||
+                billdata.gst === 12 ||
+                billdata.gst === 18 ||
+                billdata.gst === 28
+                  ? billdata.discount
+                    ? (
+                      ((grandTotal -
+                        ((grandTotal * billdata.discount) / 100).toFixed(
+                          2
+                        )) *
+                        billdata.cgst) /
+                      100
+                    ).toFixed(2)
+                    : (
+                      ((grandTotal -
+                        ((grandTotal * billdata.discount) / 100).toFixed(
+                          2
+                        )) *
+                        billdata.cgst) /
+                      100
+                    ).toFixed(2)
+                  : "00"}
+              </div>
+            </div>
+            <div className="flex justify-between pb-2 px-7">
+              <div className="font-medium">CGST PAYBLE</div>
+              <div>
+                {billdata.gst === 5 ||
+                billdata.gst === 12 ||
+                billdata.gst === 18 ||
+                billdata.gst === 28
+                  ? billdata.discount
+                    ? (
+                      ((grandTotal -
+                        ((grandTotal * billdata.discount) / 100).toFixed(
+                          2
+                        )) *
+                        billdata.sgst) /
+                      100
+                    ).toFixed(2)
+                    : (
+                      ((grandTotal -
+                        ((grandTotal * billdata.discount) / 100).toFixed(
+                          2
+                        )) *
+                        billdata.sgst) /
+                      100
+                    ).toFixed(2)
+                  : "00"}
+              </div>
+            </div>
+            <div className="flex justify-between pb-1.5 px-7">
+              <div className="font-medium">ADD/LESS</div>
+              <div>
+                {billdata.gst === 5 ||
+                billdata.gst === 12 ||
+                billdata.gst === 18 ||
+                billdata.gst === 28
+                  ? "00"
+                  : "00"}
+              </div>
+            </div>
+            <div className="flex justify-between pb-1 px-7">
+              <div className="font-medium">CR/DR/NOTE</div>
+              <div>
+                {billdata.gst === 5 ||
+                billdata.gst === 12 ||
+                billdata.gst === 18 ||
+                billdata.gst === 28
+                  ? "00"
+                  : "00"}
+              </div>
+            </div>
+            <div className="border-t-2"></div>
+            <table className="w-[89%] ml-6 pb-8">
+              <tr className="">
+              <td className="font-semibold pl-1">GRAND TOTAL</td>
+              <td className="font-semibold  text-end pr-2">
+                {Math.ceil(grandTotalWithTax).toFixed(2)}
+              </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div className="font-medium italic text-xs  pb-2">
+  Rs&nbsp;{totalInWords.charAt(0).toUpperCase() + totalInWords.slice(1)} Rupees Only
+</div>
+<table className="w-full">
+  <tbody>
+    <tr>
+      <td className="w-[40%] border p-2 align-top">
+        <div className="text-xl font-semibold italic underline mb-1">Terms & Conditions</div>
+        <div className="text-sm">Goods once sold will not be taken back or exchanged.</div>
+        <div className="text-sm">Bills not paid by due date will attract 24% interest.</div>
+      </td>
+
+      <td className="w-[30%] border p-2 align-top text-center">
+        <div className="text-xl font-semibold italic underline mb-10">Receiver</div>
+      </td>
+
+      <td className="w-[30%] border p-2 align-top">
+        <div className="text-sm font-semibold italic underline mb-2">For SHRI JI ENTERPRISE</div>
+        <div><img src="/shivamsign.jpeg" alt="sign" className="w-42 h-16"/></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+      </div>
+
+      {/* ✅ Hidden from PDF */}
+     
+    </div>
+  );
+}
+export async function getServerSideProps(context) {
+  if (!context.req.cookies.loggedIn && !context.query.loggedIn) {
+    return {
+      props: {},
+      redirect: { destination: "/login" },
+    };
+  }
+
+  return {
+    props: {},
+  };
+}
+export default BillDetailPage
