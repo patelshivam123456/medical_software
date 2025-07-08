@@ -12,6 +12,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import LoadingBtn from "@/components/Buttons/LoadingBtn";
+import Searchable from "@/components/Input/Searchable";
 
 const Index = () => {
   const router = useRouter();
@@ -62,11 +63,46 @@ const Index = () => {
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
   const [isEditingBill, setIsEditingBill] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [allClients, setAllClients] = useState([]);
+  const [filteredClientNames, setFilteredClientNames] = useState([]);
+  const [inputValue, setInputValue] = useState("");
+  const [showOptions, setShowOptions] = useState(false);
+
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [activeTab, setActiveTab] = useState("new");
+
+  const now = new Date();
+
+  const { oldBills, newBills } = useMemo(() => {
+    const oneHourAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    const old = billNumbers.filter((b) => new Date(b.createdAt) < oneHourAgo);
+    const newer = billNumbers.filter(
+      (b) => new Date(b.createdAt) >= oneHourAgo
+    );
+
+    return { oldBills: old, newBills: newer };
+  }, [billNumbers]);
+
+  const filteredOldBills = useMemo(() => {
+    return oldBills.filter((b) =>
+      `SG000${b.billNo}`.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm, oldBills]);
+
+  const filteredNewBills = useMemo(() => {
+    return newBills.filter((b) =>
+      `SG000${b.billNo}`.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm, newBills]);
+
+  const activeBills = activeTab === "old" ? filteredOldBills : filteredNewBills;
 
   useEffect(() => {
     axios.get("/api/tablets/get").then((res) => {
       setAvailableTablets(res.data.tablets);
     });
+    fetchClients();
   }, []);
 
   useEffect(() => {
@@ -89,10 +125,6 @@ const Index = () => {
     setFormFields((prev) => ({ ...prev, total: total.toFixed(2) }));
   }, [formFields.lessquantity, formFields.rate]);
 
-  const calculateFinalPrice = (price, quantity, discount) => {
-    const gross = price * quantity;
-    return gross;
-  };
 
   const handleExpiryChange = (e) => {
     let value = e.target.value.replace(/[^\d]/g, "");
@@ -162,13 +194,11 @@ const Index = () => {
     };
 
     if (editingIndex !== null) {
-      // Update existing
       const updatedTablets = [...tablets];
       updatedTablets[editingIndex] = newTablet;
       setTablets(updatedTablets);
       setEditingIndex(null);
     } else {
-      // Add new
       setTablets([...tablets, newTablet]);
     }
 
@@ -233,8 +263,6 @@ const Index = () => {
       price: "",
       discount: 0,
       rate: "",
-      // cgst: "",
-      // sgst: "",
       total: "",
       gst: Number(formFields.gst),
       lessquantity: 0,
@@ -273,7 +301,6 @@ const Index = () => {
       });
 
       if (response.status === 201) {
-        // ✅ Clear fields only on success
         setBillNo("");
         setTablets([]);
         setDiscount(0);
@@ -290,11 +317,10 @@ const Index = () => {
         setMobile("");
         setTitle("");
         setIsLoading(false);
-        setIsEditingBill("")
+        setIsEditingBill("");
         toast.success("Bill created successfully");
       }
     } catch (error) {
-      // ❌ Handle all errors based on status
       setIsLoading(false);
       if (error.response) {
         const { status, data } = error.response;
@@ -319,22 +345,15 @@ const Index = () => {
 
   const openModal = async () => {
     const res = await axios.get("/api/bills");
-    setBillNumbers(res.data.bills.map((b) => b.billNo));
+    setBillNumbers(res.data.bills);
     setModalOpen(true);
   };
 
-  const handleLogout = () => {
-    Cookies.remove("loggedIn");
-    router.push("/login");
-  };
-console.log(isEditingBill);
-
-  const handleEditBill = async (billNo) => {
+  const handleCopyBill = async (billNo) => {
     try {
       const res = await axios.get(`/api/bills/${billNo}`);
       const bill = res.data.bill;
-
-      setBillNo(bill.billNo);
+      setInputValue(bill.clientName);
       setDiscount(bill.discount || 0);
       setGst(bill.gst || 0);
       setCgst(bill.cgst || bill.gst / 2);
@@ -350,7 +369,35 @@ console.log(isEditingBill);
       setState(bill.state || "");
       setTablets(bill.tablets || []);
       setModalOpen(false);
-     isEditingBill==="copy"?toast.success("Bill copy"):toast.success("Bill loaded for editing");
+      setIsEditingBill("copy");
+      toast.success("Bill copy");
+    } catch (error) {
+      toast.error("Failed to load bill details");
+    }
+  };
+  const handleEditBill = async (billNo) => {
+    try {
+      const res = await axios.get(`/api/bills/${billNo}`);
+      const bill = res.data.bill;
+      setBillNo(bill.billNo);
+      setInputValue(bill.clientName);
+      setDiscount(bill.discount || 0);
+      setGst(bill.gst || 0);
+      setCgst(bill.cgst || bill.gst / 2);
+      setSgst(bill.sgst || bill.gst / 2);
+      setClientName(bill.clientName || "");
+      setTitle(bill.title || "");
+      setMobile(bill.mobile || "");
+      setBranchName(bill.branchName || "");
+      setBranch(bill.branch || "");
+      setAddress1(bill.address1 || "");
+      setAddress2(bill.address2 || "");
+      setPinCode(bill.pinCode || "");
+      setState(bill.state || "");
+      setTablets(bill.tablets || []);
+      setModalOpen(false);
+      setIsEditingBill("edit");
+      toast.success("Bill loaded for editing");
     } catch (error) {
       toast.error("Failed to load bill details");
     }
@@ -399,7 +446,8 @@ console.log(isEditingBill);
         setMobile("");
         setTitle("");
         setIsLoading(false);
-        setIsEditingBill("")
+        setIsEditingBill("");
+        setInputValue("");
       }
     } catch (error) {
       setIsLoading(false);
@@ -413,7 +461,7 @@ console.log(isEditingBill);
       const res = await axios.delete(`/api/bills/${billNo}`);
       if (res.status === 200) {
         toast.success("Bill deleted successfully");
-        setBillNumbers((prev) => prev.filter((b) => b !== billNo)); // remove from UI
+        setBillNumbers((prev) => prev.filter((b) => b !== billNo));
       }
     } catch (err) {
       toast.error("Error deleting bill");
@@ -428,25 +476,89 @@ console.log(isEditingBill);
   //   }
   // };
 
-  const handleResetForm=()=>{
+  const handleResetForm = () => {
     setBillNo("");
-        setTablets([]);
-        setDiscount(0);
-        setSgst(0);
-        setCgst(0);
-        setGst(0);
-        setClientName("");
-        setBranchName("");
-        setBranch("");
-        setAddress1("");
-        setAddress2("");
-        setPinCode("");
-        setState("");
-        setMobile("");
-        setTitle("");
-        setIsEditingBill("")
-  }
+    setTablets([]);
+    setDiscount(0);
+    setSgst(0);
+    setCgst(0);
+    setGst(0);
+    setClientName("");
+    setBranchName("");
+    setBranch("");
+    setAddress1("");
+    setAddress2("");
+    setPinCode("");
+    setState("");
+    setMobile("");
+    setTitle("");
+    setIsEditingBill("");
+    setInputValue("");
+    setFormFields({
+      name: "",
+      company: "",
+      salt: "",
+      quantity: 0,
+      packing: "",
+      batch: "",
+      expiry: "",
+      price: "",
+      discount: 0,
+      rate: "",
+      total: "",
+      gst: Number(formFields.gst),
+      lessquantity: 0,
+      category: "",
+      free: 0,
+      hsm: "",
+    });
+    toast.success("Reset successfully");
+  };
+  const fetchClients = async () => {
+    try {
+      const res = await axios.get("/api/client");
+      setAllClients(res.data || []);
+    } catch (err) {
+      console.error("Error fetching clients:", err);
+    }
+  };
 
+  const handleTitleChange = (value) => {
+    setTitle(value);
+    setClientName("");
+    setSelectedClient(null);
+    setInputValue("");
+    setMobile("");
+    setBranch("");
+    setBranchName("");
+    setAddress1("");
+    setAddress2("");
+    setPinCode("");
+    setState("");
+    const filtered = allClients.filter((c) => c.title === value);
+    setFilteredClientNames(filtered);
+  };
+
+  const handleClientNameChange = (value) => {
+    setClientName(value);
+
+    const found = filteredClientNames.find(
+      (c) => c.clientName.toLowerCase() === value.toLowerCase()
+    );
+
+    if (found) {
+      setSelectedClient(found);
+      setMobile(found.mobile || "");
+      setBranch(found.branch || "");
+      setBranchName(found.branchName || "");
+      setAddress1(found.address1 || "");
+      setAddress2(found.address2 || "");
+      setPinCode(found.pinCode || "");
+      setState(found.state || "");
+    } else {
+      setSelectedClient(null);
+    }
+  };
   return (
     <>
       <div className="p-6 max-w-7xl mx-auto">
@@ -461,20 +573,40 @@ console.log(isEditingBill);
         </div>
         <form onSubmit={handleSubmit} className="mb-6 w-full max-w-7xl gap-5">
           <div className="flex justify-between items-center">
-          <div className="w-1/2 md:w-[10%] mb-6">
-            <label>Invoice No:</label>
-            <input
-              type="number"
-              required
-              value={billNo}
-              onChange={(e) => setBillNo(e.target.value)}
-              className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
-            />
+            <div className="w-1/2 md:w-[10%] mb-6">
+              <label>Invoice No:</label>
+              <input
+                type="number"
+                required
+                value={billNo}
+                onChange={(e) => setBillNo(e.target.value)}
+                className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
+              />
+            </div>
+            {!billNo && isEditingBill === "copy" ? (
+              <div
+                onClick={handleResetForm}
+                className={`text-green-700 font-medium pr-3 cursor-pointer`}
+              >
+                Reset Form
+              </div>
+            ) : !billNo ? (
+              <div
+                className={`text-green-700 font-medium pr-3 cursor-not-allowed`}
+              >
+                Reset Form
+              </div>
+            ) : (
+              <div
+                onClick={handleResetForm}
+                className={`text-green-700 font-medium pr-3 cursor-pointer`}
+              >
+                Reset Form
+              </div>
+            )}
           </div>
-          <div onClick={billNo&&handleResetForm} className={`text-green-700 font-medium pr-3 ${billNo?"cursor-pointer":"cursor-not-allowed"}`}>Reset Form</div>
-          </div>
-          <div className="border p-4">
-            <div className="flex justify-end mr-4 mb-4">
+          <div className="border px-4 py-3 -mt-4">
+            <div className="flex justify-end mr-4">
               <button
                 type="button"
                 onClick={addMoreTablet}
@@ -503,7 +635,6 @@ console.log(isEditingBill);
                     setShowSuggestions(true);
                   }}
                   onFocus={() => {
-                    // Always show full list on focus
                     setFilteredSuggestions(availableTablets);
                     setShowSuggestions(true);
                   }}
@@ -535,7 +666,7 @@ console.log(isEditingBill);
                             batch: t.batch,
                             expiry: t.expiry,
                             price: t.mrp,
-                            total: (1 * (t.rate || t.price || 0)).toFixed(2), // calculate initial total
+                            total: (1 * (t.rate || t.price || 0)).toFixed(2),
                           });
                           setShowSuggestions(false);
                         }}
@@ -816,7 +947,6 @@ console.log(isEditingBill);
                     );
                   })}
                 </div>
-                {/* <AddPrductDetail handleEdit={handleEdit} handleDelete={handleDelete} tablets={tablets}/> */}
               </div>
             )}
           </div>
@@ -868,59 +998,70 @@ console.log(isEditingBill);
                 />
               </div>
             </div>
-            <div className="pt-4">
-              <div className="text-base font-semibold">Add Client Details</div>
+
+            <div className="bg-gray-200 p-4 mt-5 text-black">
+              <div className="flex gap-4">
+                <div className="text-base font-semibold">
+                  Add Client Details
+                </div>
+                <a
+                  href="/client"
+                  className="bg-orange-600 text-white px-2 py-1 text-xs font-semibold rounded-sm cursor-pointer"
+                >
+                  + Client
+                </a>
+              </div>
               <div className="flex flex-wrap items-center gap-4 pt-2">
-                <div className="w-full md:w-[10%] ">
+                <div className="w-full md:w-[10%]">
                   <label>Title</label>
                   <select
                     required
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => handleTitleChange(e.target.value)}
                     className="border py-2.5 px-2 w-full bg-white text-black outline-none rounded-sm"
                   >
                     <option value="" disabled>
                       --Select Title--
                     </option>
                     <option value="Mr.">Mr.</option>
-                    <option value="Mrs">Mrs.</option>
+                    <option value="Mrs.">Mrs.</option>
                     <option value="M/s">M/s</option>
                   </select>
                 </div>
-                <div className="w-full md:w-[25%] ">
+                <div className="w-full md:w-[25%]">
                   <label>Client Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={clientName}
-                    onChange={(e) => setClientName(e.target.value)}
-                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  <Searchable
+                    clientNames={filteredClientNames}
+                    onSelect={(value) => handleClientNameChange(value)}
+                    inputValue={inputValue}
+                    setInputValue={setInputValue}
+                    setShowOptions={setShowOptions}
+                    showOptions={showOptions}
                   />
                 </div>
-                <div className="w-full md:w-[15%] ">
+                <div className="w-full md:w-[15%]">
                   <label>Mobile</label>
                   <input
                     type="text"
-                    required
                     value={mobile}
                     maxLength={10}
                     minLength={10}
                     onChange={(e) => {
                       const val = e.target.value;
-                      if (/^\d*$/.test(val)) {
-                        setMobile(val);
-                      }
+                      if (/^\d*$/.test(val)) setMobile(val);
                     }}
                     className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    required
                   />
                 </div>
-                <div className="w-full md:w-[20%] ">
+
+                <div className="w-full md:w-[20%]">
                   <label>Branch</label>
                   <select
-                    required
                     value={branch}
                     onChange={(e) => setBranch(e.target.value)}
                     className="border py-2.5 px-2 w-full bg-white text-black outline-none rounded-sm"
+                    required
                   >
                     <option value="" disabled>
                       --Select Branch--
@@ -929,25 +1070,28 @@ console.log(isEditingBill);
                     <option value="Medical">Medical</option>
                   </select>
                 </div>
-                <div className="w-full md:w-[20%] ">
+
+                <div className="w-full md:w-[20%]">
                   <label>Branch Name</label>
                   <input
-                    required
                     value={branchName}
                     onChange={(e) => setBranchName(e.target.value)}
                     className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    required
                   />
                 </div>
-                <div className="w-full md:w-[25%] ">
+
+                <div className="w-full md:w-[25%]">
                   <label>Address 1</label>
                   <input
-                    required
                     value={address1}
                     onChange={(e) => setAddress1(e.target.value)}
                     className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    required
                   />
                 </div>
-                <div className="w-full md:w-[25%] ">
+
+                <div className="w-full md:w-[25%]">
                   <label>Address 2 (Optional)</label>
                   <input
                     value={address2}
@@ -955,29 +1099,30 @@ console.log(isEditingBill);
                     className="border p-2 w-full bg-white text-black outline-none rounded-sm"
                   />
                 </div>
-                <div className="w-full md:w-[20%] ">
+
+                <div className="w-full md:w-[20%]">
                   <label>Pincode</label>
                   <input
                     type="text"
                     inputMode="numeric"
-                    pattern="\d{6}"
                     maxLength={6}
                     minLength={6}
-                    required
                     value={pinCode}
                     onChange={(e) =>
                       setPinCode(e.target.value.replace(/\D/g, ""))
-                    } // removes non-digits
+                    }
                     className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    required
                   />
                 </div>
-                <div className="w-full md:w-[20%] ">
+
+                <div className="w-full md:w-[20%]">
                   <label>State</label>
                   <input
-                    required
                     value={state}
                     onChange={(e) => setState(e.target.value)}
                     className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    required
                   />
                 </div>
               </div>
@@ -988,10 +1133,12 @@ console.log(isEditingBill);
               <LoadingBtn />
             ) : tablets.length > 0 ? (
               <button
-                onClick={isEditingBill==="edit" ? handleUpdateBill : handleSubmit}
+                onClick={
+                  isEditingBill === "edit" ? handleUpdateBill : handleSubmit
+                }
                 className="mt-6 bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
               >
-                {isEditingBill==="edit" ? "Update Bill" : "Submit Bill"}
+                {isEditingBill === "edit" ? "Update Bill" : "Submit Bill"}
               </button>
             ) : (
               <button
@@ -1003,77 +1150,89 @@ console.log(isEditingBill);
             )}
           </div>
         </form>
-
-        {/* {tablets.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-2">Added Tablets</h3>
-            <ul className="list-disc pl-5">
-              {tablets.map((t, i) => (
-                <li key={i}>
-                  {t.name} - Qty: {t.quantity}, Packing: {t.packing}, Batch:{" "}
-                  {t.batch}, Exp: {t.expiry}, MRP: ₹{t.price}, Disc:{" "}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )} */}
-
-<Modal
-  isOpen={modalOpen}
-  onRequestClose={() => setModalOpen(false)}
-  className="bg-white p-6 border max-w-4xl mx-auto mt-40 shadow-2xl z-[100px]"
-  overlayClassName="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40  overflow-y-auto"
->
-  <div
-    onClick={() => setModalOpen(false)}
-    className="text-end font-semibold text-sm text-blue-600 cursor-pointer"
-  >
-    Close
-  </div>
-
-  <h2 className="text-xl font-bold mb-4 text-black">Invoice Numbers</h2>
-
-  {/* 🔍 Search Input */}
-  <input
-    type="text"
-    placeholder="Search Bill Number"
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    className="border px-3 py-2 rounded-sm w-full lg:w-1/2 mb-4 text-black"
-  />
-
-  <div className="flex gap-4 flex-wrap">
-    {filteredBillNumbers.length > 0 ? (
-      filteredBillNumbers.map((num, idx) => (
-        <div
-          key={idx}
-          className="bg-orange-500 py-2 px-3 flex gap-3 items-center rounded"
+        <Modal
+          isOpen={modalOpen}
+          onRequestClose={() => setModalOpen(false)}
+          className="bg-white p-6 border max-w-4xl mx-auto mt-40 shadow-2xl z-[100px]"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40  overflow-y-auto"
         >
-          <button
-            className="text-white cursor-pointer"
-            onClick={() => {
-              setModalOpen(false);
-              window.location.href = `/bill/${num}`;
-            }}
+          <div
+            onClick={() => setModalOpen(false)}
+            className="text-end font-semibold text-sm text-blue-600 cursor-pointer"
           >
-            SG000{num}
-          </button>
-          <div onClick={() => {handleEditBill(num),setIsEditingBill("edit")}}>
-            <PencilSquareIcon className="h-4 w-4 text-white cursor-pointer" />
+            Close
           </div>
-          <div onClick={() => handleDeleteBill(num)}>
-            <TrashIcon className="h-4 w-4 text-white cursor-pointer" />
+
+          <h2 className="text-xl font-bold mb-4 text-black">Invoice Numbers</h2>
+          <div className="flex gap-4 mb-4">
+            <button
+              className={`px-4 py-2 border rounded ${
+                activeTab === "new"
+                  ? "bg-red-600 text-white"
+                  : "bg-gray-200  text-green-600"
+              }`}
+              onClick={() => {
+                setActiveTab("new");
+                setSearchTerm("");
+              }}
+            >
+              New Bills
+            </button>
+            <button
+              className={`px-4 py-2 border rounded ${
+                activeTab === "old"
+                  ? "bg-red-600 text-white"
+                  : "bg-gray-200 text-green-600"
+              }`}
+              onClick={() => {
+                setActiveTab("old");
+                setSearchTerm("");
+              }}
+            >
+              Old Bills
+            </button>
           </div>
-          <div onClick={() => {handleEditBill(num),setIsEditingBill("copy")}}>
-            <DocumentDuplicateIcon className="h-4 w-4 text-white cursor-pointer" />
+
+          <input
+            type="text"
+            placeholder="Search Bill Number"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border px-3 py-2 rounded-sm w-full lg:w-1/2 mb-4 text-black"
+          />
+
+          <div className="flex gap-4 flex-wrap">
+            {activeBills.length > 0 ? (
+              activeBills.map((bill, idx) => (
+                <div
+                  key={idx}
+                  className="bg-orange-500 py-2 px-3 flex gap-3 items-center rounded"
+                >
+                  <button
+                    className="text-white cursor-pointer"
+                    onClick={() => {
+                      setModalOpen(false);
+                      window.location.href = `/bill/${bill.billNo}`;
+                    }}
+                  >
+                    SG000{bill.billNo}
+                  </button>
+                  <div onClick={() => handleEditBill(bill.billNo)}>
+                    <PencilSquareIcon className="h-4 w-4 text-white cursor-pointer" />
+                  </div>
+                  <div onClick={() => handleDeleteBill(bill.billNo)}>
+                    <TrashIcon className="h-4 w-4 text-white cursor-pointer" />
+                  </div>
+                  <div onClick={() => handleCopyBill(bill.billNo)}>
+                    <DocumentDuplicateIcon className="h-4 w-4 text-white cursor-pointer" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-black">No matching invoice numbers found.</p>
+            )}
           </div>
-        </div>
-      ))
-    ) : (
-      <p className="text-black">No matching invoice numbers found.</p>
-    )}
-  </div>
-</Modal>
+        </Modal>
       </div>
     </>
   );

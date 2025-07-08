@@ -66,21 +66,42 @@ const Header=()=> {
         </div>
         {router.pathname==="/manage-stock"?<PopoverGroup className="hidden lg:flex lg:gap-x-12">
           <a href="/" className="text-sm/6 font-semibold text-gray-900">
-            Go to Bill page
+            Bill page
           </a>
-        </PopoverGroup>:router.pathname==="/"?<PopoverGroup className="hidden lg:flex lg:gap-x-12">
+          <a href="/client" className="text-sm/6 font-semibold text-gray-900">
+            Client
+          </a>
+        </PopoverGroup>
+        :router.pathname==="/"?<PopoverGroup className="hidden lg:flex lg:gap-x-12">
           <a href="/manage-stock" className="text-sm/6 font-semibold text-gray-900">
-            Go to Manage stock page
+            Stock 
           </a>
-          </PopoverGroup>:
-          <PopoverGroup className="hidden lg:flex lg:gap-x-12">
-            <a href="/" className="text-sm/6 font-semibold text-gray-900">
-            Go to Bill page
-          </a>
-          <a href="/manage-stock" className="text-sm/6 font-semibold text-gray-900">
-            Go to Manage stock page
+          <a href="/client" className="text-sm/6 font-semibold text-gray-900">
+            Client
           </a>
           </PopoverGroup>
+          :
+          router.pathname==="/client"?<PopoverGroup className="hidden lg:flex lg:gap-x-12">
+            <a href="/" className="text-sm/6 font-semibold text-gray-900">
+            Bill page
+          </a>
+          <a href="/manage-stock" className="text-sm/6 font-semibold text-gray-900">
+            Stock 
+          </a>
+          </PopoverGroup>
+          :
+          <PopoverGroup className="hidden lg:flex lg:gap-x-12">
+            <a href="/" className="text-sm/6 font-semibold text-gray-900">
+            Bill page
+          </a>
+          <a href="/manage-stock" className="text-sm/6 font-semibold text-gray-900">
+            Stock
+          </a>
+          <a href="/client" className="text-sm/6 font-semibold text-gray-900">
+            Client
+          </a>
+          </PopoverGroup>
+          
           }
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           <a href="#" onClick={handleLogout} className="text-sm/6 font-semibold text-gray-900">
@@ -111,29 +132,13 @@ const Header=()=> {
           </div>
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-500/10">
-              {router.pathname==="/"?<div className="space-y-2 py-6">
-                <a
-                  href="/add-bill"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
-                >
-                  Go to Manage Stock
-                </a>
-              </div>:
-              router.pathname==="/manage-stock"?<div className="space-y-2 py-6">
-              <a
-                href="/"
-                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
-              >
-                Go to Bill page
-              </a>
-            </div>:
-            <>
+              {router.pathname==="/"?<>
             <div className="space-y-2 py-6">
                 <a
-                  href="/"
+                  href="/client"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
                 >
-                  Go to Bill page
+                  Client
                 </a>
               </div>
               <div className="space-y-2 py-6">
@@ -141,7 +146,69 @@ const Header=()=> {
                 href="/manage-stock"
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
-                Go to Manage stock
+                Stock
+              </a>
+            </div>
+            </>:
+              router.pathname==="/client"?<>
+              <div className="space-y-2 py-6">
+                  <a
+                    href="/"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                  >
+                    Bill page
+                  </a>
+                </div>
+                <div className="space-y-2 py-6">
+                <a
+                  href="/manage-stock"
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                >
+                  Stock
+                </a>
+              </div>
+              </>:
+              router.pathname==="/manage-stock"?<>
+              <div className="space-y-2 py-6">
+                  <a
+                    href="/"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                  >
+                    Bill page
+                  </a>
+                </div>
+                <div className="space-y-2 py-6">
+                <a
+                  href="/clint"
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                >
+                  Client
+                </a>
+              </div>
+              </>:
+            <>
+            <div className="space-y-2 py-6">
+                <a
+                  href="/"
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                >
+                  Bill page
+                </a>
+              </div>
+              <div className="space-y-2 py-6">
+              <a
+                href="/manage-stock"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Stock
+              </a>
+            </div>
+            <div className="space-y-2 py-6">
+              <a
+                href="/client"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Client
               </a>
             </div>
             </>

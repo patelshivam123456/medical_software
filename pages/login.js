@@ -66,4 +66,20 @@ const Login=()=> {
     </div>
   )
 }
+
+export async function getServerSideProps(context) {
+  console.log(context.req.cookies.loggedIn,"context.req.cookies.loggedIn");
+  
+  if (context.req.cookies.loggedIn) {
+    return {
+      props: {},
+      redirect: { destination: "/" },
+    };
+  }
+
+  return {
+    props: {},
+  };
+}
+
 export default Login
