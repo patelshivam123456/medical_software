@@ -8,6 +8,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import LoadingBtn from "@/components/Buttons/LoadingBtn";
+import { toast } from "react-toastify";
 
 const Index = () => {
   const [formData, setFormData] = useState({
@@ -39,32 +40,83 @@ const Index = () => {
     setClients(res.data);
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setIsLoading(true)
+  //   if (editId) {
+  //     // Update existing client
+  //     await axios.put(`/api/client/${editId}`, formData);
+  //   } else {
+  //     // Add new client
+  //     await axios.post("/api/client", formData);
+  //   }
+
+  //   setFormData({
+  //     title: "",
+  //     clientName: "",
+  //     mobile: "",
+  //     branch: "",
+  //     branchName: "",
+  //     address1: "",
+  //     address2: "",
+  //     pinCode: "",
+  //     state: "",
+  //   });
+  //   setIsLoading(false)
+  //   setEditId(null);
+  //   fetchClients();
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true)
-    if (editId) {
-      // Update existing client
-      await axios.put(`/api/client/${editId}`, formData);
-    } else {
-      // Add new client
-      await axios.post("/api/client", formData);
+    setIsLoading(true);
+  
+    try {
+      if (editId) {
+        // Update existing client
+        await axios.put(`/api/client/${editId}`, formData);
+      } else {
+        // Add new client
+        await axios.post("/api/client", formData);
+      }
+  
+      // Reset form after successful submit
+      setFormData({
+        title: "",
+        clientName: "",
+        mobile: "",
+        branch: "",
+        branchName: "",
+        address1: "",
+        address2: "",
+        pinCode: "",
+        state: "",
+      });
+      setEditId(null);
+      fetchClients();
+    } catch (err) {
+      if (err.response) {
+        const { status, data } = err.response;
+  
+        if (status === 409) {
+          // Duplicate entry error
+          toast.error(data.error || "Client already exists with same name and mobile.");
+        } else if (status === 400) {
+          // Validation error
+          toast.error(data.error || "Missing required fields.");
+        } else {
+          // Other known error
+          toast.error(data.error || "Something went wrong.");
+        }
+      } else {
+        // Network or unknown error
+        toast.error("Network error or server is unreachable.");
+      }
+    } finally {
+      setIsLoading(false);
     }
-
-    setFormData({
-      title: "",
-      clientName: "",
-      mobile: "",
-      branch: "",
-      branchName: "",
-      address1: "",
-      address2: "",
-      pinCode: "",
-      state: "",
-    });
-    setIsLoading(false)
-    setEditId(null);
-    fetchClients();
   };
+  
 
   const openDeleteModal = (id) => {
     setDeleteId(id);

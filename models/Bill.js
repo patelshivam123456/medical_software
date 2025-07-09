@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const billSchema = new mongoose.Schema({
   billNo: { type: Number, required: true, unique: true },
+  salesperson:{type:String},
   tablets: [
     {
       name: String,

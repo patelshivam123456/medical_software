@@ -37,7 +37,7 @@ const Header=()=> {
   }
 
   return (
-    <header className="bg-white sticky top-0 z-50 shadow-2xl">
+    <header className="bg-white sticky top-0 z-40 shadow-2xl">
       <nav aria-label="Global" className="mx-auto flex max-w-7xl py-1 items-center justify-between px-6 lg:px-8">
         <div className="flex lg:flex-1 items-center">
           <a href="/" className="-m-1.5 p-1.5">

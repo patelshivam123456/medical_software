@@ -6,6 +6,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useEffect, useState } from "react";
 import { toWords } from 'number-to-words';
+import LoadingBtn from "@/components/Buttons/LoadingBtn";
 
 const fetcher = (url) => axios.get(url).then((res) => res.data);
 
@@ -13,6 +14,7 @@ const BillDetailPage=()=> {
   const router = useRouter();
   const { id } = router.query;
   const [grandTotal, setGrandTotal] = useState(0);
+  const [downloading, setDownloading] = useState(false);
 
   const { data, error } = useSWR(
     () => (id ? `/api/bills/${id}` : null),
@@ -45,6 +47,7 @@ const roundedGrandTotal = Math.ceil(grandTotalWithTax);
 const totalInWords = toWords(roundedGrandTotal);
 
   const handleDownloadPDF = () => {
+    setDownloading(true)
     const input = document.getElementById("bill-content");
 
     html2canvas(input, {
@@ -60,6 +63,7 @@ const totalInWords = toWords(roundedGrandTotal);
 
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
       pdf.save(`Invoice-${data.bill.billNo}.pdf`);
+      setDownloading(false)
     });
   };
 
@@ -73,37 +77,43 @@ const totalInWords = toWords(roundedGrandTotal);
         padding: "40px",
         boxSizing: "border-box",
         position: "relative",
+        color:"black"
       }}
     >
       {/* ✅ Watermark logo */}
       <img
         src="/sriji.png"
         alt="Watermark"
-        className="absolute top-[52%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none select-none w-[300px]"
-        style={{ zIndex: 0 }}
+        className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none select-none w-[300px]"
+        style={{ zIndex: 10 }}
       />
  <div className="mb-6 no-print relative z-10 flex justify-end">
-        <button
+        {downloading?<LoadingBtn/>:<button
           onClick={handleDownloadPDF}
-          className="bg-green-600 text-white px-4 py-2 rounded"
+          className="bg-green-600 text-white px-4 py-2 rounded cursor-pointer"
         >
           📥 Download PDF
-        </button>
+        </button>}
       </div>
       {/* ✅ Bill content */}
       <div className="relative z-10 border px-2 py-2">
         <div className="flex">
           <div className="w-1/2">
-            <div className="font-semibold text-lg">SHRI JI ENTERPRISE</div>
-            <div className="text-xs font-semibold italic">
-              Under Composition, not eligible to collect GST
+          <div className="gap-1" style={{display:"flex",alignItems:"center"}}>
+            <div style={{marginTop:"13px"}}><img src="/sriji.png" alt="logo" className="h-12 w-12"/></div>
+            <div>
+            <div className="text-lg" style={{fontWeight:"bold"}}>SHRI JI ENTERPRISE</div>
+            <div className="text-xs font-semibold italic -mt-1">
+            GST Not Applicable
             </div>
-            <div>Aminabad,Kesarbhag,Lucknow</div>
-            <div>122001,Uttar Pradesh</div>
+            </div>
+            </div>
+            <div style={{marginTop:"-5px"}}>Pratap market,Kamla Market,Aminabad Rd</div>
+            <div>Aminabad,Lucknow,Uttar Pradesh-122001</div>
             <div className="text-base">Mobile Number: +91-8707868591</div>
           </div>
           <div className="w-1/2">
-            <div className="font-semibold text-lg">
+            <div className="text-lg" style={{fontWeight:"bold"}}>
               {billdata.title + " " + billdata.clientName}
             </div>
             <div className="">{billdata.address1}</div>
@@ -116,20 +126,20 @@ const totalInWords = toWords(roundedGrandTotal);
           </div>
         </div>
         <div className="flex  gap-2 border mt-2 px-3">
-          <div className="w-[40%]"></div>
-          <div className="w-[60%] flex gap-4 ">
+          <div className="w-[35%]"></div>
+          <div className="w-[65%] flex gap-4 ">
             <div
-              className="w-[40%] text-xl font-semibold text-center pb-4 pt-2 px-2"
-              style={{ backgroundColor: "lightgray" }}
+              className="w-[35%] text-xl font-semibold text-center pb-4 pt-2 px-2"
+              style={{ backgroundColor: "yellowgreen" }}
             >
               GST INVOICE
             </div>
-            <div className="w-[70%] flex  justify-between pb-4 ">
+            <div className="w-[65%] flex  justify-between pb-4 ">
               <div>
                 <div className="text-sm">
                   Invoice No.: SJ000{billdata.billNo}
                 </div>
-                <div className="text-sm">Sales man: </div>
+                <div className="text-sm">Sales man: {billdata.salesperson}</div>
               </div>
               <div>
                 <div className="text-sm">
@@ -174,7 +184,7 @@ const totalInWords = toWords(roundedGrandTotal);
           }}
         >
           <table className=" min-w-full pb-60 text-sm">
-            <thead className="">
+            <thead className="" style={{backgroundColor:"yellow"}}>
               <tr>
                 <th className="border px-3 py-2 text-left">Sn.</th>
                 <th className="border px-3 py-2 text-left">Qty.</th>
@@ -193,25 +203,25 @@ const totalInWords = toWords(roundedGrandTotal);
               </tr>
             </thead>
             <tbody>
-              {billdata.tablets.map((t, i) => (
-                <tr key={t._id || i} className="">
-                  <td className=" px-3 pt-1 pb-4">{i + 1}</td>
-                  <td className=" px-3 pt-1 pb-4">{t.quantity}</td>
-                  <td className=" px-3 pt-1 pb-4">{t.free}</td>
-                  <td className=" px-3 pt-1 pb-4">{t.packing}</td>
-                  <td className=" px-3 pt-1 pb-4">{t.name}</td>
-                  <td className=" px-3 pt-1 pb-4">{t.batch}</td>
-                  <td className=" px-3 pt-1 pb-4">{t.expiry}</td>
-                  <td className=" px-3 pt-1 pb-4">{t.hsm}</td>
-                  <td className=" px-3 pt-1 pb-4">{t.price}</td>
-                  <td className=" px-3 pt-1 pb-4">₹{t.rate}</td>
-                  <td className=" px-3 pt-1 pb-4">{t.discount}</td>
-                  <td className=" px-3 pt-1 pb-4">{t.sgst}</td>
-                  <td className=" px-3 pt-1 pb-4">{t.cgst}</td>
-                  <td className=" px-3 pt-1 pb-4">{t.total}</td>
-                </tr>
-              ))}
-            </tbody>
+  {billdata.tablets.map((t, i) => (
+    <tr key={t._id || i} >
+      <td className="px-3 pt-1 pb-4">{i + 1}</td>
+      <td className="px-3 pt-1 pb-4">{t.quantity}</td>
+      <td className="px-3 pt-1 pb-4">{t.free}</td>
+      <td className="px-3 pt-1 pb-4">{t.packing}</td>
+      <td className="px-3 pt-1 pb-4">{t.name}</td>
+      <td className="px-3 pt-1 pb-4">{t.batch}</td>
+      <td className="px-3 pt-1 pb-4">{t.expiry}</td>
+      <td className="px-3 pt-1 pb-4">{t.hsm}</td>
+      <td className="px-3 pt-1 pb-4">{t.price}</td>
+      <td className="px-3 pt-1 pb-4">₹{t.rate}</td>
+      <td className="px-3 pt-1 pb-4">{t.discount}</td>
+      <td className="px-3 pt-1 pb-4">{t.sgst}</td>
+      <td className="px-3 pt-1 pb-4">{t.cgst}</td>
+      <td className="px-3 pt-1 pb-4">{t.total}</td>
+    </tr>
+  ))}
+</tbody>
             
           </table>
         </div>
@@ -226,7 +236,7 @@ const totalInWords = toWords(roundedGrandTotal);
             // }}
           >
             <table className=" min-w-full border pb-60 text-sm mt-3">
-              <thead className="">
+              <thead className="" style={{backgroundColor:"yellowgreen"}}>
                 <tr>
                   <th className="border px-3 py-2 text-left">CLASS</th>
                   <th className="border px-3 py-2 text-left">TOTAL</th>
@@ -239,13 +249,13 @@ const totalInWords = toWords(roundedGrandTotal);
               </thead>
               <tbody>
                 <tr key={1} className="">
-                  <td className="border px-3 pt-1 pb-2">{"GST 5.00"}</td>
+                  <td className="border px-3 pt-1 pb-2 font-semibold">{"GST 5.00"}</td>
                   <td className="border px-3 pt-1 pb-2">
                     {billdata.gst === 5
                       ? billdata.discount
                         ? grandTotal.toFixed(2)
                         : grandTotal.toFixed(2)
-                      : ""}
+                      : "00"}
                   </td>
                   <td className="border px-3 pt-1 pb-2">{"00"}</td>
                   <td className="border px-3 pt-1 pb-2">
@@ -293,13 +303,13 @@ const totalInWords = toWords(roundedGrandTotal);
                   </td>
                 </tr>
                 <tr key={2} className="">
-                  <td className="border px-3 pt-1 pb-2">{"GST 12.00"}</td>
+                  <td className="border px-3 pt-1 pb-2 font-semibold">{"GST 12.00"}</td>
                   <td className="border px-3 pt-1 pb-2">
                     {billdata.gst === 12
                       ? billdata.discount
                         ? grandTotal.toFixed(2)
                         : grandTotal.toFixed(2)
-                      : ""}
+                      : "00"}
                   </td>
                   <td className="border px-3 pt-1 pb-2">{"00"}</td>
                   <td className="border px-3 pt-1 pb-2">
@@ -347,13 +357,13 @@ const totalInWords = toWords(roundedGrandTotal);
                   </td>
                 </tr>
                 <tr key={3} className="">
-                  <td className="border px-3 pt-1 pb-2">{"GST 18.00"}</td>
+                  <td className="border px-3 pt-1 pb-2 font-semibold">{"GST 18.00"}</td>
                   <td className="border px-3 pt-1 pb-2">
                     {billdata.gst === 18
                       ? billdata.discount
                         ? grandTotal.toFixed(2)
                         : grandTotal.toFixed(2)
-                      : ""}
+                      : "00"}
                   </td>
                   <td className="border px-3 pt-1 pb-2">{"00"}</td>
                   <td className="border px-3 pt-1 pb-2">
@@ -401,13 +411,13 @@ const totalInWords = toWords(roundedGrandTotal);
                   </td>
                 </tr>
                 <tr key={4} className="">
-                  <td className="border px-3 pt-1 pb-2">{"GST 28.00"}</td>
+                  <td className="border px-3 pt-1 pb-2 font-semibold">{"GST 28.00"}</td>
                   <td className="border px-3 pt-1 pb-2">
                     {billdata.gst === 28
                       ? billdata.discount
                         ? grandTotal.toFixed(2)
                         : grandTotal.toFixed(2)
-                      : ""}
+                      : "00"}
                   </td>
                   <td className="border px-3 pt-1 pb-2">{"00"}</td>
                   <td className="border px-3 pt-1 pb-2">
@@ -455,8 +465,8 @@ const totalInWords = toWords(roundedGrandTotal);
                   </td>
                 </tr>
                 <tr key={5} className="">
-                  <td className="border px-3 pt-1 pb-2">{"TOTAL"}</td>
-                  <td className="border px-3 pt-1 pb-2">
+                  <td className="border px-3 pt-1 pb-2 font-semibold">{"TOTAL"}</td>
+                  <td className="border px-3 pt-1 pb-2 font-semibold">
                     {billdata.gst === 5 ||
                     billdata.gst === 12 ||
                     billdata.gst === 18 ||
@@ -464,10 +474,10 @@ const totalInWords = toWords(roundedGrandTotal);
                       ? billdata.discount
                         ? grandTotal.toFixed(2)
                         : grandTotal.toFixed(2)
-                      : ""}
+                      : "00"}
                   </td>
-                  <td className="border px-3 pt-1 pb-2">{"00"}</td>
-                  <td className="border px-3 pt-1 pb-2">
+                  <td className="border px-3 pt-1 pb-2 font-semibold">{"00"}</td>
+                  <td className="border px-3 pt-1 pb-2 font-semibold">
                     {billdata.gst === 5 ||
                     billdata.gst === 12 ||
                     billdata.gst === 18 ||
@@ -477,7 +487,7 @@ const totalInWords = toWords(roundedGrandTotal);
                         : "00"
                       : "00"}
                   </td>
-                  <td className="border px-3 pt-1 pb-2">
+                  <td className="border px-3 pt-1 pb-2 font-semibold">
                     {billdata.gst === 5 ||
                     billdata.gst === 12 ||
                     billdata.gst === 18 ||
@@ -492,7 +502,7 @@ const totalInWords = toWords(roundedGrandTotal);
                         ).toFixed(2)
                       : "00"}
                   </td>
-                  <td className="border px-3 pt-1 pb-2">
+                  <td className="border px-3 pt-1 pb-2 font-semibold">
                     {billdata.gst === 5 ||
                     billdata.gst === 12 ||
                     billdata.gst === 18 ||
@@ -507,7 +517,7 @@ const totalInWords = toWords(roundedGrandTotal);
                         ).toFixed(2)
                       : "00"}
                   </td>
-                  <td className="border px-3 pt-1 pb-2">
+                  <td className="border px-3 pt-1 pb-2 font-semibold">
                     {billdata.gst === 5 ||
                     billdata.gst === 12 ||
                     billdata.gst === 18 ||
@@ -526,8 +536,8 @@ const totalInWords = toWords(roundedGrandTotal);
               </tbody>
             </table>
           </div>
-          <div className="w-[40%] pt-3">
-            <div className="flex justify-between  pb-2 px-7">
+          <div className="w-[40%] space-y-3 pt-5">
+            <div className="flex justify-between px-7 text-sm">
               <div className="font-medium">SUB TOTAL</div>
               <div>
                 {billdata.gst === 5 ||
@@ -543,7 +553,7 @@ const totalInWords = toWords(roundedGrandTotal);
                   : grandTotal.toFixed(2)}
               </div>
             </div>
-            <div className="flex justify-between pt-1 pb-3 px-7">
+            <div className="flex justify-between  px-7 text-sm">
               <div className="font-medium">SGST PAYBLE</div>
               <div>
                 {billdata.gst === 5 ||
@@ -570,7 +580,7 @@ const totalInWords = toWords(roundedGrandTotal);
                   : "00"}
               </div>
             </div>
-            <div className="flex justify-between pb-2 px-7">
+            <div className="flex justify-between  px-7 text-sm">
               <div className="font-medium">CGST PAYBLE</div>
               <div>
                 {billdata.gst === 5 ||
@@ -597,7 +607,7 @@ const totalInWords = toWords(roundedGrandTotal);
                   : "00"}
               </div>
             </div>
-            <div className="flex justify-between pb-1.5 px-7">
+            <div className="flex justify-between  px-7 text-sm " >
               <div className="font-medium">ADD/LESS</div>
               <div>
                 {billdata.gst === 5 ||
@@ -608,7 +618,7 @@ const totalInWords = toWords(roundedGrandTotal);
                   : "00"}
               </div>
             </div>
-            <div className="flex justify-between pb-1 px-7">
+            <div className="flex justify-between px-7 text-sm " style={{}}>
               <div className="font-medium">CR/DR/NOTE</div>
               <div>
                 {billdata.gst === 5 ||
@@ -619,15 +629,19 @@ const totalInWords = toWords(roundedGrandTotal);
                   : "00"}
               </div>
             </div>
-            <div className="border-t-2"></div>
-            <table className="w-[89%] ml-6 pb-8">
-              <tr className="">
-              <td className="font-semibold pl-1">GRAND TOTAL</td>
-              <td className="font-semibold  text-end pr-2">
-                {Math.ceil(grandTotalWithTax).toFixed(2)}
-              </td>
-              </tr>
-            </table>
+            {/* <div className="border-t-2"></div> */}
+            <div
+  className="w-[98%] ml-2 flex justify-between items-center font-bold border text-white bg-black px-4 py-3 "
+  style={{
+    borderWidth: "2px",
+    fontSize: "16px",
+    backgroundColor: "skyblue",
+    color:"#00000"
+  }}
+>
+  <div style={{marginTop:"-14px",color:"black"}}>GRAND TOTAL</div>
+  <div style={{marginTop:"-14px",paddingRight:"8px",color:"black"}}>₹{Math.ceil(grandTotalWithTax).toFixed(2)}</div>
+</div>
           </div>
         </div>
         <div className="font-medium italic text-xs  pb-2">

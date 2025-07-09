@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const Searchable=({ clientNames, onSelect,setInputValue,inputValue,showOptions,setShowOptions })=> {
+const Searchable=({ clientNames, onSelect,setInputValue,inputValue,showOptions,setShowOptions,required })=> {
   
   const filteredOptions = clientNames.filter((c) =>
     c.clientName.toLowerCase().includes(inputValue.toLowerCase())
@@ -20,7 +20,7 @@ const Searchable=({ clientNames, onSelect,setInputValue,inputValue,showOptions,s
         onBlur={() => setTimeout(() => setShowOptions(false), 100)} // Delay to allow click
         className="border p-2 w-full bg-white text-black outline-none rounded-sm"
         placeholder="Search client..."
-        required
+        required={required}
       />
       {showOptions && filteredOptions.length > 0 && (
         <ul className="absolute z-10 w-[75%] lg:w-[25%] max-h-40 overflow-y-auto bg-white text-black border border-gray-300 rounded shadow-md mt-1">

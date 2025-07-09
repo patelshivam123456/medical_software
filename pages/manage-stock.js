@@ -238,6 +238,7 @@ const ManageStockPage = () => {
       setCategory("");
       setCompany("");
       setSalt("");
+      setSaltSearch("");
       setQuantity(0);
       setPrice("");
       fetchTablets();

@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
     try {
-      const { billNo, tablets, discount = 0,gst=0 ,cgst = 0, sgst = 0,title,clientName,mobile,branch,branchName,address1,address2,pinCode,state } = req.body;
+      const { billNo,salesperson, tablets, discount = 0,gst=0 ,cgst = 0, sgst = 0,title,clientName,mobile,branch,branchName,address1,address2,pinCode,state } = req.body;
 
       // ✅ 1. Validate Request Body
       if (!billNo || typeof billNo !== "string") {
@@ -53,7 +53,7 @@ export default async function handler(req, res) {
       }
 
       // ✅ 4. Create Bill
-      const bill = new Bill({ billNo, tablets, discount,gst, cgst, sgst,title,clientName,mobile,branch,branchName,address1,address2,pinCode,state });
+      const bill = new Bill({ billNo, salesperson,tablets, discount,gst, cgst, sgst,title,clientName,mobile,branch,branchName,address1,address2,pinCode,state });
 
       try {
         await bill.save();

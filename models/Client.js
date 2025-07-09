@@ -13,4 +13,7 @@ const clientSchema = new mongoose.Schema({
   state: String,
 });
 
+// Prevent duplicate clientName + mobile
+clientSchema.index({ mobile: 1 }, { unique: true });
+
 export default mongoose.models.Client || mongoose.model("Client", clientSchema);

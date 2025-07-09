@@ -17,6 +17,7 @@ import Searchable from "@/components/Input/Searchable";
 const Index = () => {
   const router = useRouter();
   const [billNo, setBillNo] = useState("");
+  const [salesPerson, setSalesPerson] = useState("");
   const [discount, setDiscount] = useState(0);
   const [gst, setGst] = useState(0);
   const [cgst, setCgst] = useState(0);
@@ -47,7 +48,7 @@ const Index = () => {
     expiry: "",
     price: "",
     rate: "",
-    discount: 0,
+    discount: 10,
     sgst: 0,
     cgst: 0,
     total: 0,
@@ -70,6 +71,10 @@ const Index = () => {
 
   const [selectedClient, setSelectedClient] = useState(null);
   const [activeTab, setActiveTab] = useState("new");
+
+  const [groupedClients, setGroupedClients] = useState({});
+  const [mobileOptions, setMobileOptions] = useState([]);
+  const [clientMobileGroup, setClientMobileGroup] = useState([]);
 
   const now = new Date();
 
@@ -99,11 +104,21 @@ const Index = () => {
   const activeBills = activeTab === "old" ? filteredOldBills : filteredNewBills;
 
   useEffect(() => {
-    axios.get("/api/tablets/get").then((res) => {
-      setAvailableTablets(res.data.tablets);
-    });
+    // axios.get("/api/tablets/get").then((res) => {
+    //   setAvailableTablets(res.data.tablets);
+    // });
+    fetchTabDetails()
     fetchClients();
   }, []);
+
+  const fetchTabDetails = async () => {
+    try {
+      const res = await axios.get("/api/tablets/get");
+      setAvailableTablets(res.data.tablets);
+    } catch (err) {
+      console.error("Error fetching clients:", err);
+    }
+  };
 
   useEffect(() => {
     if (gst) {
@@ -111,6 +126,20 @@ const Index = () => {
       setSgst(Number(gst) / 2);
     }
   }, [gst]);
+  // useEffect(() => {
+  //   const updatedFields = { ...formFields };
+  //   if (discount > 0) {
+  //     updatedFields.discount = discount;
+  //   } else if (discount === "") {
+  //     updatedFields.discount = 10;
+  //   }
+  //   if (gst === "" || gst === "0" || Number(gst) === 0) {
+  //     updatedFields.gst = 12;
+  //   } else {
+  //     updatedFields.gst = gst;
+  //   }
+  //   setFormFields(updatedFields);
+  // }, [discount, gst]);
 
   const filteredBillNumbers = useMemo(() => {
     return billNumbers.filter((num) =>
@@ -125,7 +154,6 @@ const Index = () => {
     setFormFields((prev) => ({ ...prev, total: total.toFixed(2) }));
   }, [formFields.lessquantity, formFields.rate]);
 
-
   const handleExpiryChange = (e) => {
     let value = e.target.value.replace(/[^\d]/g, "");
     if (value.length >= 3) {
@@ -134,6 +162,106 @@ const Index = () => {
     setFormFields({ ...formFields, expiry: value });
   };
 
+  useEffect(() => {
+    const quantity = Number(formFields.lessquantity);
+
+    if (quantity > 0 && editingIndex === null) {
+      const timer = setTimeout(() => {
+        addMoreTablet();
+      }, 800);
+      return () => clearTimeout(timer); 
+    }
+  }, [formFields.lessquantity]);
+
+  // const addMoreTablet = () => {
+  //   const {
+  //     name,
+  //     company,
+  //     salt,
+  //     quantity,
+  //     packing,
+  //     batch,
+  //     expiry,
+  //     price,
+  //     discount,
+  //     rate,
+  //     total,
+  //     gst,
+  //     lessquantity,
+  //     category,
+  //     free,
+  //     hsm,
+  //   } = formFields;
+
+  //   if (
+  //     !name ||
+  //     !company ||
+  //     !salt ||
+  //     !packing ||
+  //     !batch ||
+  //     !expiry ||
+  //     !price ||
+  //     !rate ||
+  //     !total ||
+  //     !gst ||
+  //     !lessquantity ||
+  //     !category
+  //   ) {
+  //     toast.error("Please fill all fields before adding.");
+  //     return;
+  //   }
+
+  //   const newTablet = {
+  //     name,
+  //     company,
+  //     salt,
+  //     quantity: Number(quantity),
+  //     packing,
+  //     batch,
+  //     expiry,
+  //     price: Number(price),
+  //     discount: Number(discount),
+  //     rate: Number(rate),
+  //     sgst: Number(gst) / 2,
+  //     cgst: Number(gst) / 2,
+  //     total: Number(total),
+  //     gst: Number(gst),
+  //     lessquantity: Number(lessquantity),
+  //     category,
+  //     free: Number(free),
+  //     hsm,
+  //   };
+
+  //   if (editingIndex !== null) {
+  //     const updatedTablets = [...tablets];
+  //     updatedTablets[editingIndex] = newTablet;
+  //     setTablets(updatedTablets);
+  //     setEditingIndex(null);
+  //   } else {
+  //     setTablets([...tablets, newTablet]);
+  //   }
+
+  //   setFormFields({
+  //     name: "",
+  //     company: "",
+  //     salt: "",
+  //     quantity: 0,
+  //     packing: "",
+  //     batch: "",
+  //     expiry: "",
+  //     price: 0,
+  //     discount: 0,
+  //     rate: 0,
+  //     total: 0.0,
+  //     gst: Number(formFields.gst),
+  //     lessquantity: 0,
+  //     category: "",
+  //     free: 0,
+  //     hsm: "",
+  //   });
+
+  //   setShowSuggestions(false);
+  // };
   const addMoreTablet = () => {
     const {
       name,
@@ -173,13 +301,13 @@ const Index = () => {
     }
 
     const newTablet = {
-      name,
-      company,
-      salt,
+      name: name.trim(),
+      company: company.trim(),
+      salt: salt.trim(),
       quantity: Number(quantity),
-      packing,
-      batch,
-      expiry,
+      packing: packing.trim(),
+      batch: batch.trim(),
+      expiry: expiry.trim(),
       price: Number(price),
       discount: Number(discount),
       rate: Number(rate),
@@ -188,10 +316,29 @@ const Index = () => {
       total: Number(total),
       gst: Number(gst),
       lessquantity: Number(lessquantity),
-      category,
+      category: category.trim(),
       free: Number(free),
-      hsm,
+      hsm: hsm.trim(),
     };
+    const isDuplicate = tablets.some((tablet, index) => {
+      if (editingIndex !== null && editingIndex === index) return false;
+      return (
+        tablet.name === newTablet.name &&
+        tablet.company === newTablet.company &&
+        tablet.salt === newTablet.salt &&
+        tablet.batch === newTablet.batch &&
+        tablet.category === newTablet.category &&
+        tablet.expiry === newTablet.expiry &&
+        tablet.packing === newTablet.packing &&
+        tablet.quantity === newTablet.quantity &&
+        tablet.price === newTablet.price
+      );
+    });
+
+    if (isDuplicate) {
+      toast.error("Duplicate tablet details found. Please modify the entry.");
+      return;
+    }
 
     if (editingIndex !== null) {
       const updatedTablets = [...tablets];
@@ -275,19 +422,25 @@ const Index = () => {
   const handleSubmit = async (e) => {
     setIsLoading(true);
     e.preventDefault();
-
+    if (!title || !clientName || !mobile || !branch || !branchName || !address1 || !pinCode || !state) {
+      toast.error("Please fill all Client fields.");
+      setIsLoading(false);
+      return;
+    }
     if (tablets.length === 0) {
       toast.error("Add at least one tablet before submitting.");
+      setIsLoading(false);
       return;
     }
 
     try {
       const response = await axios.post("/api/bills", {
         billNo,
+        salesperson:salesPerson,
         tablets,
-        discount,
-        sgst,
-        cgst,
+        discount:Number(discount),
+        sgst:Number(sgst),
+        cgst:Number(cgst),
         gst: Number(gst),
         clientName,
         branchName,
@@ -302,6 +455,7 @@ const Index = () => {
 
       if (response.status === 201) {
         setBillNo("");
+        setSalesPerson("")
         setTablets([]);
         setDiscount(0);
         setSgst(0);
@@ -319,6 +473,7 @@ const Index = () => {
         setIsLoading(false);
         setIsEditingBill("");
         toast.success("Bill created successfully");
+        fetchTabDetails()
       }
     } catch (error) {
       setIsLoading(false);
@@ -327,14 +482,19 @@ const Index = () => {
         setIsLoading(false);
         if (status === 400) {
           toast.error(`Validation Error: ${data.message}`);
+          setIsLoading(false);
         } else if (status === 404) {
           toast.error(`Not Found: ${data.message}`);
+          setIsLoading(false);
         } else if (status === 409) {
           toast.error(`Duplicate Bill: ${data.message}`);
+          setIsLoading(false);
         } else if (status === 500) {
           toast.error(`Server Error: ${data.message}`);
+          setIsLoading(false);
         } else {
           toast.error(`Error: ${data.message || "Something went wrong"}`);
+          setIsLoading(false);
         }
       } else {
         toast.error("Network error or server not responding");
@@ -353,6 +513,7 @@ const Index = () => {
     try {
       const res = await axios.get(`/api/bills/${billNo}`);
       const bill = res.data.bill;
+      setSalesPerson(bill.salesperson||"")
       setInputValue(bill.clientName);
       setDiscount(bill.discount || 0);
       setGst(bill.gst || 0);
@@ -380,6 +541,7 @@ const Index = () => {
       const res = await axios.get(`/api/bills/${billNo}`);
       const bill = res.data.bill;
       setBillNo(bill.billNo);
+      setSalesPerson(bill.salesperson)
       setInputValue(bill.clientName);
       setDiscount(bill.discount || 0);
       setGst(bill.gst || 0);
@@ -397,6 +559,7 @@ const Index = () => {
       setTablets(bill.tablets || []);
       setModalOpen(false);
       setIsEditingBill("edit");
+      fetchTabDetails()
       toast.success("Bill loaded for editing");
     } catch (error) {
       toast.error("Failed to load bill details");
@@ -412,10 +575,11 @@ const Index = () => {
     try {
       const res = await axios.put(`/api/bills/${billNo}`, {
         billNo,
+        salesperson:salesPerson,
         tablets,
-        discount,
-        sgst,
-        cgst,
+        discount:Number(discount),
+        sgst:Number(sgst),
+        cgst:Number(cgst),
         gst: Number(gst),
         clientName,
         branchName,
@@ -431,6 +595,7 @@ const Index = () => {
       if (res.status === 200) {
         toast.success("Bill updated successfully");
         setBillNo("");
+        setSalesPerson("")
         setTablets([]);
         setDiscount(0);
         setSgst(0);
@@ -478,6 +643,7 @@ const Index = () => {
 
   const handleResetForm = () => {
     setBillNo("");
+    setSalesPerson("")
     setTablets([]);
     setDiscount(0);
     setSgst(0);
@@ -514,15 +680,73 @@ const Index = () => {
     });
     toast.success("Reset successfully");
   };
+  // const fetchClients = async () => {
+  //   try {
+  //     const res = await axios.get("/api/client");
+  //     setAllClients(res.data || []);
+  //   } catch (err) {
+  //     console.error("Error fetching clients:", err);
+  //   }
+  // };
+
   const fetchClients = async () => {
     try {
       const res = await axios.get("/api/client");
-      setAllClients(res.data || []);
+      const clients = res.data || [];
+  
+      // Group clients by clientName
+      const grouped = clients.reduce((acc, client) => {
+        const nameKey = client.clientName.toLowerCase();
+        if (!acc[nameKey]) acc[nameKey] = [];
+        acc[nameKey].push(client);
+        return acc;
+      }, {});
+  
+      setGroupedClients(grouped); // You need to define this state
+      setAllClients(clients);
     } catch (err) {
       console.error("Error fetching clients:", err);
     }
   };
+  
 
+  // const handleTitleChange = (value) => {
+  //   setTitle(value);
+  //   setClientName("");
+  //   setSelectedClient(null);
+  //   setInputValue("");
+  //   setMobile("");
+  //   setBranch("");
+  //   setBranchName("");
+  //   setAddress1("");
+  //   setAddress2("");
+  //   setPinCode("");
+  //   setState("");
+  //   const filtered = allClients.filter((c) => c.title === value);
+  //   setFilteredClientNames(filtered);
+  // };
+
+  // const handleClientNameChange = (value) => {
+  //   setClientName(value);
+
+  //   const found = filteredClientNames.find(
+  //     (c) => c.clientName.toLowerCase() === value.toLowerCase()
+  //   );
+
+  //   if (found) {
+  //     setSelectedClient(found);
+  //     setMobile(found.mobile || "");
+  //     setBranch(found.branch || "");
+  //     setBranchName(found.branchName || "");
+  //     setAddress1(found.address1 || "");
+  //     setAddress2(found.address2 || "");
+  //     setPinCode(found.pinCode || "");
+  //     setState(found.state || "");
+  //   } else {
+  //     setSelectedClient(null);
+  //   }
+  // };
+  
   const handleTitleChange = (value) => {
     setTitle(value);
     setClientName("");
@@ -535,29 +759,73 @@ const Index = () => {
     setAddress2("");
     setPinCode("");
     setState("");
-    const filtered = allClients.filter((c) => c.title === value);
+    setMobileOptions([]);
+  
+    const filtered = Object.values(groupedClients).map((clients) => {
+      // Pick first client of each group that matches the title
+      const match = clients.find((c) => c.title === value);
+      return match;
+    }).filter(Boolean);
+  
     setFilteredClientNames(filtered);
   };
-
+  
+  
   const handleClientNameChange = (value) => {
     setClientName(value);
-
-    const found = filteredClientNames.find(
-      (c) => c.clientName.toLowerCase() === value.toLowerCase()
-    );
-
-    if (found) {
-      setSelectedClient(found);
-      setMobile(found.mobile || "");
-      setBranch(found.branch || "");
-      setBranchName(found.branchName || "");
-      setAddress1(found.address1 || "");
-      setAddress2(found.address2 || "");
-      setPinCode(found.pinCode || "");
-      setState(found.state || "");
-    } else {
-      setSelectedClient(null);
+    setSelectedClient(null);
+    setMobile("");
+    setBranch("");
+    setBranchName("");
+    setAddress1("");
+    setAddress2("");
+    setPinCode("");
+    setState("");
+    setMobileOptions([]);
+  
+    const nameKey = value.toLowerCase();
+    const matchingClients = groupedClients[nameKey] || [];
+  
+    if (matchingClients.length === 1) {
+      // Only one client → auto-fill everything
+      const client = matchingClients[0];
+      setMobile(client.mobile || "");
+      setBranch(client.branch || "");
+      setBranchName(client.branchName || "");
+      setAddress1(client.address1 || "");
+      setAddress2(client.address2 || "");
+      setPinCode(client.pinCode || "");
+      setState(client.state || "");
+      setMobileOptions([]);
+      setClientMobileGroup([]);
+    } else if (matchingClients.length > 1) {
+      // Multiple clients → show mobile dropdown
+      setMobileOptions(matchingClients.map((c) => c.mobile));
+      setClientMobileGroup(matchingClients);
     }
+  };
+  
+
+  const resetForm = () => {
+    setEditingIndex(null)
+    setFormFields({
+      name: "",
+      company: "",
+      salt: "",
+      quantity: 0,
+      packing: "",
+      batch: "",
+      expiry: "",
+      price: 0,
+      discount: 10,
+      rate: 0,
+      total: 0.0,
+      gst: 12,
+      lessquantity: 0,
+      category: "",
+      free: 0,
+      hsm: "",
+    });
   };
   return (
     <>
@@ -572,8 +840,9 @@ const Index = () => {
           </button>
         </div>
         <form onSubmit={handleSubmit} className="mb-6 w-full max-w-7xl gap-5">
-          <div className="flex justify-between items-center">
-            <div className="w-1/2 md:w-[10%] mb-6">
+          <div className="lg:flex justify-between lg:items-center">
+            <div className="w-full lg:w-1/2 flex items-center gap-3">
+            <div className="w-[60%] md:w-[20%] lg:mb-6">
               <label>Invoice No:</label>
               <input
                 type="number"
@@ -583,38 +852,41 @@ const Index = () => {
                 className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
               />
             </div>
+            <div className="w-full md:w-[50%] lg:mb-6">
+              <label>Sales Person:</label>
+              <input
+                type="text"
+                required
+                value={salesPerson}
+                onChange={(e) => setSalesPerson(e.target.value)}
+                className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
+              />
+            </div>
+            </div>
             {!billNo && isEditingBill === "copy" ? (
               <div
                 onClick={handleResetForm}
-                className={`text-green-700 font-medium pr-3 cursor-pointer`}
+                className={`text-green-700 pb-5 text-right  lg:pb:0 font-medium pr-3 cursor-pointer`}
               >
                 Reset Form
               </div>
             ) : !billNo ? (
               <div
-                className={`text-green-700 font-medium pr-3 cursor-not-allowed`}
+                className={`text-green-700 pb-5 text-right  lg:pb:0 font-medium pr-3 cursor-not-allowed`}
               >
                 Reset Form
               </div>
             ) : (
               <div
                 onClick={handleResetForm}
-                className={`text-green-700 font-medium pr-3 cursor-pointer`}
+                className={`text-green-700 pb-5 text-right  lg:pb:0 font-medium pr-3 cursor-pointer`}
               >
                 Reset Form
               </div>
             )}
           </div>
           <div className="border px-4 py-3 -mt-4">
-            <div className="flex justify-end mr-4">
-              <button
-                type="button"
-                onClick={addMoreTablet}
-                className="bg-green-600 text-white px-4 py-2 rounded h-[42px] cursor-pointer"
-              >
-                {editingIndex !== null ? "Update Tablet" : "Add More"}
-              </button>
-            </div>
+            
             <div className="flex flex-wrap gap-4 items-end ">
               <div className="w-full md:w-[30%] relative">
                 <label>Product Name:</label>
@@ -667,6 +939,8 @@ const Index = () => {
                             expiry: t.expiry,
                             price: t.mrp,
                             total: (1 * (t.rate || t.price || 0)).toFixed(2),
+                            lessquantity:"",
+                            free:""
                           });
                           setShowSuggestions(false);
                         }}
@@ -718,53 +992,7 @@ const Index = () => {
                   required
                 />
               </div>
-              <div className="w-full md:w-[10%] ">
-                <label>Total Stock</label>
-                <input
-                  type="number"
-                  value={formFields.quantity}
-                  onChange={(e) =>
-                    setFormFields({ ...formFields, quantity: e.target.value })
-                  }
-                  disabled
-                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
-                  required
-                />
-              </div>
-
-              <div className="w-full md:w-[10%] ">
-                <label>Quantity</label>
-                <input
-                  type="number"
-                  value={formFields.lessquantity}
-                  onChange={(e) =>
-                    setFormFields({
-                      ...formFields,
-                      lessquantity: e.target.value,
-                    })
-                  }
-                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
-                  required
-                />
-              </div>
-
-              <div className="w-full md:w-[10%] ">
-                <label>Free</label>
-                <input
-                  type="number"
-                  value={formFields.free}
-                  onChange={(e) =>
-                    setFormFields({
-                      ...formFields,
-                      free: e.target.value,
-                    })
-                  }
-                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
-                  required
-                />
-              </div>
-
-              <div className="w-full md:w-[10%] ">
+              <div className="w-full md:w-[14%] ">
                 <label>HSM</label>
                 <select
                   type="number"
@@ -787,7 +1015,7 @@ const Index = () => {
                 </select>
               </div>
 
-              <div className="w-full md:w-[14%] ">
+              <div className="w-full md:w-[12%] ">
                 <label>Packing</label>
                 <input
                   type="text"
@@ -857,7 +1085,7 @@ const Index = () => {
                 />
               </div>
 
-              <div className="w-full md:w-[10%] ">
+              <div className="w-full md:w-[8%] ">
                 <label>Discount %</label>
                 <input
                   value={formFields.discount}
@@ -867,7 +1095,7 @@ const Index = () => {
                   className="border p-2 w-full bg-white text-black outline-none rounded-sm"
                 />
               </div>
-              <div className="w-full md:w-[10%] ">
+              <div className="w-full md:w-[5%] ">
                 <label>GST</label>
                 <select
                   type="text"
@@ -884,7 +1112,7 @@ const Index = () => {
                   <option value="28">28</option>
                 </select>
               </div>
-              <div className="w-full md:w-[10%] ">
+              <div className="w-full md:w-[5%] ">
                 <label>CGST</label>
                 <input
                   value={formFields.gst / 2}
@@ -896,7 +1124,7 @@ const Index = () => {
                 />
               </div>
 
-              <div className="w-full md:w-[10%] ">
+              <div className="w-full md:w-[5%] ">
                 <label>SGST</label>
                 <input
                   value={formFields.gst / 2}
@@ -907,6 +1135,52 @@ const Index = () => {
                   className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                 />
               </div>
+              <div className="w-full md:w-[10%] ">
+                <label>Total Stock</label>
+                <input
+                  type="number"
+                  value={formFields.quantity}
+                  onChange={(e) =>
+                    setFormFields({ ...formFields, quantity: e.target.value })
+                  }
+                  disabled
+                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
+                  required
+                />
+              </div>
+
+              <div className="w-full md:w-[10%] ">
+                <label>Free</label>
+                <input
+                  type="number"
+                  value={formFields.free}
+                  onChange={(e) =>
+                    setFormFields({
+                      ...formFields,
+                      free: e.target.value,
+                    })
+                  }
+                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  required
+                />
+              </div>
+
+              <div className="w-full md:w-[10%] ">
+                <label>Quantity</label>
+                <input
+                  type="number"
+                  value={formFields.lessquantity}
+                  onChange={(e) =>
+                    setFormFields({
+                      ...formFields,
+                      lessquantity: e.target.value,
+                    })
+                  }
+                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  required
+                />
+              </div>
+
               <div className="w-full md:w-[10%] ">
                 <label>Total</label>
                 <input
@@ -919,6 +1193,16 @@ const Index = () => {
                 />
               </div>
             </div>
+            {editingIndex !== null&&<div className="flex items-center gap-2 justify-end pt-2 lg:pt-0 lg:mr-4">
+              <button
+                type="button"
+                onClick={addMoreTablet}
+                className="bg-green-600 text-xs text-white p-2 rounded  cursor-pointer"
+              >
+                Update
+              </button>
+              <div className="text-sm text-red-600 cursor-pointer" onClick={resetForm}>Reset</div>
+            </div>}
             <div className="border-[1px] mt-5 mb-2"></div>
             {tablets.length > 0 && (
               <div className="">
@@ -960,6 +1244,7 @@ const Index = () => {
                   value={discount}
                   onChange={(e) => setDiscount(e.target.value)}
                   className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  onClick={()=>setDiscount(0)}
                 />
               </div>
               <div className="w-full md:w-[10%] ">
@@ -1037,9 +1322,10 @@ const Index = () => {
                     setInputValue={setInputValue}
                     setShowOptions={setShowOptions}
                     showOptions={showOptions}
+                    required={true}
                   />
                 </div>
-                <div className="w-full md:w-[15%]">
+                {/* <div className="w-full md:w-[15%]">
                   <label>Mobile</label>
                   <input
                     type="text"
@@ -1053,7 +1339,51 @@ const Index = () => {
                     className="border p-2 w-full bg-white text-black outline-none rounded-sm"
                     required
                   />
-                </div>
+                </div> */}
+
+<div className="w-full md:w-[15%]">
+  <label>Mobile</label>
+  {mobileOptions.length > 1 ? (
+  <select
+    value={mobile}
+    onChange={(e) => {
+      const selectedMobile = e.target.value;
+      setMobile(selectedMobile);
+
+      const matchedClient = clientMobileGroup.find(c => c.mobile === selectedMobile);
+      if (matchedClient) {
+        setBranch(matchedClient.branch || "");
+        setBranchName(matchedClient.branchName || "");
+        setAddress1(matchedClient.address1 || "");
+        setAddress2(matchedClient.address2 || "");
+        setPinCode(matchedClient.pinCode || "");
+        setState(matchedClient.state || "");
+      }
+    }}
+    required
+    className="border py-2.5 px-2 w-full bg-white text-black outline-none rounded-sm"
+  >
+    <option value="" disabled>--Select Mobile--</option>
+    {mobileOptions.map((mob, i) => (
+      <option key={i} value={mob}>{mob}</option>
+    ))}
+  </select>
+) : (
+  <input
+    type="text"
+    value={mobile}
+    maxLength={10}
+    minLength={10}
+    onChange={(e) => {
+      const val = e.target.value;
+      if (/^\d*$/.test(val)) setMobile(val);
+    }}
+    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+    required
+  />
+)}
+
+</div>
 
                 <div className="w-full md:w-[20%]">
                   <label>Branch</label>
@@ -1153,7 +1483,7 @@ const Index = () => {
         <Modal
           isOpen={modalOpen}
           onRequestClose={() => setModalOpen(false)}
-          className="bg-white p-6 border max-w-4xl mx-auto mt-40 shadow-2xl z-[100px]"
+          className="bg-white  p-6 border max-w-4xl mx-auto mt-2 lg:mt-20 shadow-2xl z-50"
           overlayClassName="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40  overflow-y-auto"
         >
           <div
@@ -1163,10 +1493,11 @@ const Index = () => {
             Close
           </div>
 
-          <h2 className="text-xl font-bold mb-4 text-black">Invoice Numbers</h2>
+          <h2 className="text-xl font-bold mb-2 lg:mb-4 text-black">Invoice Numbers</h2>
+          <div className="lg:flex justify-between items-center">
           <div className="flex gap-4 mb-4">
             <button
-              className={`px-4 py-2 border rounded ${
+              className={`px-2 py-0 border rounded text-sm ${
                 activeTab === "new"
                   ? "bg-red-600 text-white"
                   : "bg-gray-200  text-green-600"
@@ -1176,7 +1507,7 @@ const Index = () => {
                 setSearchTerm("");
               }}
             >
-              New Bills
+              Newest
             </button>
             <button
               className={`px-4 py-2 border rounded ${
@@ -1189,27 +1520,28 @@ const Index = () => {
                 setSearchTerm("");
               }}
             >
-              Old Bills
+              Draft
             </button>
           </div>
 
           <input
             type="text"
-            placeholder="Search Bill Number"
+            placeholder="Search Invoice Number"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="border px-3 py-2 rounded-sm w-full lg:w-1/2 mb-4 text-black"
+            className="border px-3 py-2 rounded-sm w-full lg:w-[25%] mb-4 text-black"
           />
-
+</div>
+<div className="overflow-auto max-h-[300px]">
           <div className="flex gap-4 flex-wrap">
             {activeBills.length > 0 ? (
               activeBills.map((bill, idx) => (
                 <div
                   key={idx}
-                  className="bg-orange-500 py-2 px-3 flex gap-3 items-center rounded"
+                  className="bg-orange-500 py-2 px-3 flex gap-1 lg:gap-3 items-center rounded"
                 >
                   <button
-                    className="text-white cursor-pointer"
+                    className="text-white cursor-pointer text-sm"
                     onClick={() => {
                       setModalOpen(false);
                       window.location.href = `/bill/${bill.billNo}`;
@@ -1232,8 +1564,10 @@ const Index = () => {
               <p className="text-black">No matching invoice numbers found.</p>
             )}
           </div>
+          </div>
         </Modal>
       </div>
+     
     </>
   );
 };
