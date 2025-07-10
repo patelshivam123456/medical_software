@@ -21,10 +21,13 @@ const Login = () => {
         Cookies.set("loginType",res.data.loginType)
         Cookies.set('loggedIn', 'true')
         if(res.data.loginType==="stockiest"){
-          router.push("/manage-stock")
+          router.push("/admin/manage-stock")
+        }
+        else if(res.data.loginType==="stockiest"){
+        router.push('/admin/bill')
         }
         else{
-        router.push('/')
+          router.push("/admin")
         }
       }
     } catch (err) {
@@ -90,19 +93,19 @@ export async function getServerSideProps(context) {
   if (context.req.cookies.loggedIn&&context.req.cookies.loginType==="admin") {
     return {
       props: {},
-      redirect: { destination: '/' },
+      redirect: { destination: '/admin/bill' },
     }
   }
   else if (context.req.cookies.loggedIn&&context.req.cookies.loginType==="sales") {
     return {
       props: {},
-      redirect: { destination: '/' },
+      redirect: { destination: '/admin/bill' },
     }
   }
   else if (context.req.cookies.loggedIn&&context.req.cookies.loginType==="stockiest") {
     return {
       props: {},
-      redirect: { destination: '/manage-stock' },
+      redirect: { destination: '/admin/manage-stock' },
     }
   }
 

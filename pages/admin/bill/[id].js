@@ -72,7 +72,7 @@ const totalInWords = toWords(roundedGrandTotal);
       id="bill-content"
       className="relative p-6 max-w-7xl mx-auto bg-white "
       style={{
-        width: "2400px",
+        width: "2000px",
         minHeight: '700px',
         padding: "40px",
         boxSizing: "border-box",
@@ -87,7 +87,7 @@ const totalInWords = toWords(roundedGrandTotal);
         className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none select-none w-[300px]"
         style={{ zIndex: 10 }}
       />
- <div className="mb-6 no-print relative z-10 flex justify-end">
+ <div className="mb-6 -mt-6 no-print relative z-10 flex justify-end">
         {downloading?<LoadingBtn/>:<button
           onClick={handleDownloadPDF}
           className="bg-green-600 text-white px-4 py-2 rounded cursor-pointer"
@@ -205,20 +205,20 @@ const totalInWords = toWords(roundedGrandTotal);
             <tbody>
   {billdata.tablets.map((t, i) => (
     <tr key={t._id || i} >
-      <td className="px-3 pt-1 pb-4">{i + 1}</td>
-      <td className="px-3 pt-1 pb-4">{t.lessquantity}</td>
-      <td className="px-3 pt-1 pb-4">{t.free}</td>
-      <td className="px-3 pt-1 pb-4">{t.packing}</td>
-      <td className="px-3 pt-1 pb-4 min-w-[280px]">{t.name}</td>
-      <td className="px-3 pt-1 pb-4">{t.batch}</td>
-      <td className="px-3 pt-1 pb-4">{t.expiry}</td>
-      <td className="px-3 pt-1 pb-4">{t.hsm}</td>
-      <td className="px-3 pt-1 pb-4">{t.price}</td>
-      <td className="px-3 pt-1 pb-4">₹{t.rate}</td>
-      <td className="px-3 pt-1 pb-4">{t.discount}</td>
-      <td className="px-3 pt-1 pb-4">{t.sgst}</td>
-      <td className="px-3 pt-1 pb-4">{t.cgst}</td>
-      <td className="px-3 pt-1 pb-4">{t.total}</td>
+      <td className="px-3 pb-1">{i + 1}</td>
+      <td className="px-3 pb-1 text-right">{t.lessquantity}</td>
+      <td className="px-3 pb-1 text-right">{t.free}</td>
+      <td className="px-3 pb-1">{t.packing}</td>
+      <td className="px-3 pb-1 min-w-[280px]">{t.name}</td>
+      <td className="px-3 pb-1">{t.batch}</td>
+      <td className="px-3 pb-1">{t.expiry}</td>
+      <td className="px-3 pb-1">{t.hsm}</td>
+      <td className="px-3 pb-1 text-right font-mono">{Number(t.price).toFixed(2)}</td>
+      <td className="px-3 pb-1 text-right font-mono">{Number(t.rate).toFixed(2)}</td>
+      <td className="px-3 pb-1 text-right font-mono">{Number(t.discount).toFixed(2)}</td>
+      <td className="px-3 pb-1">{t.sgst}</td>
+      <td className="px-3 pb-1">{t.cgst}</td>
+      <td className="px-3 pb-1 text-right font-mono">{Number(t.total).toFixed(2)}</td>
     </tr>
   ))}
 </tbody>

@@ -41,7 +41,7 @@ const Header=()=> {
   const handleLogout =()=>{
     Cookies.remove("loggedIn")  
     Cookies.remove("loginType")
-    router.push("/")
+    router.push("/admin")
   }
 
   return (
@@ -112,13 +112,13 @@ const Header=()=> {
           
           } */}
           <PopoverGroup className="hidden lg:flex lg:gap-x-12">
-           {(checkLoginType==="admin"||checkLoginType==="sales")&& <a href="/" className="text-sm/6 font-semibold text-gray-900">
+           {(checkLoginType==="admin"||checkLoginType==="sales")&& <a href="/admin/bill" className="text-sm/6 font-semibold text-gray-900">
             Bill page
           </a>}
-          {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/manage-stock" className="text-sm/6 font-semibold text-gray-900">
+          {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/admin/manage-stock" className="text-sm/6 font-semibold text-gray-900">
             Stock
           </a>}
-          {(checkLoginType==="admin"||checkLoginType==="sales")&&<a href="/client" className="text-sm/6 font-semibold text-gray-900">
+          {(checkLoginType==="admin"||checkLoginType==="sales")&&<a href="/admin/client" className="text-sm/6 font-semibold text-gray-900">
             Client
           </a>}
           {(checkLoginType==="admin")&&<a href="/admin/accesstype/adduser" className="text-sm/6 font-semibold text-gray-900">
@@ -237,7 +237,7 @@ const Header=()=> {
             } */}
            {(checkLoginType==="admin"||checkLoginType==="sales")&& <div className="space-y-2 py-6">
                 <a
-                  href="/"
+                  href="/admin/bill"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
                 >
                   Bill page
@@ -245,7 +245,7 @@ const Header=()=> {
               </div>}
               {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">
               <a
-                href="/manage-stock"
+                href="/admin/manage-stock"
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
                 Stock
@@ -253,7 +253,7 @@ const Header=()=> {
             </div>}
             {(checkLoginType==="admin"||checkLoginType==="sales")&&<div className="space-y-2 py-6">
               <a
-                href="/client"
+                href="/admin/client"
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
                 Client
