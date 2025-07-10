@@ -2,7 +2,7 @@
 
 import Cookies from 'js-cookie'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogPanel,
@@ -29,10 +29,18 @@ import {
 
 const Header=()=> {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [checkLoginType,setCheckLoginType] = useState('')
   const router = useRouter()
+
+  useEffect(()=>{
+    if(Cookies.get("loginType")){
+        setCheckLoginType(Cookies.get("loginType"))
+    }
+  },[])
 
   const handleLogout =()=>{
     Cookies.remove("loggedIn")  
+    Cookies.remove("loginType")
     router.push("/")
   }
 
@@ -64,7 +72,7 @@ const Header=()=> {
             <Bars3Icon aria-hidden="true" className="size-6" />
           </button>
         </div>
-        {router.pathname==="/manage-stock"?<PopoverGroup className="hidden lg:flex lg:gap-x-12">
+        {/* {router.pathname==="/manage-stock"?<PopoverGroup className="hidden lg:flex lg:gap-x-12">
           <a href="/" className="text-sm/6 font-semibold text-gray-900">
             Bill page
           </a>
@@ -102,7 +110,21 @@ const Header=()=> {
           </a>
           </PopoverGroup>
           
-          }
+          } */}
+          <PopoverGroup className="hidden lg:flex lg:gap-x-12">
+           {(checkLoginType==="admin"||checkLoginType==="sales")&& <a href="/" className="text-sm/6 font-semibold text-gray-900">
+            Bill page
+          </a>}
+          {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/manage-stock" className="text-sm/6 font-semibold text-gray-900">
+            Stock
+          </a>}
+          {(checkLoginType==="admin"||checkLoginType==="sales")&&<a href="/client" className="text-sm/6 font-semibold text-gray-900">
+            Client
+          </a>}
+          {(checkLoginType==="admin")&&<a href="/admin/accesstype/adduser" className="text-sm/6 font-semibold text-gray-900">
+            Login Access
+          </a>}
+          </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           <a href="#" onClick={handleLogout} className="text-sm/6 font-semibold text-gray-900">
             Log out <span aria-hidden="true">&rarr;</span>
@@ -132,7 +154,7 @@ const Header=()=> {
           </div>
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-500/10">
-              {router.pathname==="/"?<>
+              {/* {router.pathname==="/"?<>
             <div className="space-y-2 py-6">
                 <a
                   href="/client"
@@ -212,7 +234,39 @@ const Header=()=> {
               </a>
             </div>
             </>
-            }
+            } */}
+           {(checkLoginType==="admin"||checkLoginType==="sales")&& <div className="space-y-2 py-6">
+                <a
+                  href="/"
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                >
+                  Bill page
+                </a>
+              </div>}
+              {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">
+              <a
+                href="/manage-stock"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Stock
+              </a>
+            </div>}
+            {(checkLoginType==="admin"||checkLoginType==="sales")&&<div className="space-y-2 py-6">
+              <a
+                href="/client"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Client
+              </a>
+            </div>}
+            {(checkLoginType==="admin")&&<div className="space-y-2 py-6">
+              <a
+                href="/admin/accesstype/adduser"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Login Access
+              </a>
+            </div>}
               <div className="py-6">
                 <a
                   href="#"

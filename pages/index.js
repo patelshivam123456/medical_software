@@ -474,6 +474,7 @@ const Index = () => {
         setIsEditingBill("");
         toast.success("Bill created successfully");
         fetchTabDetails()
+        router.push("/bill/"+billNo)
       }
     } catch (error) {
       setIsLoading(false);
@@ -613,6 +614,7 @@ const Index = () => {
         setIsLoading(false);
         setIsEditingBill("");
         setInputValue("");
+        router.push("/bill/"+billNo)
       }
     } catch (error) {
       setIsLoading(false);
@@ -856,7 +858,7 @@ const Index = () => {
               <label>Sales Person:</label>
               <input
                 type="text"
-                required
+                
                 value={salesPerson}
                 onChange={(e) => setSalesPerson(e.target.value)}
                 className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
@@ -1573,7 +1575,17 @@ const Index = () => {
 };
 
 export async function getServerSideProps(context) {
-  if (!context.req.cookies.loggedIn && !context.query.loggedIn) {
+  const { loggedIn, loginType } = context.req.cookies;
+
+  if (!loggedIn && !context.query.loggedIn) {
+    return {
+      props: {},
+      redirect: { destination: "/login" },
+    };
+  }
+
+  // Only allow admin or sales
+  if (loggedIn && loginType !== "admin" && loginType !== "sales") {
     return {
       props: {},
       redirect: { destination: "/login" },

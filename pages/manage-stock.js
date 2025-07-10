@@ -892,7 +892,17 @@ const ManageStockPage = () => {
   );
 };
 export async function getServerSideProps(context) {
-  if (!context.req.cookies.loggedIn && !context.query.loggedIn) {
+  const { loggedIn, loginType } = context.req.cookies;
+
+  if (!loggedIn && !context.query.loggedIn) {
+    return {
+      props: {},
+      redirect: { destination: "/login" },
+    };
+  }
+
+  // Only allow admin or sales
+  if (loggedIn && loginType !== "admin" && loginType !== "stockiest") {
     return {
       props: {},
       redirect: { destination: "/login" },

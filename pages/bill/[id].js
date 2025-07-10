@@ -70,9 +70,9 @@ const totalInWords = toWords(roundedGrandTotal);
   return (
     <div
       id="bill-content"
-      className="relative p-6 max-w-6xl mx-auto bg-white "
+      className="relative p-6 max-w-7xl mx-auto bg-white "
       style={{
-        width: "1050px",
+        width: "2400px",
         minHeight: '700px',
         padding: "40px",
         boxSizing: "border-box",
@@ -130,7 +130,7 @@ const totalInWords = toWords(roundedGrandTotal);
           <div className="w-[65%] flex gap-4 ">
             <div
               className="w-[35%] text-xl font-semibold text-center pb-4 pt-2 px-2"
-              style={{ backgroundColor: "yellowgreen" }}
+              style={{ backgroundColor: "#f5b13d" }}
             >
               GST INVOICE
             </div>
@@ -184,13 +184,13 @@ const totalInWords = toWords(roundedGrandTotal);
           }}
         >
           <table className=" min-w-full pb-60 text-sm">
-            <thead className="" style={{backgroundColor:"yellow"}}>
+            <thead className="" style={{backgroundColor:"#60b16b",color:"black"}}>
               <tr>
                 <th className="border px-3 py-2 text-left">Sn.</th>
                 <th className="border px-3 py-2 text-left">Qty.</th>
                 <th className="border px-3 py-2 text-left">Free</th>
                 <th className="border px-3 py-2 text-left">Pack</th>
-                <th className="border px-3 py-2 text-left">Product</th>
+                <th className="border px-3 py-2 text-left min-w-[280px]">Product</th>
                 <th className="border px-3 py-2 text-left">Batch</th>
                 <th className="border px-3 py-2 text-left">Exp.</th>
                 <th className="border px-3 py-2 text-left">HSN</th>
@@ -206,10 +206,10 @@ const totalInWords = toWords(roundedGrandTotal);
   {billdata.tablets.map((t, i) => (
     <tr key={t._id || i} >
       <td className="px-3 pt-1 pb-4">{i + 1}</td>
-      <td className="px-3 pt-1 pb-4">{t.quantity}</td>
+      <td className="px-3 pt-1 pb-4">{t.lessquantity}</td>
       <td className="px-3 pt-1 pb-4">{t.free}</td>
       <td className="px-3 pt-1 pb-4">{t.packing}</td>
-      <td className="px-3 pt-1 pb-4">{t.name}</td>
+      <td className="px-3 pt-1 pb-4 min-w-[280px]">{t.name}</td>
       <td className="px-3 pt-1 pb-4">{t.batch}</td>
       <td className="px-3 pt-1 pb-4">{t.expiry}</td>
       <td className="px-3 pt-1 pb-4">{t.hsm}</td>
@@ -675,7 +675,17 @@ const totalInWords = toWords(roundedGrandTotal);
   );
 }
 export async function getServerSideProps(context) {
-  if (!context.req.cookies.loggedIn && !context.query.loggedIn) {
+  const { loggedIn, loginType } = context.req.cookies;
+
+  if (!loggedIn && !context.query.loggedIn) {
+    return {
+      props: {},
+      redirect: { destination: "/login" },
+    };
+  }
+
+  // Only allow admin or sales
+  if (loggedIn && loginType !== "admin" && loginType !== "sales") {
     return {
       props: {},
       redirect: { destination: "/login" },

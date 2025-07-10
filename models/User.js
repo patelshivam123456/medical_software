@@ -1,16 +1,35 @@
-import mongoose from 'mongoose'
+// import mongoose from 'mongoose'
+
+// const UserSchema = new mongoose.Schema({
+//   mobile: {
+//     type: String,
+//     required: true,
+//     unique: true,
+//   },
+//   password: {
+//     type: String,
+//     required: true,
+//   },
+// })
+
+// // Prevent model overwrite error in dev
+// export const User = mongoose.models.User || mongoose.model('User', UserSchema)
+
+
+import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
-  mobile: {
+  mobile: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  loginType: {
     type: String,
-    required: true,
-    unique: true,
+    enum: ['admin', 'sales', 'stockiest'],
+    default: 'admin',
   },
-  password: {
-    type: String,
-    required: true,
-  },
-})
+}, {
+  timestamps: true, // ✅ adds createdAt and updatedAt automatically
+});
 
-// Prevent model overwrite error in dev
-export const User = mongoose.models.User || mongoose.model('User', UserSchema)
+export const User = mongoose.models.User || mongoose.model('User', UserSchema);
+
+
