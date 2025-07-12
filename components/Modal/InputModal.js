@@ -8,7 +8,7 @@ const InputModal = (props) => {
       <h3 className="text-lg font-bold mb-4 text-black">{props.label}</h3>
       <input
         type="text"
-        placeholder="Company Name"
+        placeholder={props.placeholder}
         value={props.value}
         onChange={props.onChange}
         className="w-full border px-3 py-2 rounded mb-4 text-black"

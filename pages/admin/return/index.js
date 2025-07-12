@@ -600,6 +600,9 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
         toast.success("Bill deleted successfully");
         setBillNumbers((prev) => prev.filter((b) => b !== invoiceId));
         setLoading(false)
+        setConfirmDeleteId(false)
+        const res = await axios.get("/api/return");
+        setBillNumbers(res.data.bills);
       }
     } catch (err) {
       toast.error("Error deleting bill");
@@ -799,8 +802,8 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
           <div className="lg:flex justify-between lg:items-center">
             <div className="w-full lg:w-1/2 flex flex-wrap lg:flex-nowrap items-center lg:gap-3">
             
-     <div className="w-[60%] md:w-[20%] lg:mb-6 relative invoice-search">
-  <label>Invoice No:</label>
+     <div className="w-[60%] md:w-[30%] lg:mb-6 relative invoice-search">
+  <label>Bill Invoice No:</label>
   <input
     type="text"
     value={billNo}
@@ -1550,10 +1553,10 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
 
           <input
             type="text"
-            placeholder="Search Invoice Number"
+            placeholder="Search Invoice/Mobile/Client"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="border px-3 py-2 rounded-sm w-full lg:w-[25%] mb-4 text-black"
+            className="border px-3 py-2 rounded-sm w-full lg:w-[30%] mb-4 text-black"
           />
 </div>
 <div className="overflow-auto max-h-[300px]">

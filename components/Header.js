@@ -118,7 +118,7 @@ const Header=({isLoggedStatus})=> {
             Bill page
           </a>}
           {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/admin/manage-stock" className="text-sm/6 font-semibold text-gray-900">
-            Stock
+            Purchase
           </a>}
           {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/admin/return" className="text-sm/6 font-semibold text-gray-900">
             Return
@@ -254,7 +254,7 @@ const Header=({isLoggedStatus})=> {
                 href="/admin/manage-stock"
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
-                Stock
+                Purchase
               </a>
             </div>}
             {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">

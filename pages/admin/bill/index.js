@@ -81,6 +81,7 @@ const Index = (props) => {
   const [invoiceId,setInvoiceId] = useState('')
   const [confirmDeleteId,setConfirmDeleteId] = useState(false)
   const [isLoggedCheck,setIsLoggedCheck] = useState('')
+  const [saveBillNo,setSaveBillNo]= useState('')
 
   const now = new Date();
 
@@ -219,12 +220,25 @@ const Index = (props) => {
     );
   }, [searchTerm, billNumbers]);
 
+  // useEffect(() => {
+  //   const quantity = parseFloat(formFields.lessquantity) || 0;
+  //   const rate = parseFloat(formFields.rate) || 0;
+  //   const total = quantity * rate;
+  //   setFormFields((prev) => ({ ...prev, total: total.toFixed(2) }));
+  // }, [formFields.lessquantity,formFields.rate]);
+
   useEffect(() => {
-    const quantity = parseFloat(formFields.lessquantity) || 0;
-    const rate = parseFloat(formFields.rate) || 0;
-    const total = quantity * rate;
-    setFormFields((prev) => ({ ...prev, total: total.toFixed(2) }));
-  }, [formFields.lessquantity, formFields.rate]);
+    const quantity = Number(formFields.lessquantity);
+  
+    if (quantity > 0 && editingIndex === null) {
+      const timer = setTimeout(() => {
+        addMoreTablet();
+      }, 1200);
+  
+      return () => clearTimeout(timer);
+    }
+  }, [formFields.lessquantity]);
+  
 
   const handleExpiryChange = (e) => {
     let value = e.target.value.replace(/[^\d]/g, "");
@@ -234,16 +248,16 @@ const Index = (props) => {
     setFormFields({ ...formFields, expiry: value });
   };
 
-  useEffect(() => {
-    const quantity = Number(formFields.lessquantity);
+  // useEffect(() => {
+  //   const quantity = Number(formFields.lessquantity);
 
-    if (quantity > 0 && editingIndex === null) {
-      const timer = setTimeout(() => {
-        addMoreTablet();
-      }, 1200);
-      return () => clearTimeout(timer); 
-    }
-  }, [formFields.lessquantity]);
+  //   if (quantity > 0 && editingIndex === null) {
+  //     const timer = setTimeout(() => {
+  //       addMoreTablet();
+  //     }, 1200);
+  //     return () => clearTimeout(timer); 
+  //   }
+  // }, [formFields.lessquantity]);
 
   // const addMoreTablet = () => {
   //   const {
@@ -346,14 +360,16 @@ const Index = (props) => {
       price,
       discount,
       rate,
-      total,
       gst,
       lessquantity,
       category,
       free,
       hsm,
     } = formFields;
-
+  
+    // Calculate total HERE to avoid stale state
+    const total = (parseFloat(lessquantity || 0) * parseFloat(rate || 0)).toFixed(2);
+  
     if (
       !name ||
       !company ||
@@ -371,7 +387,7 @@ const Index = (props) => {
       toast.error("Please fill all fields before adding.");
       return;
     }
-
+  
     const newTablet = {
       name: name.trim(),
       company: company.trim(),
@@ -392,6 +408,7 @@ const Index = (props) => {
       free: Number(free),
       hsm: hsm.trim(),
     };
+  
     const isDuplicate = tablets.some((tablet, index) => {
       if (editingIndex !== null && editingIndex === index) return false;
       return (
@@ -406,12 +423,12 @@ const Index = (props) => {
         tablet.price === newTablet.price
       );
     });
-
+  
     if (isDuplicate) {
       toast.error("Duplicate tablet details found. Please modify the entry.");
       return;
     }
-
+  
     if (editingIndex !== null) {
       const updatedTablets = [...tablets];
       updatedTablets[editingIndex] = newTablet;
@@ -420,7 +437,7 @@ const Index = (props) => {
     } else {
       setTablets([...tablets, newTablet]);
     }
-
+  
     setFormFields({
       name: "",
       company: "",
@@ -430,7 +447,7 @@ const Index = (props) => {
       batch: "",
       expiry: "",
       price: 0,
-      discount: 0,
+      discount: Number(formFields.discount),
       rate: 0,
       total: 0.0,
       gst: Number(formFields.gst),
@@ -439,9 +456,10 @@ const Index = (props) => {
       free: 0,
       hsm: "",
     });
-
+  
     setShowSuggestions(false);
   };
+  
 
   const handleEdit = (tablet, index) => {
     setFormFields({
@@ -507,7 +525,7 @@ const Index = (props) => {
 
     try {
       const response = await axios.post("/api/bills", {
-        billNo,
+        // billNo,
         salesperson:salesPerson,
         tablets,
         discount:Number(discount),
@@ -546,7 +564,10 @@ const Index = (props) => {
         setIsEditingBill("");
         toast.success("Bill created successfully");
         fetchTabDetails()
-        router.push("/admin/bill/"+billNo)
+        fetchBills()
+        // if(saveBillNo){
+        // router.push("/admin/bill/"+saveBillNo)
+        // }
       }
     } catch (error) {
       setIsLoading(false);
@@ -580,6 +601,14 @@ const Index = (props) => {
     const res = await axios.get("/api/bills");
     setBillNumbers(res.data.bills);
     setModalOpen(true);
+  };
+
+  const fetchBills= async () => {
+    const res = await axios.get("/api/bills");
+    setBillNumbers(res.data.bills);
+    setSaveBillNo(res.data.bills[0])
+    // setModalOpen(true);
+    router.push("/admin/bill/"+res.data.bills[0].billNo)
   };
 
   const handleCopyBill = async (billNo) => {
@@ -703,6 +732,9 @@ const Index = (props) => {
         toast.success("Bill deleted successfully");
         setBillNumbers((prev) => prev.filter((b) => b !== invoiceId));
         setLoading(false)
+        setConfirmDeleteId(false)
+        const res = await axios.get("/api/bills");
+        setBillNumbers(res.data.bills);
       }
     } catch (err) {
       toast.error("Error deleting bill");
@@ -921,7 +953,7 @@ const Index = (props) => {
         <form onSubmit={handleSubmit} className="mb-6 w-full max-w-7xl gap-5">
           <div className="lg:flex justify-between lg:items-center">
             <div className="w-full lg:w-1/2 flex items-center gap-3">
-            <div className="w-[60%] md:w-[20%] lg:mb-6">
+            {/* <div className="w-[60%] md:w-[20%] lg:mb-6">
               <label>Invoice No:</label>
               <input
                 type="number"
@@ -931,7 +963,7 @@ const Index = (props) => {
                 onChange={(e) => setBillNo(e.target.value)}
                 className={`block w-full text-black ${isEditingBill === "edit"?"bg-gray-200 cursor-not-allowed":"bg-white"} border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white`}
               />
-            </div>
+            </div> */}
             <div className="w-full md:w-[50%] lg:mb-6">
               <label>Sales Person:</label>
               <input
@@ -1261,7 +1293,7 @@ const Index = (props) => {
                 />
               </div>
 
-              <div className="w-full md:w-[10%] ">
+              {/* <div className="w-full md:w-[10%] ">
                 <label>Total</label>
                 <input
                   value={formFields.total}
@@ -1271,7 +1303,7 @@ const Index = (props) => {
                   disabled
                   className="border p-2 w-full bg-gray-300 cursor-not-allowed  text-black outline-none rounded-sm"
                 />
-              </div>
+              </div> */}
             </div>
             {editingIndex !== null&&<div className="flex items-center gap-2 justify-end pt-2 lg:pt-0 lg:mr-4">
               <button
@@ -1352,16 +1384,7 @@ const Index = (props) => {
 
           <div>
             <div className="flex flex-wrap items-center gap-4 pt-2">
-              <div className="w-full md:w-[10%] ">
-                <label>Discount %</label>
-                <input
-                  type="text"
-                  value={discount}
-                  onChange={(e) => setDiscount(e.target.value)}
-                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
-                  onClick={()=>setDiscount(0)}
-                />
-              </div>
+              
               <div className="w-full md:w-[10%] ">
                 <label>GST</label>
                 <select
@@ -1395,6 +1418,17 @@ const Index = (props) => {
                   disabled
                   onChange={(e) => setSgst(e.target.value)}
                   className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
+                />
+              </div>
+              <div className="w-full md:w-[10%] ">
+                <label>Discount %</label>
+                <input
+                  type="text"
+                  value={discount}
+                  onChange={(e) => setDiscount(e.target.value)}
+                  className={`border p-2 w-full ${gst===0?"bg-gray-200 cursor-not-allowed":"bg-white"} text-black outline-none rounded-sm`}
+                  onClick={()=>setDiscount(0)}
+                  disabled={gst===0}
                 />
               </div>
             </div>
@@ -1660,7 +1694,7 @@ const Index = (props) => {
                 className="cursor-pointer"
                 onClick={() => {
                   setModalOpen(false);
-                  window.location.href = `/admin/return/${bill.newbillNo}`;
+                  window.location.href = `/admin/bill/${bill.billNo}`;
                 }}
               >
                 <span className="text-xs text-white bg-green-600 px-2 py-1 rounded">View</span>

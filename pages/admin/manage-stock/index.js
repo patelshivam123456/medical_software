@@ -7,6 +7,7 @@ import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import * as XLSX from "xlsx";
 import LoadingBtn from "@/components/Buttons/LoadingBtn";
 import Header from "@/components/Header";
+import ConfirmationModal from "@/components/Modal/ConfirmationModal";
 
 const ManageStockPage = (props) => {
   const categoryDropdownRef = useRef(null);
@@ -39,6 +40,7 @@ const ManageStockPage = (props) => {
 
   const [quantity, setQuantity] = useState(0);
   const [price, setPrice] = useState();
+  const [purchase, setPurchase] = useState();
   const [mrp, setMrp] = useState();
   const [tablets, setTablets] = useState([]);
   const [filteredTablets, setFilteredTablets] = useState([]);
@@ -50,6 +52,9 @@ const ManageStockPage = (props) => {
   const [expiry, setExpiry] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [checkStatus,setCheckStatus]=useState('')
+  const [saveId,setSaveId]= useState('')
+  const [confirmDeleteId,setConfirmDeleteId] = useState(false)
+  const [loading,setLoading]= useState(false)
   const tabletsPerPage = 5;
 
   const [filters, setFilters] = useState({
@@ -62,6 +67,7 @@ const ManageStockPage = (props) => {
     quantity: "",
     mrp: "",
     price: "",
+    purchase:"",
     createdAt: "",
     updatedAt: "",
   });
@@ -224,6 +230,7 @@ const ManageStockPage = (props) => {
         salt,
         quantity: Number(quantity),
         price: Number(price),
+        purchase: Number(purchase),
         mrp: Number(mrp),
         mg,
         batch,
@@ -249,6 +256,7 @@ const ManageStockPage = (props) => {
       setSaltSearch("");
       setQuantity(0);
       setPrice("");
+      setPurchase("");
       fetchTablets();
       setMrp("");
       setCompanySearch("");
@@ -272,6 +280,7 @@ const ManageStockPage = (props) => {
     setSalt(tab.salt);
     setQuantity(tab.quantity);
     setPrice(tab.price);
+    setPurchase(tab.purchase);
     setMrp(tab.mrp);
     setEditId(tab._id);
     setMg(tab.mg);
@@ -287,6 +296,7 @@ const ManageStockPage = (props) => {
     setSalt("");
     setQuantity(0);
     setPrice("");
+    setPurchase("");
     setMrp("");
     setCompanySearch("");
     setCategorySearch("");
@@ -297,12 +307,16 @@ const ManageStockPage = (props) => {
     setExpiry("");
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
+    setLoading(true)
     try {
-      await axios.delete(`/api/tablets/delete?id=${id}`);
+      await axios.delete(`/api/tablets/delete?id=${saveId}`);
       fetchTablets();
+      setLoading(false)
+      setConfirmDeleteId(false)
     } catch (err) {
-      alert("Delete failed");
+      toast.error("Delete failed");
+      setLoading(false)
     }
   };
 
@@ -370,6 +384,7 @@ const ManageStockPage = (props) => {
         "Quantity",
         "MRP",
         "Price",
+        "Purchase",
         "Created Date",
         "Updated Date",
       ],
@@ -384,6 +399,7 @@ const ManageStockPage = (props) => {
         tab.quantity,
         tab.mrp,
         tab.price,
+        tab.purchase,
         tab.createdAt?.split("T")[0],
         tab.updatedAt?.split("T")[0],
       ]),
@@ -423,7 +439,7 @@ const ManageStockPage = (props) => {
      <Header isLoggedStatus={checkStatus}/>
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold mb-4">Manage Stock</h2>
+        <h2 className="text-2xl font-bold mb-4">Purchase</h2>
       </div>
       <form onSubmit={handleSubmit} className="mb-6 w-full max-w-7xl gap-5">
         <div className="flex flex-wrap -mx-3 mb-6">
@@ -610,9 +626,20 @@ const ManageStockPage = (props) => {
               required
             />
           </div>
+          <div className="w-full md:w-[30%] px-3 mb-6 md:mb-0">
+            <div className="pb-1 text-base">Purchase Rate</div>
+            <input
+              type="number"
+              value={purchase}
+              onChange={(e) => setPurchase(e.target.value)}
+              placeholder="Rate"
+              className="block w-full text-black bg-gray-200 border border-red-500 rounded py-3 px-4 mb-3 focus:outline-none focus:bg-white"
+              required
+            />
+          </div>
 
           <div className="w-full md:w-[30%] px-3 mb-6 md:mb-0">
-            <div className="pb-1 text-base">Rate</div>
+            <div className="pb-1 text-base">Sell Rate</div>
             <input
               type="number"
               value={price}
@@ -622,6 +649,7 @@ const ManageStockPage = (props) => {
               required
             />
           </div>
+          
           <div className="w-full md:w-[30%] px-3 mb-6 md:mb-0">
             <div className="pb-1 text-base">Mg</div>
             <input
@@ -707,7 +735,8 @@ const ManageStockPage = (props) => {
                 <th className="border p-2 text-black">Salt</th>
                 <th className="border p-2 text-black">Quantity</th>
                 <th className="border p-2 text-black">MRP</th>
-                <th className="border p-2 text-black">Price</th>
+                <th className="border p-2 text-black">Purchase Price</th>
+                <th className="border p-2 text-black">Sell Price</th>
                 <th className="border p-2 text-black">Created date</th>
                 <th className="border p-2 text-black">Updated date</th>
                 <th className="border p-2 text-black">Actions</th>
@@ -781,6 +810,14 @@ const ManageStockPage = (props) => {
                 <td className="border p-1">
                   <input
                     type="text"
+                    value={filters.purchase}
+                    onChange={(e) => handleFilterChange(e, "price")}
+                    className="w-full p-1 border rounded text-black"
+                  />
+                </td>
+                <td className="border p-1">
+                  <input
+                    type="text"
                     value={filters.price}
                     onChange={(e) => handleFilterChange(e, "price")}
                     className="w-full p-1 border rounded text-black"
@@ -817,6 +854,7 @@ const ManageStockPage = (props) => {
                   <td className="border p-2 text-center">{tab.salt}</td>
                   <td className="border p-2 text-center">{tab.quantity}</td>
                   <td className="border p-2 text-center">₹{tab.mrp}</td>
+                  <td className="border p-2 text-center">₹{tab.purchase}</td>
                   <td className="border p-2 text-center">₹{tab.price}</td>
                   <td className="border p-2 text-center">
                     {tab.createdAt?.split("T")[0]}
@@ -827,12 +865,12 @@ const ManageStockPage = (props) => {
                   <td className="border p-2 text-center">
                     <button
                       onClick={() => handleEdit(tab)}
-                      className="text-yellow-600 font-semibold lg:text-white mr-4 cursor-pointer"
+                      className="text-yellow-600 font-semibold lg:text-green-600 mr-4 cursor-pointer"
                     >
                       <PencilSquareIcon className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleDelete(tab._id)}
+                      onClick={() =>{setConfirmDeleteId(true), setSaveId(tab._id)}}
                       className="text-red-600 cursor-pointer"
                     >
                       <TrashIcon className="h-4 w-4" />
@@ -898,6 +936,10 @@ const ManageStockPage = (props) => {
           />
         </>
       )}
+      <div>
+        <ConfirmationModal loading={loading} title={"Are you sure want to delete this Product?"}
+        confirmDeleteId={confirmDeleteId} setConfirmDeleteId={setConfirmDeleteId} confirmDelete={handleDelete}/>
+      </div>
     </div>
     </>
   );

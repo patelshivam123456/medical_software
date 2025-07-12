@@ -8,15 +8,15 @@ export default async function handler(req, res) {
 
   await connectToDB();
 
-  const { id, name,packaging,category,company,salt,quantity, price,mrp,mg,batch,expiry } = req.body;
+  const { id, name,packaging,category,company,salt,quantity,purchase, price,mrp,mg,batch,expiry } = req.body;
 
-  if (!id || !name||!packaging||!category||!company||!salt || quantity == null || price == null||mrp==null||!mg||!batch||!expiry) {
+  if (!id || !name||!packaging||!category||!company||!salt || quantity == null ||purchase==null|| price == null||mrp==null||!mg||!batch||!expiry) {
     return res.status(400).json({ success: false, message: 'All fields required' });
   }
 
   const updated = await Tablet.findByIdAndUpdate(
     id,
-    { name: name.trim(),packaging,category,company,salt, quantity, price,mrp,mg,batch,expiry },
+    { name: name.trim(),packaging,category,company,salt, quantity, purchase,price,mrp,mg,batch,expiry },
     { new: true }
   );
 

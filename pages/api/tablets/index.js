@@ -14,9 +14,10 @@ export default async function handler(req, res) {
 
       name = name.trim();
       quantity = Number(quantity);
+      purchase=Number(purchase);
       price = Number(price);
 
-      if (isNaN(quantity) || isNaN(price)) {
+      if (isNaN(quantity) || isNaN(price)||isNaN(purchase)) {
         return res.status(400).json({ success: false, message: 'Quantity and Price must be numbers' });
       }
 
@@ -25,7 +26,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ success: false, message: 'Tablet already exists' });
       }
 
-      const tablet = new Tablet({ name, quantity, price });
+      const tablet = new Tablet({ name, quantity, purchase,price });
       await tablet.save();
 
       return res.status(201).json({ success: true, tablet });

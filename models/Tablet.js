@@ -7,6 +7,7 @@ const TabletSchema = new mongoose.Schema({
   company: { type: String, trim: true },
   salt: { type: String, trim: true },
   quantity: { type: Number, required: true },
+  purchase:{type:Number,required:true},
   price: { type: Number, required: true },
   mrp: { type: Number },
   mg: { type: String, trim: true },
