@@ -19,7 +19,7 @@ const BillDetailPage=(props)=> {
   const [isLoggedCheck,setIsLoggedCheck] = useState('')
 
   const { data, error } = useSWR(
-    () => (id ? `/api/bills/${id}` : null),
+    () => (id ? `/api/return/${id}` : null),
     fetcher
   );
   const billdata = data?.bill;
@@ -68,7 +68,7 @@ const totalInWords = toWords(roundedGrandTotal);
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Invoice-${data.bill.billNo}.pdf`);
+      pdf.save(`Invoice-${data.bill.newbillNo}.pdf`);
       setDownloading(false)
     });
   };
@@ -134,7 +134,9 @@ const totalInWords = toWords(roundedGrandTotal);
           </div>
         </div>
         <div className="flex  gap-2 border mt-2 px-3">
-          <div className="w-[35%]"></div>
+          <div className="w-[35%]">
+          <div className="text-sm">Return Person: {billdata.returnperson}</div>
+          </div>
           <div className="w-[65%] flex gap-4 ">
             <div
               className="w-[35%] text-xl font-semibold text-center pb-4 pt-2 px-2"
@@ -145,7 +147,7 @@ const totalInWords = toWords(roundedGrandTotal);
             <div className="w-[65%] flex  justify-between pb-4 ">
               <div>
                 <div className="text-sm">
-                  Invoice No.: SJ000{billdata.billNo}
+                  Invoice No.: SJ000{billdata.newbillNo}
                 </div>
                 <div className="text-sm">Sales man: {billdata.salesperson}</div>
               </div>
@@ -196,7 +198,7 @@ const totalInWords = toWords(roundedGrandTotal);
               <tr>
                 <th className="border px-3 py-2 text-left">Sn.</th>
                 <th className="border px-3 py-2 text-left">Qty.</th>
-                <th className="border px-3 py-2 text-left">Free</th>
+                <th className="border px-3 py-2 text-left">Return</th>
                 <th className="border px-3 py-2 text-left">Pack</th>
                 <th className="border px-3 py-2 text-left min-w-[280px]">Product</th>
                 <th className="border px-3 py-2 text-left">Batch</th>
@@ -215,7 +217,7 @@ const totalInWords = toWords(roundedGrandTotal);
     <tr key={t._id || i} >
       <td className="px-3 pb-1">{i + 1}</td>
       <td className="px-3 pb-1 text-right">{t.lessquantity}</td>
-      <td className="px-3 pb-1 text-right">{t.free}</td>
+      <td className="px-3 pb-1 text-right">{t.returnquantity}</td>
       <td className="px-3 pb-1">{t.packing}</td>
       <td className="px-3 pb-1 min-w-[280px]">{t.name}</td>
       <td className="px-3 pb-1">{t.batch}</td>
@@ -694,7 +696,7 @@ export async function getServerSideProps(context) {
   }
 
   // Only allow admin or sales
-  if (loggedIn && loginType !== "admin" && loginType !== "sales") {
+  if (loggedIn && loginType !== "admin" && loginType !== "stockiest") {
     return {
       props: {},
       redirect: { destination: "/admin" },

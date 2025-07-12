@@ -5,8 +5,9 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import Pagination from "@/components/Pagination/pagination";
 import LoadingBtn from "@/components/Buttons/LoadingBtn";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import Header from "@/components/Header";
 
-const AddUser = ()=> {
+const AddUser = (props)=> {
   const [formData, setFormData] = useState({ mobile: "", password: "", loginType: "" });
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
@@ -16,6 +17,7 @@ const AddUser = ()=> {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null); 
   const [loading,setLoading] = useState(false)
    const [currentPage, setCurrentPage] = useState(1);
+   const [isLoggedCheck,setIsLoggedCheck] = useState('')
    const itemsPerPage = 10;
 
   const fetchUsers = async () => {
@@ -24,6 +26,9 @@ const AddUser = ()=> {
   };
 
   useEffect(() => {
+    if(props.isLoggedStatus){
+      setIsLoggedCheck(props.isLoggedStatus)
+    }
     fetchUsers();
     setFormData({ mobile: "", password: "", loginType: "" });
   }, []);
@@ -84,6 +89,8 @@ const AddUser = ()=> {
   );
 
   return (
+    <>
+    <Header isLoggedStatus={isLoggedCheck}/>
     <div className="p-6 max-w-4xl mx-auto">
       <div className=" bg-white text-black px-4 py-2">
         <div className="flex items-center gap-5 border-b-[1px]">
@@ -227,6 +234,7 @@ const AddUser = ()=> {
         </div>
       )}
     </div>
+    </>
   );
 }
 export async function getServerSideProps(context) {
@@ -235,7 +243,7 @@ export async function getServerSideProps(context) {
   if (!loggedIn && !context.query.loggedIn) {
     return {
       props: {},
-      redirect: { destination: "/login" },
+      redirect: { destination: "/admin" },
     };
   }
 
@@ -243,12 +251,14 @@ export async function getServerSideProps(context) {
   if (loggedIn && loginType !== "admin") {
     return {
       props: {},
-      redirect: { destination: "/login" },
+      redirect: { destination: "/admin" },
     };
   }
 
+  const isLoggedStatus= loggedIn
+
   return {
-    props: {},
+    props: {isLoggedStatus},
   };
 }
 export default AddUser

@@ -6,8 +6,9 @@ import { toast } from "react-toastify";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import * as XLSX from "xlsx";
 import LoadingBtn from "@/components/Buttons/LoadingBtn";
+import Header from "@/components/Header";
 
-const ManageStockPage = () => {
+const ManageStockPage = (props) => {
   const categoryDropdownRef = useRef(null);
   const companyDropdownRef = useRef(null);
   const saltDropdownRef = useRef(null);
@@ -48,6 +49,7 @@ const ManageStockPage = () => {
   const [batch, setBatch] = useState("");
   const [expiry, setExpiry] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [checkStatus,setCheckStatus]=useState('')
   const tabletsPerPage = 5;
 
   const [filters, setFilters] = useState({
@@ -63,6 +65,12 @@ const ManageStockPage = () => {
     createdAt: "",
     updatedAt: "",
   });
+
+  useEffect(()=>{
+    if(props.isCheckStatus){
+      setCheckStatus(props.isCheckStatus)
+    }
+  },[])
 
   useEffect(() => {
     const searchText = search.toLowerCase();
@@ -411,6 +419,8 @@ const ManageStockPage = () => {
   };
 
   return (
+    <>
+     <Header isLoggedStatus={checkStatus}/>
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold mb-4">Manage Stock</h2>
@@ -889,6 +899,7 @@ const ManageStockPage = () => {
         </>
       )}
     </div>
+    </>
   );
 };
 export async function getServerSideProps(context) {
@@ -897,7 +908,7 @@ export async function getServerSideProps(context) {
   if (!loggedIn && !context.query.loggedIn) {
     return {
       props: {},
-      redirect: { destination: "/login" },
+      redirect: { destination: "/admin" },
     };
   }
 
@@ -905,12 +916,14 @@ export async function getServerSideProps(context) {
   if (loggedIn && loginType !== "admin" && loginType !== "stockiest") {
     return {
       props: {},
-      redirect: { destination: "/login" },
+      redirect: { destination: "/admin" },
     };
   }
 
+  const isCheckStatus=loggedIn
+
   return {
-    props: {},
+    props: {isCheckStatus},
   };
 }
 

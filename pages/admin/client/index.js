@@ -10,8 +10,9 @@ import {
 import LoadingBtn from "@/components/Buttons/LoadingBtn";
 import { toast } from "react-toastify";
 import Pagination from "@/components/Pagination/pagination";
+import Header from "@/components/Header";
 
-const Index = () => {
+const Index = (props) => {
   const [formData, setFormData] = useState({
     title: "",
     clientName: "",
@@ -30,10 +31,14 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading,setIsLoading] =useState(false)
+  const [loginCheck,setLoginCheck] = useState('')
   const itemsPerPage = 10;
 
   useEffect(() => {
     fetchClients();
+    if(props.isLoggedCheck){
+      setLoginCheck(props.isLoggedCheck)
+    }
   }, []);
 
   const fetchClients = async () => {
@@ -177,6 +182,8 @@ const Index = () => {
     currentPage * itemsPerPage
   );
   return (
+   <>
+   <Header isLoggedStatus={loginCheck}/>
     <div className="p-6 max-w-7xl mx-auto">
       <form onSubmit={handleSubmit}>
         <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -413,6 +420,7 @@ const Index = () => {
         </div>
       </Modal>
     </div>
+   </>
   );
 };
 
@@ -422,7 +430,7 @@ export async function getServerSideProps(context) {
   if (!loggedIn && !context.query.loggedIn) {
     return {
       props: {},
-      redirect: { destination: "/login" },
+      redirect: { destination: "/admin" },
     };
   }
 
@@ -430,12 +438,14 @@ export async function getServerSideProps(context) {
   if (loggedIn && loginType !== "admin" && loginType !== "sales") {
     return {
       props: {},
-      redirect: { destination: "/login" },
+      redirect: { destination: "/admin" },
     };
   }
 
+  const isLoggedCheck=loggedIn
+
   return {
-    props: {},
+    props: {isLoggedCheck},
   };
 }
 export default Index;

@@ -27,7 +27,7 @@ import {
 
 
 
-const Header=()=> {
+const Header=({isLoggedStatus})=> {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [checkLoginType,setCheckLoginType] = useState('')
   const router = useRouter()
@@ -36,6 +36,7 @@ const Header=()=> {
     if(Cookies.get("loginType")){
         setCheckLoginType(Cookies.get("loginType"))
     }
+   
   },[])
 
   const handleLogout =()=>{
@@ -111,12 +112,16 @@ const Header=()=> {
           </PopoverGroup>
           
           } */}
+          {(router.pathname.toLowerCase().includes("admin")&&isLoggedStatus)&&<>
           <PopoverGroup className="hidden lg:flex lg:gap-x-12">
            {(checkLoginType==="admin"||checkLoginType==="sales")&& <a href="/admin/bill" className="text-sm/6 font-semibold text-gray-900">
             Bill page
           </a>}
           {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/admin/manage-stock" className="text-sm/6 font-semibold text-gray-900">
             Stock
+          </a>}
+          {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/admin/return" className="text-sm/6 font-semibold text-gray-900">
+            Return
           </a>}
           {(checkLoginType==="admin"||checkLoginType==="sales")&&<a href="/admin/client" className="text-sm/6 font-semibold text-gray-900">
             Client
@@ -130,6 +135,7 @@ const Header=()=> {
             Log out <span aria-hidden="true">&rarr;</span>
           </a>
         </div>
+        </>}
       </nav>
       <Dialog open={mobileMenuOpen} onClose={setMobileMenuOpen} className="lg:hidden">
         <div className="fixed inset-0 z-50" />
@@ -251,6 +257,14 @@ const Header=()=> {
                 Stock
               </a>
             </div>}
+            {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">
+              <a
+                href="/admin/return"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Return
+              </a>
+            </div>}
             {(checkLoginType==="admin"||checkLoginType==="sales")&&<div className="space-y-2 py-6">
               <a
                 href="/admin/client"
@@ -267,7 +281,7 @@ const Header=()=> {
                 Login Access
               </a>
             </div>}
-              <div className="py-6">
+              {router.pathname.toLowerCase().includes("admin")&&<div className="py-6">
                 <a
                   href="#"
                   onClick={handleLogout}
@@ -275,7 +289,7 @@ const Header=()=> {
                 >
                   Log out
                 </a>
-              </div>
+              </div>}
             </div>
           </div>
         </DialogPanel>

@@ -20,7 +20,9 @@ import Header from "@/components/Header";
 const Index = (props) => {
   const router = useRouter();
   const [billNo, setBillNo] = useState("");
+  const [newbillNo, setnewBillNo] = useState("");
   const [salesPerson, setSalesPerson] = useState("");
+  const [returnPerson, setReturnPerson] = useState("");
   const [discount, setDiscount] = useState(0);
   const [gst, setGst] = useState(0);
   const [cgst, setCgst] = useState(0);
@@ -57,6 +59,7 @@ const Index = (props) => {
     total: 0,
     gst: 12,
     lessquantity: 0,
+    returnquantity:0,
     category: "",
     free: 0,
     hsm: "",
@@ -81,6 +84,8 @@ const Index = (props) => {
   const [invoiceId,setInvoiceId] = useState('')
   const [confirmDeleteId,setConfirmDeleteId] = useState(false)
   const [isLoggedCheck,setIsLoggedCheck] = useState('')
+  const [batchSuggestions, setBatchSuggestions] = useState([]);
+const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
 
   const now = new Date();
 
@@ -96,78 +101,21 @@ const Index = (props) => {
   }, [billNumbers]);
 
   const filteredOldBills = useMemo(() => {
-    const lowerSearch = searchTerm.toLowerCase();
-  
-    return oldBills.filter((bill) => {
-      const searchableFields = [
-        `SG000${bill.billNo}`,
-        bill.billNo,
-        bill.clientName,
-        bill.mobile,
-        bill.address1,
-        bill.address2,
-        bill.state,
-        bill.pinCode,
-        bill.branch,
-        bill.branchName,
-        bill.salesperson,
-        bill.title,
-        bill.createdAt,
-        bill.updatedAt,
-        // Add tablet fields
-        ...(bill.tablets || []).flatMap((tab) => [
-          tab.name,
-          tab.company,
-          tab.salt,
-          tab.category,
-          tab.batch,
-          tab.expiry,
-        ]),
-      ];
-  
-      return searchableFields
-        .filter(Boolean) // remove undefined/null
-        .some((field) =>
-          field.toString().toLowerCase().includes(lowerSearch)
-        );
-    });
+    return oldBills.filter((b) =>
+      `SG000${b.newbillNo}`.toLowerCase().includes(searchTerm.toLowerCase())||
+      `SG000${b.billNo}`.toLowerCase().includes(searchTerm.toLowerCase())||
+      b.mobile.toLowerCase().includes(searchTerm.toLowerCase())||
+      b.clientName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   }, [searchTerm, oldBills]);
 
   const filteredNewBills = useMemo(() => {
-    const lowerSearch = searchTerm.toLowerCase();
-    return newBills.filter((bill) =>{
-      const searchableFields = [
-        `SG000${bill.billNo}`,
-        bill.billNo,
-        bill.clientName,
-        bill.mobile,
-        bill.address1,
-        bill.address2,
-        bill.state,
-        bill.pinCode,
-        bill.branch,
-        bill.branchName,
-        bill.salesperson,
-        bill.title,
-        bill.createdAt,
-        bill.updatedAt,
-        // Add tablet fields
-        ...(bill.tablets || []).flatMap((tab) => [
-          tab.name,
-          tab.company,
-          tab.salt,
-          tab.category,
-          tab.batch,
-          tab.expiry,
-        ]),
-      ];
-  
-      return searchableFields
-        .filter(Boolean) // remove undefined/null
-        .some((field) =>
-          field.toString().toLowerCase().includes(lowerSearch)
-        );
-    });
+    return newBills.filter((b) =>
+      `SG000${b.newbillNo}`.toLowerCase().includes(searchTerm.toLowerCase())||
+      `SG000${b.billNo}`.toLowerCase().includes(searchTerm.toLowerCase())||
+      b.mobile.toLowerCase().includes(searchTerm.toLowerCase())||
+      b.clientName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   }, [searchTerm, newBills]);
 
   const activeBills = activeTab === "old" ? filteredOldBills : filteredNewBills;
@@ -220,11 +168,11 @@ const Index = (props) => {
   }, [searchTerm, billNumbers]);
 
   useEffect(() => {
-    const quantity = parseFloat(formFields.lessquantity) || 0;
+    const quantity = parseFloat(formFields.returnquantity) || 0;
     const rate = parseFloat(formFields.rate) || 0;
     const total = quantity * rate;
     setFormFields((prev) => ({ ...prev, total: total.toFixed(2) }));
-  }, [formFields.lessquantity, formFields.rate]);
+  }, [formFields.returnquantity, formFields.rate]);
 
   const handleExpiryChange = (e) => {
     let value = e.target.value.replace(/[^\d]/g, "");
@@ -235,7 +183,7 @@ const Index = (props) => {
   };
 
   useEffect(() => {
-    const quantity = Number(formFields.lessquantity);
+    const quantity = Number(formFields.returnquantity);
 
     if (quantity > 0 && editingIndex === null) {
       const timer = setTimeout(() => {
@@ -243,97 +191,8 @@ const Index = (props) => {
       }, 1200);
       return () => clearTimeout(timer); 
     }
-  }, [formFields.lessquantity]);
+  }, [formFields.returnquantity]);
 
-  // const addMoreTablet = () => {
-  //   const {
-  //     name,
-  //     company,
-  //     salt,
-  //     quantity,
-  //     packing,
-  //     batch,
-  //     expiry,
-  //     price,
-  //     discount,
-  //     rate,
-  //     total,
-  //     gst,
-  //     lessquantity,
-  //     category,
-  //     free,
-  //     hsm,
-  //   } = formFields;
-
-  //   if (
-  //     !name ||
-  //     !company ||
-  //     !salt ||
-  //     !packing ||
-  //     !batch ||
-  //     !expiry ||
-  //     !price ||
-  //     !rate ||
-  //     !total ||
-  //     !gst ||
-  //     !lessquantity ||
-  //     !category
-  //   ) {
-  //     toast.error("Please fill all fields before adding.");
-  //     return;
-  //   }
-
-  //   const newTablet = {
-  //     name,
-  //     company,
-  //     salt,
-  //     quantity: Number(quantity),
-  //     packing,
-  //     batch,
-  //     expiry,
-  //     price: Number(price),
-  //     discount: Number(discount),
-  //     rate: Number(rate),
-  //     sgst: Number(gst) / 2,
-  //     cgst: Number(gst) / 2,
-  //     total: Number(total),
-  //     gst: Number(gst),
-  //     lessquantity: Number(lessquantity),
-  //     category,
-  //     free: Number(free),
-  //     hsm,
-  //   };
-
-  //   if (editingIndex !== null) {
-  //     const updatedTablets = [...tablets];
-  //     updatedTablets[editingIndex] = newTablet;
-  //     setTablets(updatedTablets);
-  //     setEditingIndex(null);
-  //   } else {
-  //     setTablets([...tablets, newTablet]);
-  //   }
-
-  //   setFormFields({
-  //     name: "",
-  //     company: "",
-  //     salt: "",
-  //     quantity: 0,
-  //     packing: "",
-  //     batch: "",
-  //     expiry: "",
-  //     price: 0,
-  //     discount: 0,
-  //     rate: 0,
-  //     total: 0.0,
-  //     gst: Number(formFields.gst),
-  //     lessquantity: 0,
-  //     category: "",
-  //     free: 0,
-  //     hsm: "",
-  //   });
-
-  //   setShowSuggestions(false);
-  // };
   const addMoreTablet = () => {
     const {
       name,
@@ -349,6 +208,7 @@ const Index = (props) => {
       total,
       gst,
       lessquantity,
+      returnquantity,
       category,
       free,
       hsm,
@@ -366,9 +226,15 @@ const Index = (props) => {
       !total ||
       !gst ||
       !lessquantity ||
+      !returnquantity||
       !category
     ) {
       toast.error("Please fill all fields before adding.");
+      return;
+    }
+
+    if (Number(returnquantity) > Number(lessquantity)) {
+      toast.error("Return quantity cannot be greater than sold quantity (lessquantity).");
       return;
     }
 
@@ -388,6 +254,7 @@ const Index = (props) => {
       total: Number(total),
       gst: Number(gst),
       lessquantity: Number(lessquantity),
+      returnquantity:Number(returnquantity),
       category: category.trim(),
       free: Number(free),
       hsm: hsm.trim(),
@@ -435,6 +302,7 @@ const Index = (props) => {
       total: 0.0,
       gst: Number(formFields.gst),
       lessquantity: 0,
+      returnquantity: 0,
       category: "",
       free: 0,
       hsm: "",
@@ -445,32 +313,35 @@ const Index = (props) => {
 
   const handleEdit = (tablet, index) => {
     setFormFields({
-      name: tablet.name,
-      company: tablet.company,
-      salt: tablet.salt,
-      quantity: tablet.quantity,
-      packing: tablet.packing,
-      batch: tablet.batch,
-      expiry: tablet.expiry,
-      price: tablet.price,
-      discount: tablet.discount,
-      rate: tablet.rate,
-      cgst: tablet.cgst,
-      sgst: tablet.sgst,
-      total: tablet.total,
-      gst: tablet.gst,
-      lessquantity: tablet.lessquantity,
-      category: tablet.category,
-      free: tablet.free,
-      hsm: tablet.hsm,
+      name: tablet.name || "",
+      company: tablet.company || "",
+      salt: tablet.salt || "",
+      quantity: tablet.quantity || 0,
+      packing: tablet.packing || "",
+      batch: tablet.batch || "",
+      expiry: tablet.expiry || "",
+      price: tablet.price || "",
+      discount: tablet.discount || 0,
+      rate: tablet.rate || "",
+      total: tablet.total || "",
+      gst: tablet.gst || 0,
+      lessquantity: tablet.lessquantity || 0,
+      returnquantity: tablet.returnquantity || 0,
+      category: tablet.category || "",
+      free: tablet.free || 0,
+      hsm: tablet.hsm || "",
     });
-    setEditingIndex(index);
+  
+    setEditingIndex(index); // 🔁 Remember which row is being edited
   };
+  
 
   const handleDelete = (index) => {
     const updated = [...tablets];
-    updated.splice(index, 1);
+    updated.splice(index, 1); // ✅ now correctly deletes the right item
     setTablets(updated);
+  
+    // Reset form
     setFormFields({
       name: "",
       company: "",
@@ -485,11 +356,13 @@ const Index = (props) => {
       total: "",
       gst: Number(formFields.gst),
       lessquantity: 0,
+      returnquantity: 0,
       category: "",
       free: 0,
       hsm: "",
     });
   };
+  
 
   const handleSubmit = async (e) => {
     setIsLoading(true);
@@ -504,12 +377,22 @@ const Index = (props) => {
       setIsLoading(false);
       return;
     }
+    const sanitizedTablets = tablets.map((tab) => {
+      const returnQty = Number(tab.returnquantity) || 0;
+      const rate = Number(tab.rate) || 0;
+      return {
+        ...tab,
+        returnquantity: returnQty,
+        total: returnQty > 0 ? +(rate * returnQty).toFixed(2) : 0,
+      };
+    });
 
     try {
-      const response = await axios.post("/api/bills", {
+      const response = await axios.post("/api/return", {
         billNo,
         salesperson:salesPerson,
-        tablets,
+        returnperson:returnPerson,
+        tablets:sanitizedTablets,
         discount:Number(discount),
         sgst:Number(sgst),
         cgst:Number(cgst),
@@ -546,7 +429,7 @@ const Index = (props) => {
         setIsEditingBill("");
         toast.success("Bill created successfully");
         fetchTabDetails()
-        router.push("/admin/bill/"+billNo)
+        fetchreturnData()
       }
     } catch (error) {
       setIsLoading(false);
@@ -576,17 +459,27 @@ const Index = (props) => {
     }
   };
 
+  const fetchreturnData = async () => {
+    const res = await axios.get("/api/return");
+    const newBillNo=res.data.bills[0].newbillNo
+    router.push("/admin/return/"+newBillNo)
+  };
+
   const openModal = async () => {
-    const res = await axios.get("/api/bills");
+    const res = await axios.get("/api/return");
     setBillNumbers(res.data.bills);
     setModalOpen(true);
   };
 
-  const handleCopyBill = async (billNo) => {
+
+  const handleEditOldBill = async (billNo) => {
     try {
       const res = await axios.get(`/api/bills/${billNo}`);
       const bill = res.data.bill;
-      setSalesPerson(bill.salesperson||"")
+      setBillNo(bill.billNo);
+      setnewBillNo(bill.newbillNo)
+      setSalesPerson(bill.salesperson)
+      setReturnPerson(bill.returnperson)
       setInputValue(bill.clientName);
       setDiscount(bill.discount || 0);
       setGst(bill.gst || 0);
@@ -603,18 +496,21 @@ const Index = (props) => {
       setState(bill.state || "");
       setTablets(bill.tablets || []);
       setModalOpen(false);
-      setIsEditingBill("copy");
-      toast.success("Bill copy");
+      setIsEditingBill("new");
+      fetchTabDetails()
+      toast.success("Bill loaded for editing");
     } catch (error) {
       toast.error("Failed to load bill details");
     }
   };
   const handleEditBill = async (billNo) => {
     try {
-      const res = await axios.get(`/api/bills/${billNo}`);
+      const res = await axios.get(`/api/return/${billNo}`);
       const bill = res.data.bill;
       setBillNo(bill.billNo);
+      setnewBillNo(bill.newbillNo)
       setSalesPerson(bill.salesperson)
+      setReturnPerson(bill.returnperson)
       setInputValue(bill.clientName);
       setDiscount(bill.discount || 0);
       setGst(bill.gst || 0);
@@ -646,9 +542,10 @@ const Index = (props) => {
     }
 
     try {
-      const res = await axios.put(`/api/bills/${billNo}`, {
+      const res = await axios.put(`/api/return/${newbillNo}`, {
         billNo,
         salesperson:salesPerson,
+        returnperson:returnPerson,
         tablets,
         discount:Number(discount),
         sgst:Number(sgst),
@@ -686,7 +583,7 @@ const Index = (props) => {
         setIsLoading(false);
         setIsEditingBill("");
         setInputValue("");
-        router.push("/admin/bill/"+billNo)
+        router.push("/admin/return/"+newbillNo)
       }
     } catch (error) {
       setIsLoading(false);
@@ -698,7 +595,7 @@ const Index = (props) => {
   const handleDeleteBill = async () => {
     setLoading(true)
     try {
-      const res = await axios.delete(`/api/bills/${invoiceId}`);
+      const res = await axios.delete(`/api/return/${invoiceId}`);
       if (res.status === 200) {
         toast.success("Bill deleted successfully");
         setBillNumbers((prev) => prev.filter((b) => b !== invoiceId));
@@ -709,14 +606,6 @@ const Index = (props) => {
       setLoading(false)
     }
   };
-
-  // const handleDraftBill = async (billNo) => {
-  //   try {
-  //     router.push(`/bill/${billNo}?draft=true`);
-  //   } catch (error) {
-  //     toast.error("Failed to open bill draft");
-  //   }
-  // };
 
   const handleResetForm = () => {
     setBillNo("");
@@ -751,20 +640,13 @@ const Index = (props) => {
       total: "",
       gst: Number(formFields.gst),
       lessquantity: 0,
+      returnquantity:0,
       category: "",
       free: 0,
       hsm: "",
     });
     toast.success("Reset successfully");
   };
-  // const fetchClients = async () => {
-  //   try {
-  //     const res = await axios.get("/api/client");
-  //     setAllClients(res.data || []);
-  //   } catch (err) {
-  //     console.error("Error fetching clients:", err);
-  //   }
-  // };
 
   const fetchClients = async () => {
     try {
@@ -785,44 +667,6 @@ const Index = (props) => {
       console.error("Error fetching clients:", err);
     }
   };
-  
-
-  // const handleTitleChange = (value) => {
-  //   setTitle(value);
-  //   setClientName("");
-  //   setSelectedClient(null);
-  //   setInputValue("");
-  //   setMobile("");
-  //   setBranch("");
-  //   setBranchName("");
-  //   setAddress1("");
-  //   setAddress2("");
-  //   setPinCode("");
-  //   setState("");
-  //   const filtered = allClients.filter((c) => c.title === value);
-  //   setFilteredClientNames(filtered);
-  // };
-
-  // const handleClientNameChange = (value) => {
-  //   setClientName(value);
-
-  //   const found = filteredClientNames.find(
-  //     (c) => c.clientName.toLowerCase() === value.toLowerCase()
-  //   );
-
-  //   if (found) {
-  //     setSelectedClient(found);
-  //     setMobile(found.mobile || "");
-  //     setBranch(found.branch || "");
-  //     setBranchName(found.branchName || "");
-  //     setAddress1(found.address1 || "");
-  //     setAddress2(found.address2 || "");
-  //     setPinCode(found.pinCode || "");
-  //     setState(found.state || "");
-  //   } else {
-  //     setSelectedClient(null);
-  //   }
-  // };
   
   const handleTitleChange = (value) => {
     setTitle(value);
@@ -899,20 +743,53 @@ const Index = (props) => {
       total: 0.0,
       gst: 12,
       lessquantity: 0,
+      returnquantity:0,
       category: "",
       free: 0,
       hsm: "",
     });
   };
+
+  const [allBillNos, setAllBillNos] = useState([]);
+  const [filteredBillNos, setFilteredBillNos] = useState([]);
+  const [showBillDropdown, setShowBillDropdown] = useState(false);
+
+  const handleInvoiceSearchChange = (e) => {
+    const value = e.target.value;
+    setBillNo(value);
+    const filtered = allBillNos.filter((no) =>
+        `SG000${no}`.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredBillNos(filtered);
+  };
+
+
+
+  const fetchAllBillNumbers = async () => {
+    try {
+      const { data } = await axios.get("/api/bills"); // Make sure this returns array of billNos
+      const billNos = data?.bills?.map((item) => item.billNo.toString());
+      setAllBillNos(billNos);
+      setFilteredBillNos(billNos);
+    } catch (err) {
+      console.error("Error fetching invoice numbers", err);
+    }
+  };
+  const handleInvoiceSelect = (selectedNo) => {
+    setBillNo(selectedNo);
+    setShowBillDropdown(false);
+    handleEditOldBill(selectedNo);
+  };
+  
   return (
     <>
     <Header isLoggedStatus={isLoggedCheck}/>
       <div className="p-6 max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-2xl font-bold lg:mb-4">Create Bill</h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold mb-4">Return Product</h2>
           <button
             onClick={openModal}
-            className=" bg-gray-700 text-white px-4 py-2 hidden lg:block rounded cursor-pointer"
+            className=" bg-gray-700 text-white px-4 py-2 rounded cursor-pointer hidden lg:block"
           >
             Show All Invoice
           </button>
@@ -920,26 +797,52 @@ const Index = (props) => {
         </div>
         <form onSubmit={handleSubmit} className="mb-6 w-full max-w-7xl gap-5">
           <div className="lg:flex justify-between lg:items-center">
-            <div className="w-full lg:w-1/2 flex items-center gap-3">
-            <div className="w-[60%] md:w-[20%] lg:mb-6">
-              <label>Invoice No:</label>
-              <input
-                type="number"
-                required
-                value={billNo}
-                disabled={isEditingBill === "edit"}
-                onChange={(e) => setBillNo(e.target.value)}
-                className={`block w-full text-black ${isEditingBill === "edit"?"bg-gray-200 cursor-not-allowed":"bg-white"} border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white`}
-              />
-            </div>
-            <div className="w-full md:w-[50%] lg:mb-6">
+            <div className="w-full lg:w-1/2 flex flex-wrap lg:flex-nowrap items-center lg:gap-3">
+            
+     <div className="w-[60%] md:w-[20%] lg:mb-6 relative invoice-search">
+  <label>Invoice No:</label>
+  <input
+    type="text"
+    value={billNo}
+    onFocus={() => {
+      setShowBillDropdown(true);
+      fetchAllBillNumbers();
+    }}
+    onChange={handleInvoiceSearchChange}
+    className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
+  />
+  {showBillDropdown && filteredBillNos.length > 0 && (
+    <ul className="absolute z-20 bg-white border border-gray-300 w-full max-h-40 overflow-y-auto shadow-lg rounded">
+      {filteredBillNos.map((no, index) => (
+        <li
+          key={index}
+          onClick={() => handleInvoiceSelect(no)}
+          className="p-2 hover:bg-blue-100 cursor-pointer"
+        >
+          {"SG000"+no}
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+<div className="w-full md:w-[50%] lg:mb-6">
               <label>Sales Person:</label>
               <input
                 type="text"
-                
+                disabled
                 value={salesPerson}
                 onChange={(e) => setSalesPerson(e.target.value)}
-                className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
+                className="block w-full text-black bg-gray-200 cursor-not-allowed border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
+              />
+            </div>
+            <div className="w-full md:w-[50%] lg:mb-6">
+              <label>Return Person:</label>
+              <input
+                type="text"
+                
+                value={returnPerson}
+                onChange={(e) => setReturnPerson(e.target.value)}
+                className="block w-full text-black bg-white border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
               />
             </div>
             </div>
@@ -968,69 +871,20 @@ const Index = (props) => {
           <div className="border px-4 py-3 -mt-4">
             
             <div className="flex flex-wrap gap-4 items-end ">
-              <div className="w-full md:w-[30%] relative">
-                <label>Product Name:</label>
+   
+
+             <div className="w-full md:w-[30%] ">
+                <label>product Name</label>
                 <input
                   type="text"
                   value={formFields.name}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setFormFields({ ...formFields, name: value });
-
-                    const filtered = value
-                      ? availableTablets.filter((t) =>
-                          t.name.toLowerCase().includes(value.toLowerCase())
-                        )
-                      : availableTablets;
-
-                    setFilteredSuggestions(filtered);
-                    setShowSuggestions(true);
-                  }}
-                  onFocus={() => {
-                    setFilteredSuggestions(availableTablets);
-                    setShowSuggestions(true);
-                  }}
-                  onBlur={() =>
-                    setTimeout(() => setShowSuggestions(false), 150)
+                  onChange={(e) =>
+                    setFormFields({ ...formFields, name: e.target.value })
                   }
-                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
-                  autoComplete="off"
+                  disabled
+                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                   required
                 />
-                {showSuggestions && filteredSuggestions.length > 0 && (
-                  <ul className="absolute z-10 w-full bg-white border max-h-[200px] overflow-y-auto shadow rounded mt-1">
-                    {filteredSuggestions.map((t, i) => (
-                      <li
-                        key={i}
-                        onMouseDown={() => {
-                          setFormFields({
-                            ...formFields,
-                            name: t.name,
-                            packing: t.packaging || "",
-                            quantity: t.quantity,
-                            category: t.category,
-                            rate: t.rate || t.price || "",
-                            company: t.company,
-                            salt: t.salt,
-                            discount: 10,
-                            cgst: 6,
-                            sgst: 6,
-                            batch: t.batch,
-                            expiry: t.expiry,
-                            price: t.mrp,
-                            total: (1 * (t.rate || t.price || 0)).toFixed(2),
-                            lessquantity:"",
-                            free:""
-                          });
-                          setShowSuggestions(false);
-                        }}
-                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm text-black"
-                      >
-                        {t.name + " " + "(" + t.packaging + ")"}
-                      </li>
-                    ))}
-                  </ul>
-                )}
               </div>
 
               <div className="w-full md:w-[30%] ">
@@ -1083,7 +937,8 @@ const Index = (props) => {
                       hsm: e.target.value,
                     })
                   }
-                  className="border px-2 py-2.5 w-full bg-white text-black outline-none rounded-sm"
+                  disabled
+                  className="border px-2 py-2.5 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                 >
                   <option value={""}>Select HSM</option>
                   <option value={"3003"}>
@@ -1157,10 +1012,11 @@ const Index = (props) => {
                 <input
                   type="number"
                   value={formFields.rate}
+                  disabled
                   onChange={(e) =>
                     setFormFields({ ...formFields, rate: e.target.value })
                   }
-                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                   required
                 />
               </div>
@@ -1172,7 +1028,8 @@ const Index = (props) => {
                   onChange={(e) =>
                     setFormFields({ ...formFields, discount: e.target.value })
                   }
-                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  discount
+                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                 />
               </div>
               <div className="w-full md:w-[5%] ">
@@ -1180,10 +1037,11 @@ const Index = (props) => {
                 <select
                   type="text"
                   value={formFields.gst}
+                  disabled
                   onChange={(e) =>
                     setFormFields({ ...formFields, gst: e.target.value })
                   }
-                  className="border py-2.5 px-2 w-full bg-white text-black outline-none rounded-sm"
+                  className="border py-2.5 px-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                 >
                   <option value="0">0</option>
                   <option value="5">5</option>
@@ -1215,7 +1073,7 @@ const Index = (props) => {
                   className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                 />
               </div>
-              <div className="w-full md:w-[10%] ">
+              {/* <div className="w-full md:w-[10%] ">
                 <label>Total Stock</label>
                 <input
                   type="number"
@@ -1227,33 +1085,50 @@ const Index = (props) => {
                   className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                   required
                 />
-              </div>
+              </div> */}
 
-              <div className="w-full md:w-[10%] ">
+              {/* <div className="w-full md:w-[10%] ">
                 <label>Free</label>
                 <input
                   type="number"
                   value={formFields.free}
+                  disabled
                   onChange={(e) =>
                     setFormFields({
                       ...formFields,
                       free: e.target.value,
                     })
                   }
-                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                   required
                 />
-              </div>
+              </div> */}
 
               <div className="w-full md:w-[10%] ">
                 <label>Quantity</label>
                 <input
                   type="number"
                   value={formFields.lessquantity}
+                  disabled
                   onChange={(e) =>
                     setFormFields({
                       ...formFields,
                       lessquantity: e.target.value,
+                    })
+                  }
+                  className="border p-2 w-full bg-gray-200 cursor-not-allowed text-black outline-none rounded-sm"
+                  required
+                />
+              </div>
+              <div className="w-full md:w-[10%] ">
+                <label>Return Quantity</label>
+                <input
+                  type="number"
+                  value={formFields.returnquantity}
+                  onChange={(e) =>
+                    setFormFields({
+                      ...formFields,
+                      returnquantity: e.target.value,
                     })
                   }
                   className="border p-2 w-full bg-white text-black outline-none rounded-sm"
@@ -1285,69 +1160,91 @@ const Index = (props) => {
             </div>}
             <div className="border-[1px] mt-5 mb-2"></div>
             {tablets.length > 0 && (
-  <div className="">
-    <h3 className="text-base font-semibold mb-2">Product Detail</h3>
-    
-    <div className="w-full overflow-x-auto">
-      <table className="min-w-[1500px] border border-gray-300 rounded bg-white shadow-md text-sm">
-        <thead className="bg-green-700 text-white">
-          <tr>
-            <th className="p-2">#</th>
-            <th className="p-2">Name</th>
-            <th className="p-2">Company</th>
-            <th className="p-2">Salt</th>
-            <th className="p-2">Category</th>
-            <th className="p-2">Packing</th>
-            <th className="p-2">Batch</th>
-            <th className="p-2">Expiry</th>
-            <th className="p-2">Qty</th>
-            <th className="p-2">LessQty</th>
-            <th className="p-2">Rate</th>
-            <th className="p-2">Price</th>
-            <th className="p-2">Discount (%)</th>
-            <th className="p-2">GST (%)</th>
-            <th className="p-2">Free</th>
-            <th className="p-2">HSM</th>
-            <th className="p-2">Total</th>
-            <th className="p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="text-gray-800">
-          {tablets.map((t, index) => (
-            <tr key={index} className="border-t border-gray-200 hover:bg-gray-100">
-              <td className="p-2 text-center">{index + 1}</td>
-              <td className="p-2">{t.name}</td>
-              <td className="p-2">{t.company}</td>
-              <td className="p-2">{t.salt}</td>
-              <td className="p-2">{t.category}</td>
-              <td className="p-2">{t.packing}</td>
-              <td className="p-2">{t.batch}</td>
-              <td className="p-2">{t.expiry}</td>
-              <td className="p-2 text-center">{t.quantity}</td>
-              <td className="p-2 text-center">{t.lessquantity}</td>
-              <td className="p-2 text-center">{t.rate}</td>
-              <td className="p-2 text-center">{t.price}</td>
-              <td className="p-2 text-center">{t.discount}</td>
-              <td className="p-2 text-center">{t.gst}</td>
-              <td className="p-2 text-center">{t.free}</td>
-              <td className="p-2 text-center">{t.hsm}</td>
-              <td className="p-2 text-center">{t.total}</td>
-              <td className="p-2 flex items-center justify-center gap-2">
-                <div className="cursor-pointer" onClick={() => handleEdit(t, index)} title="Edit">
-                  <PencilSquareIcon className="h-5 w-5 text-blue-600 hover:text-blue-800" />
-                </div>
-                <div className="cursor-pointer" onClick={() => handleDelete(index)} title="Delete">
-                  <TrashIcon className="h-5 w-5 text-red-600 hover:text-red-800" />
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+              <div className="">
+                <h3 className="text-base font-semibold mb-2">Product Detail</h3>
+                <div className="flex items-center flex-wrap gap-4">
+                  {/* {tablets.map((t, index) => {
+                    return (
+                      <div className="flex items-center gap-2 bg-[#3b8f4b] p-2 shadow-2xl z-30 rounded-sm">
+                        <div className="pr-2 text-[#f3ab37]">
+                          {" "}
+                          Product&nbsp;{index + 1}
+                        </div>
+                        <div
+                          className="cursor-pointer"
+                          onClick={() => handleEdit(t, index)}
+                        >
+                          <PencilSquareIcon className="h-5 w-5 text-red-500" />
+                        </div>
+                        <div
+                          className="cursor-pointer"
+                          onClick={() => handleDelete(t._id)}
+                        >
+                          <TrashIcon className="h-5 w-5 text-[#f3ab37]" />
+                        </div>
+                      </div>
+                    );
+                  })} */}
+
+{tablets.length > 0 && (
+  <div className=" overflow-x-auto">
+    <table className="min-w-full border border-gray-300 rounded-md bg-white shadow-md">
+      <thead className="bg-green-700 text-white text-sm">
+        <tr>
+          <th className="p-2">#</th>
+          <th className="p-2 min-w-[200px]">Name</th>
+          <th className="p-2">Batch</th>
+          <th className="p-2">Packing</th>
+          <th className="p-2">Qty</th>
+          <th className="p-2">LessQty</th>
+          <th className="p-2">ReturnQty</th>
+          <th className="p-2">Rate</th>
+          <th className="p-2">Total</th>
+          <th className="p-2">Actions</th>
+        </tr>
+      </thead>
+      <tbody className="text-sm text-gray-800">
+      {tablets.map((t, index) => {
+  const returnQty = Number(t.returnquantity) || 0;
+  const calculatedTotal = Number(t.rate) * returnQty;
+
+  return (
+    <tr key={index} className="border-t border-gray-200 hover:bg-gray-100">
+      <td className="p-2 text-center">{index + 1}</td>
+      <td className="p-2 min-w-[200px]">{t.name}</td>
+      <td className="p-2">{t.batch}</td>
+      <td className="p-2">{t.packing}</td>
+      <td className="p-2 text-center">{t.quantity}</td>
+      <td className="p-2 text-center">{t.lessquantity}</td>
+
+      {/* ✅ show 0 if not present */}
+      <td className="p-2 text-center">{returnQty}</td>
+
+      <td className="p-2 text-center">{t.rate}</td>
+
+      {/* ✅ show total based on returnquantity */}
+      <td className="p-2 text-center">{calculatedTotal.toFixed(2)}</td>
+
+      <td className="p-2 flex items-center justify-center gap-2">
+        <div onClick={() => handleEdit(t, index)} title="Edit">
+          <PencilSquareIcon className="h-5 w-5 text-blue-600 hover:text-blue-800" />
+        </div>
+        <div onClick={() => handleDelete(index)} title="Delete">
+          <TrashIcon className="h-5 w-5 text-red-600 hover:text-red-800" />
+        </div>
+      </td>
+    </tr>
+  );
+})}
+
+      </tbody>
+    </table>
   </div>
 )}
 
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
@@ -1357,8 +1254,9 @@ const Index = (props) => {
                 <input
                   type="text"
                   value={discount}
+                  disabled
                   onChange={(e) => setDiscount(e.target.value)}
-                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                   onClick={()=>setDiscount(0)}
                 />
               </div>
@@ -1367,8 +1265,9 @@ const Index = (props) => {
                 <select
                   type="text"
                   value={gst}
+                  disabled
                   onChange={(e) => setGst(e.target.value)}
-                  className="border py-2.5 px-2 w-full bg-white text-black outline-none rounded-sm"
+                  className="border py-2.5 px-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                 >
                   <option value="0">0</option>
                   <option value="5">5</option>
@@ -1404,12 +1303,12 @@ const Index = (props) => {
                 <div className="text-base font-semibold">
                   Add Client Details
                 </div>
-                <a
+                {/* <a
                   href="/admin/client"
                   className="bg-orange-600 text-white px-2 py-1 text-xs font-semibold rounded-sm cursor-pointer"
                 >
                   + Client
-                </a>
+                </a> */}
               </div>
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <div className="w-full md:w-[10%]">
@@ -1417,8 +1316,9 @@ const Index = (props) => {
                   <select
                     required
                     value={title}
+                    disabled
                     onChange={(e) => handleTitleChange(e.target.value)}
-                    className="border py-2.5 px-2 w-full bg-white text-black outline-none rounded-sm"
+                    className="border py-2.5 px-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                   >
                     <option value="" disabled>
                       --Select Title--
@@ -1438,8 +1338,24 @@ const Index = (props) => {
                     setShowOptions={setShowOptions}
                     showOptions={showOptions}
                     required={true}
+                    disabled={true}
                   />
                 </div>
+                {/* <div className="w-full md:w-[15%]">
+                  <label>Mobile</label>
+                  <input
+                    type="text"
+                    value={mobile}
+                    maxLength={10}
+                    minLength={10}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (/^\d*$/.test(val)) setMobile(val);
+                    }}
+                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    required
+                  />
+                </div> */}
 
 <div className="w-full md:w-[15%]">
   <label>Mobile</label>
@@ -1461,7 +1377,8 @@ const Index = (props) => {
       }
     }}
     required
-    className="border py-2.5 px-2 w-full bg-white text-black outline-none rounded-sm"
+    disabled
+    className="border py-2.5 px-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
   >
     <option value="" disabled>--Select Mobile--</option>
     {mobileOptions.map((mob, i) => (
@@ -1478,8 +1395,9 @@ const Index = (props) => {
       const val = e.target.value;
       if (/^\d*$/.test(val)) setMobile(val);
     }}
-    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+    className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
     required
+    disabled
   />
 )}
 
@@ -1490,8 +1408,9 @@ const Index = (props) => {
                   <select
                     value={branch}
                     onChange={(e) => setBranch(e.target.value)}
-                    className="border py-2.5 px-2 w-full bg-white text-black outline-none rounded-sm"
+                    className="border py-2.5 px-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                     required
+                    disabled
                   >
                     <option value="" disabled>
                       --Select Branch--
@@ -1506,8 +1425,9 @@ const Index = (props) => {
                   <input
                     value={branchName}
                     onChange={(e) => setBranchName(e.target.value)}
-                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                     required
+                    disabled
                   />
                 </div>
 
@@ -1516,8 +1436,9 @@ const Index = (props) => {
                   <input
                     value={address1}
                     onChange={(e) => setAddress1(e.target.value)}
-                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                     required
+                    disabled
                   />
                 </div>
 
@@ -1525,8 +1446,9 @@ const Index = (props) => {
                   <label>Address 2 (Optional)</label>
                   <input
                     value={address2}
+                    disabled
                     onChange={(e) => setAddress2(e.target.value)}
-                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                   />
                 </div>
 
@@ -1541,7 +1463,8 @@ const Index = (props) => {
                     onChange={(e) =>
                       setPinCode(e.target.value.replace(/\D/g, ""))
                     }
-                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    disabled
+                    className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                     required
                   />
                 </div>
@@ -1551,8 +1474,9 @@ const Index = (props) => {
                   <input
                     value={state}
                     onChange={(e) => setState(e.target.value)}
-                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                     required
+                    disabled
                   />
                 </div>
               </div>
@@ -1568,14 +1492,14 @@ const Index = (props) => {
                 }
                 className="mt-6 bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
               >
-                {isEditingBill === "edit" ? "Update Bill" : "Submit Bill"}
+                {isEditingBill === "edit" ? "Update Bill" : "Return Bill"}
               </button>
             ) : (
               <button
                 type="submit"
                 className="mt-6 bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
               >
-                Submit Bill
+                Return Bill
               </button>
             )}
           </div>
@@ -1583,7 +1507,7 @@ const Index = (props) => {
         <Modal
           isOpen={modalOpen}
           onRequestClose={() => setModalOpen(false)}
-          className="bg-white  p-6 border max-w-4xl mx-auto mt-2 lg:mt-12 shadow-2xl z-50"
+          className="bg-white  p-6 border max-w-4xl mx-auto mt-2 lg:mt-20 shadow-2xl z-50"
           overlayClassName="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40  overflow-y-auto"
         >
           <div
@@ -1632,13 +1556,13 @@ const Index = (props) => {
             className="border px-3 py-2 rounded-sm w-full lg:w-[25%] mb-4 text-black"
           />
 </div>
-<div className="overflow-auto max-h-[500px] lg:mx-h-[260px]">
-<div className="overflow-x-auto">
+<div className="overflow-auto max-h-[300px]">
+<div className="mt-4 overflow-x-auto">
   <table className="min-w-full border border-gray-300 rounded bg-white shadow-md">
     <thead className="bg-orange-500 text-white text-sm">
       <tr>
         <th className="p-2 text-left">Bill No</th>
-        <th className="p-2 text-left min-w-[200px]">Client</th>
+        <th className="p-2 text-left">Client</th>
         <th className="p-2 text-left">Mobile</th>
         <th className="p-2 text-left">Created At</th>
         <th className="p-2 text-left">Updated At</th>
@@ -1649,8 +1573,8 @@ const Index = (props) => {
       {activeBills.length > 0 ? (
         activeBills.map((bill, idx) => (
           <tr key={idx} className="border-t border-gray-200 hover:bg-gray-100">
-            <td className="p-2 font-semibold text-[#f3ab37]">SG000{bill.billNo}</td>
-            <td className="p-2 min-w-[200px]">{bill.clientName || "-"}</td>
+            <td className="p-2 font-semibold text-[#f3ab37]">SG000{bill.newbillNo}</td>
+            <td className="p-2">{bill.clientName || "-"}</td>
             <td className="p-2">{bill.mobile || "-"}</td>
             <td className="p-2">{new Date(bill.createdAt).toLocaleDateString()}</td>
             <td className="p-2">{new Date(bill.updatedAt).toLocaleDateString()}</td>
@@ -1666,7 +1590,7 @@ const Index = (props) => {
                 <span className="text-xs text-white bg-green-600 px-2 py-1 rounded">View</span>
               </div>
 
-              <div title="Edit" className="cursor-pointer" onClick={() => handleEditBill(bill.billNo)}>
+              <div title="Edit" className="cursor-pointer" onClick={() => handleEditBill(bill.newbillNo)}>
                 <PencilSquareIcon className="h-5 w-5 text-blue-600 hover:text-blue-800" />
               </div>
 
@@ -1675,15 +1599,15 @@ const Index = (props) => {
                 title="Delete"
                 onClick={() => {
                   setConfirmDeleteId(true);
-                  setInvoiceId(bill.billNo);
+                  setInvoiceId(bill.newbillNo);
                 }}
               >
                 <TrashIcon className="h-5 w-5 text-red-600 hover:text-red-800" />
               </div>
 
-              <div title="Copy" onClick={() => handleCopyBill(bill.billNo)}>
+              {/* <div title="Copy" onClick={() => handleCopyBill(bill.newbillNo)}>
                 <DocumentDuplicateIcon className="h-5 w-5 text-gray-500 hover:text-black" />
-              </div>
+              </div> */}
             </td>
           </tr>
         ))
@@ -1721,7 +1645,7 @@ export async function getServerSideProps(context) {
   }
 
   // Only allow admin or sales
-  if (loggedIn && loginType !== "admin" && loginType !== "sales") {
+  if (loggedIn && loginType !== "admin" && loginType !== "stockiest") {
     return {
       props: {},
       redirect: { destination: "/admin" },
