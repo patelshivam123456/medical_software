@@ -1361,8 +1361,8 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
             <th className="p-2">Batch</th>
             <th className="p-2">Expiry</th>
             <th className="p-2">LessQty</th>
-            <th className="p-2">Rate</th>
-            <th className="p-2">Price</th>
+            <th className="p-2">MRP</th>
+            <th className="p-2">Selling Price</th>
             <th className="p-2">Total</th>
             <th className="p-2">Actions</th>
           </tr>
@@ -1370,14 +1370,16 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         <tbody className="text-gray-800">
           {tablets.map((t, index) => (
             <tr key={index} className="border-t border-gray-200 hover:bg-gray-100">
+              {console.log(t)}
+              
               <td className="p-2 text-center">{index + 1}</td>
               <td className="p-2 text-center">{t.name}</td>
               <td className="p-2 text-center">{t.packing}</td>
               <td className="p-2 text-center">{t.batch}</td>
               <td className="p-2 text-center">{t.expiry}</td>
               <td className="p-2 text-center">{t.lessquantity}</td>
-              <td className="p-2 text-center">{t.rate}</td>
               <td className="p-2 text-center">{t.price}</td>
+              <td className="p-2 text-center">{t.rate}</td>
               <td className="p-2 text-center">{t.total}</td>
               <td className="p-2 flex items-center justify-center gap-2">
                 <div className="cursor-pointer" onClick={() => handleEdit(t, index)} title="Edit">

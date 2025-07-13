@@ -1198,7 +1198,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
           <th className="p-2 min-w-[200px]">Name</th>
           <th className="p-2">Batch</th>
           <th className="p-2">Packing</th>
-          <th className="p-2">Qty</th>
+          {/* <th className="p-2">Qty</th> */}
           <th className="p-2">LessQty</th>
           <th className="p-2">ReturnQty</th>
           <th className="p-2">Rate</th>
@@ -1217,7 +1217,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       <td className="p-2 min-w-[200px]">{t.name}</td>
       <td className="p-2">{t.batch}</td>
       <td className="p-2">{t.packing}</td>
-      <td className="p-2 text-center">{t.quantity}</td>
+      {/* <td className="p-2 text-center">{t.quantity}</td> */}
       <td className="p-2 text-center">{t.lessquantity}</td>
 
       {/* ✅ show 0 if not present */}
