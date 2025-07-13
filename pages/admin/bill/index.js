@@ -82,6 +82,8 @@ const Index = (props) => {
   const [confirmDeleteId,setConfirmDeleteId] = useState(false)
   const [isLoggedCheck,setIsLoggedCheck] = useState('')
   const [saveBillNo,setSaveBillNo]= useState('')
+  const [filterType, setFilterType] = useState("all");
+const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
 
   const now = new Date();
 
@@ -368,7 +370,7 @@ const Index = (props) => {
     } = formFields;
   
     // Calculate total HERE to avoid stale state
-    const total = (parseFloat(lessquantity || 0) * parseFloat(rate || 0)).toFixed(2);
+    const total = (parseFloat(rate || 0) / parseFloat(lessquantity || 0)).toFixed(2);
   
     if (
       !name ||
@@ -936,6 +938,35 @@ const Index = (props) => {
       hsm: "",
     });
   };
+
+  const filteredBills = useMemo(() => {
+    const now = new Date();
+    const filterDate = (createdAt) => {
+      const billDate = new Date(createdAt);
+      if (filterType === "day") {
+        return billDate.toDateString() === now.toDateString();
+      } else if (filterType === "1month") {
+        return billDate >= new Date(now.setMonth(now.getMonth() - 1));
+      } else if (filterType === "2month") {
+        return billDate >= new Date(now.setMonth(now.getMonth() - 2));
+      } else if (filterType === "3month") {
+        return billDate >= new Date(now.setMonth(now.getMonth() - 3));
+      } else if (filterType === "custom" && customDateRange.from && customDateRange.to) {
+        return (
+          billDate >= new Date(customDateRange.from) &&
+          billDate <= new Date(customDateRange.to)
+        );
+      }
+      return true;
+    };
+  
+    return activeBills
+      .filter((bill) => filterDate(bill.createdAt))
+      .filter((b) =>
+        `SG000${b.billNo}`.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  }, [searchTerm, activeBills, filterType, customDateRange]);
+  
   return (
     <>
     <Header isLoggedStatus={isLoggedCheck}/>
@@ -1321,25 +1352,17 @@ const Index = (props) => {
     <h3 className="text-base font-semibold mb-2">Product Detail</h3>
     
     <div className="w-full overflow-x-auto">
-      <table className="min-w-[1500px] border border-gray-300 rounded bg-white shadow-md text-sm">
+      <table className="min-w-[1000px] border border-gray-300 rounded bg-white shadow-md text-sm">
         <thead className="bg-green-700 text-white">
           <tr>
             <th className="p-2">#</th>
             <th className="p-2">Name</th>
-            <th className="p-2">Company</th>
-            <th className="p-2">Salt</th>
-            <th className="p-2">Category</th>
             <th className="p-2">Packing</th>
             <th className="p-2">Batch</th>
             <th className="p-2">Expiry</th>
-            <th className="p-2">Qty</th>
             <th className="p-2">LessQty</th>
             <th className="p-2">Rate</th>
             <th className="p-2">Price</th>
-            <th className="p-2">Discount (%)</th>
-            <th className="p-2">GST (%)</th>
-            <th className="p-2">Free</th>
-            <th className="p-2">HSM</th>
             <th className="p-2">Total</th>
             <th className="p-2">Actions</th>
           </tr>
@@ -1348,21 +1371,13 @@ const Index = (props) => {
           {tablets.map((t, index) => (
             <tr key={index} className="border-t border-gray-200 hover:bg-gray-100">
               <td className="p-2 text-center">{index + 1}</td>
-              <td className="p-2">{t.name}</td>
-              <td className="p-2">{t.company}</td>
-              <td className="p-2">{t.salt}</td>
-              <td className="p-2">{t.category}</td>
-              <td className="p-2">{t.packing}</td>
-              <td className="p-2">{t.batch}</td>
-              <td className="p-2">{t.expiry}</td>
-              <td className="p-2 text-center">{t.quantity}</td>
+              <td className="p-2 text-center">{t.name}</td>
+              <td className="p-2 text-center">{t.packing}</td>
+              <td className="p-2 text-center">{t.batch}</td>
+              <td className="p-2 text-center">{t.expiry}</td>
               <td className="p-2 text-center">{t.lessquantity}</td>
               <td className="p-2 text-center">{t.rate}</td>
               <td className="p-2 text-center">{t.price}</td>
-              <td className="p-2 text-center">{t.discount}</td>
-              <td className="p-2 text-center">{t.gst}</td>
-              <td className="p-2 text-center">{t.free}</td>
-              <td className="p-2 text-center">{t.hsm}</td>
               <td className="p-2 text-center">{t.total}</td>
               <td className="p-2 flex items-center justify-center gap-2">
                 <div className="cursor-pointer" onClick={() => handleEdit(t, index)} title="Edit">
@@ -1628,6 +1643,7 @@ const Index = (props) => {
           </div>
 
           <h2 className="text-xl font-bold mb-2 lg:mb-4 text-black">Invoice Numbers</h2>
+      
           <div className="lg:flex justify-between items-center">
           <div className="flex gap-4 mb-4">
             <button
@@ -1658,6 +1674,38 @@ const Index = (props) => {
             </button>
           </div>
 
+          <div className="flex flex-wrap gap-4 items-center mb-4">
+  <select
+    className="border px-3 py-2 rounded-sm text-black"
+    value={filterType}
+    onChange={(e) => setFilterType(e.target.value)}
+  >
+    <option value="all">All</option>
+    <option value="day">Day Bill</option>
+    <option value="1month">1 Month Bill</option>
+    <option value="2month">2 Month Bill</option>
+    <option value="3month">3 Month Bill</option>
+    <option value="custom">Custom Date</option>
+  </select>
+
+  {filterType === "custom" && (
+    <div className="flex gap-2">
+      <input
+        type="date"
+        value={customDateRange.from}
+        onChange={(e) => setCustomDateRange({ ...customDateRange, from: e.target.value })}
+        className="border px-2 py-1 rounded-sm"
+      />
+      <input
+        type="date"
+        value={customDateRange.to}
+        onChange={(e) => setCustomDateRange({ ...customDateRange, to: e.target.value })}
+        className="border px-2 py-1 rounded-sm"
+      />
+    </div>
+  )}
+</div>
+
           <input
             type="text"
             placeholder="Search Invoice Number"
@@ -1680,8 +1728,8 @@ const Index = (props) => {
       </tr>
     </thead>
     <tbody className="text-sm text-gray-800">
-      {activeBills.length > 0 ? (
-        activeBills.map((bill, idx) => (
+      {filteredBills.length > 0 ? (
+        filteredBills.map((bill, idx) => (
           <tr key={idx} className="border-t border-gray-200 hover:bg-gray-100">
             <td className="p-2 font-semibold text-[#f3ab37]">SG000{bill.billNo}</td>
             <td className="p-2 min-w-[200px]">{bill.clientName || "-"}</td>

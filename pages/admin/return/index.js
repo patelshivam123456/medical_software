@@ -170,7 +170,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
   useEffect(() => {
     const quantity = parseFloat(formFields.returnquantity) || 0;
     const rate = parseFloat(formFields.rate) || 0;
-    const total = quantity * rate;
+    const total = rate/quantity;
     setFormFields((prev) => ({ ...prev, total: total.toFixed(2) }));
   }, [formFields.returnquantity, formFields.rate]);
 
@@ -383,7 +383,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       return {
         ...tab,
         returnquantity: returnQty,
-        total: returnQty > 0 ? +(rate * returnQty).toFixed(2) : 0,
+        total: returnQty > 0 ? +(rate / returnQty).toFixed(2) : 0,
       };
     });
 
@@ -1142,7 +1142,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
               <div className="w-full md:w-[10%] ">
                 <label>Total</label>
                 <input
-                  value={formFields.total}
+                  value={formFields.returnquantity>0?formFields.total:0}
                   onChange={(e) =>
                     setFormFields({ ...formFields, total: e.target.value })
                   }
@@ -1209,7 +1209,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       <tbody className="text-sm text-gray-800">
       {tablets.map((t, index) => {
   const returnQty = Number(t.returnquantity) || 0;
-  const calculatedTotal = Number(t.rate) * returnQty;
+  const calculatedTotal = returnQty>0?Number(t.rate) /returnQty:0;
 
   return (
     <tr key={index} className="border-t border-gray-200 hover:bg-gray-100">
