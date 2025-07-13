@@ -63,6 +63,7 @@ const Index = (props) => {
     category: "",
     free: 0,
     hsm: "",
+    strips:0
   });
 
   // for custom dropdown
@@ -238,6 +239,10 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       return;
     }
 
+
+    // ✅ Calculate strips
+    const strip = calculateStrips(packing, parseInt(lessquantity));
+
     const newTablet = {
       name: name.trim(),
       company: company.trim(),
@@ -258,6 +263,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       category: category.trim(),
       free: Number(free),
       hsm: hsm.trim(),
+      strips:Number(strip),
     };
     const isDuplicate = tablets.some((tablet, index) => {
       if (editingIndex !== null && editingIndex === index) return false;
@@ -500,7 +506,14 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       fetchTabDetails()
       toast.success("Bill loaded for editing");
     } catch (error) {
-      toast.error("Failed to load bill details");
+      console.error("API error:", error);
+  
+      const errorMessage =
+        error?.response?.data?.message || "Something went wrong while fetching clients.";
+  
+      toast.error(errorMessage, {
+        position: toast.POSITION.TOP_RIGHT,
+      });
     }
   };
   const handleEditBill = async (billNo) => {
@@ -666,8 +679,15 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
   
       setGroupedClients(grouped); // You need to define this state
       setAllClients(clients);
-    } catch (err) {
-      console.error("Error fetching clients:", err);
+    } catch (error) {
+      console.error("API error:", error);
+  
+      const errorMessage =
+        error?.response?.data?.message || "Something went wrong while fetching clients.";
+  
+      toast.error(errorMessage, {
+        position: toast.POSITION.TOP_RIGHT,
+      });
     }
   };
   
@@ -774,8 +794,15 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       const billNos = data?.bills?.map((item) => item.billNo.toString());
       setAllBillNos(billNos);
       setFilteredBillNos(billNos);
-    } catch (err) {
-      console.error("Error fetching invoice numbers", err);
+    } catch (error) {
+      console.error("API error:", error);
+  
+      const errorMessage =
+        error?.response?.data?.message || "Something went wrong while fetching clients.";
+  
+      toast.error(errorMessage, {
+        position: toast.POSITION.TOP_RIGHT,
+      });
     }
   };
   const handleInvoiceSelect = (selectedNo) => {
@@ -783,6 +810,18 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
     setShowBillDropdown(false);
     handleEditOldBill(selectedNo);
   };
+
+  const calculateStrips=(packing, quantity)=> {
+    if (!packing || !quantity) return 0;
+
+    const parts = packing.split("*");
+    if (parts.length !== 2) return 0;
+  
+    const multiplier = parseInt(parts[1], 10);
+    if (isNaN(multiplier) || multiplier === 0) return 0;
+  
+    return Math.floor(quantity / multiplier);
+  }
   
   return (
     <>
@@ -1198,9 +1237,10 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
           <th className="p-2 min-w-[200px]">Name</th>
           <th className="p-2">Batch</th>
           <th className="p-2">Packing</th>
-          {/* <th className="p-2">Qty</th> */}
+         
           <th className="p-2">LessQty</th>
           <th className="p-2">ReturnQty</th>
+          <th className="p-2">Strips</th>
           <th className="p-2">Rate</th>
           <th className="p-2">Total</th>
           <th className="p-2">Actions</th>
@@ -1217,12 +1257,14 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       <td className="p-2 min-w-[200px]">{t.name}</td>
       <td className="p-2">{t.batch}</td>
       <td className="p-2">{t.packing}</td>
-      {/* <td className="p-2 text-center">{t.quantity}</td> */}
+     
       <td className="p-2 text-center">{t.lessquantity}</td>
 
       {/* ✅ show 0 if not present */}
       <td className="p-2 text-center">{returnQty}</td>
-
+      <td className="p-2 text-center">
+    {calculateStrips(t.packing, parseInt(returnQty || 0))}
+  </td>
       <td className="p-2 text-center">{t.rate}</td>
 
       {/* ✅ show total based on returnquantity */}
@@ -1597,7 +1639,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
                 <PencilSquareIcon className="h-5 w-5 text-blue-600 hover:text-blue-800" />
               </div>
 
-              <div
+              {props.checkLoginType==="admin"&&<div
               className="cursor-pointer"
                 title="Delete"
                 onClick={() => {
@@ -1606,7 +1648,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
                 }}
               >
                 <TrashIcon className="h-5 w-5 text-red-600 hover:text-red-800" />
-              </div>
+              </div>}
 
               {/* <div title="Copy" onClick={() => handleCopyBill(bill.newbillNo)}>
                 <DocumentDuplicateIcon className="h-5 w-5 text-gray-500 hover:text-black" />
@@ -1655,9 +1697,10 @@ export async function getServerSideProps(context) {
     };
   }
   const isLoggedStatus= loggedIn
+  const checkLoginType=loginType
 
   return {
-    props: {isLoggedStatus},
+    props: {isLoggedStatus,checkLoginType},
   };
 }
 

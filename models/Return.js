@@ -26,6 +26,7 @@ const returnBillSchema = new mongoose.Schema({
       sgst: Number,
       cgst: Number,
       total: Number,
+      strips:Number
     },
   ],
   discount: { type: Number , required: false, default: "" },

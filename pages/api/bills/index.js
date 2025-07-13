@@ -29,7 +29,7 @@ export default async function handler(req, res) {
       // ✅ 2. Check if Bill Already Exists
       const existingBill = await Bill.findOne({ nextBillNo });
       if (existingBill) {
-        return res.status(409).json({ success: false, message: `Bill with number ${billNo} already exists` });
+        return res.status(409).json({ success: false, message: `Bill with number ${nextBillNo} already exists` });
       }
 
       // ✅ 3. Validate Stock Availability

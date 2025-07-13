@@ -23,6 +23,7 @@ const billSchema = new mongoose.Schema({
       sgst: Number,
       cgst: Number,
       total: Number,
+      strips:Number
     },
   ],
   discount: { type: Number },

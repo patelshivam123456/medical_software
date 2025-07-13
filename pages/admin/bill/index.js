@@ -60,6 +60,7 @@ const Index = (props) => {
     category: "",
     free: 0,
     hsm: "",
+    strips:0
   });
 
   // for custom dropdown
@@ -367,9 +368,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       category,
       free,
       hsm,
+      strips,
     } = formFields;
   
-    // Calculate total HERE to avoid stale state
     const total = (parseFloat(rate || 0) / parseFloat(lessquantity || 0)).toFixed(2);
   
     if (
@@ -390,6 +391,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       return;
     }
   
+    // ✅ Calculate strips
+    const strip = calculateStrips(packing, parseInt(lessquantity));
+  
     const newTablet = {
       name: name.trim(),
       company: company.trim(),
@@ -409,6 +413,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       category: category.trim(),
       free: Number(free),
       hsm: hsm.trim(),
+      strips:Number(strip),
     };
   
     const isDuplicate = tablets.some((tablet, index) => {
@@ -791,15 +796,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
     });
     toast.success("Reset successfully");
   };
-  // const fetchClients = async () => {
-  //   try {
-  //     const res = await axios.get("/api/client");
-  //     setAllClients(res.data || []);
-  //   } catch (err) {
-  //     console.error("Error fetching clients:", err);
-  //   }
-  // };
-
+ 
   const fetchClients = async () => {
     try {
       const res = await axios.get("/api/client");
@@ -966,6 +963,19 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         `SG000${b.billNo}`.toLowerCase().includes(searchTerm.toLowerCase())
       );
   }, [searchTerm, activeBills, filterType, customDateRange]);
+
+  const calculateStrips=(packing, quantity)=> {
+    if (!packing || !quantity) return 0;
+
+    const parts = packing.split("*");
+    if (parts.length !== 2) return 0;
+  
+    const multiplier = parseInt(parts[1], 10);
+    if (isNaN(multiplier) || multiplier === 0) return 0;
+  
+    return Math.floor(quantity / multiplier);
+  }
+  
   
   return (
     <>
@@ -1361,6 +1371,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
             <th className="p-2">Batch</th>
             <th className="p-2">Expiry</th>
             <th className="p-2">LessQty</th>
+            <th className="p-2">Strip</th>
             <th className="p-2">MRP</th>
             <th className="p-2">Selling Price</th>
             <th className="p-2">Total</th>
@@ -1370,7 +1381,6 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         <tbody className="text-gray-800">
           {tablets.map((t, index) => (
             <tr key={index} className="border-t border-gray-200 hover:bg-gray-100">
-              {console.log(t)}
               
               <td className="p-2 text-center">{index + 1}</td>
               <td className="p-2 text-center">{t.name}</td>
@@ -1378,6 +1388,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
               <td className="p-2 text-center">{t.batch}</td>
               <td className="p-2 text-center">{t.expiry}</td>
               <td className="p-2 text-center">{t.lessquantity}</td>
+              <td className="p-2 text-center">
+    {calculateStrips(t.packing, parseInt(t.lessquantity || 0))}
+  </td>
               <td className="p-2 text-center">{t.price}</td>
               <td className="p-2 text-center">{t.rate}</td>
               <td className="p-2 text-center">{t.total}</td>
@@ -1754,7 +1767,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                 <PencilSquareIcon className="h-5 w-5 text-blue-600 hover:text-blue-800" />
               </div>
 
-              <div
+             {props.checkLoginType==="admin"&& <div
               className="cursor-pointer"
                 title="Delete"
                 onClick={() => {
@@ -1763,7 +1776,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                 }}
               >
                 <TrashIcon className="h-5 w-5 text-red-600 hover:text-red-800" />
-              </div>
+              </div>}
 
               <div title="Copy" onClick={() => handleCopyBill(bill.billNo)}>
                 <DocumentDuplicateIcon className="h-5 w-5 text-gray-500 hover:text-black" />
@@ -1812,9 +1825,10 @@ export async function getServerSideProps(context) {
     };
   }
   const isLoggedStatus= loggedIn
+  const checkLoginType=loginType
 
   return {
-    props: {isLoggedStatus},
+    props: {isLoggedStatus,checkLoginType},
   };
 }
 
