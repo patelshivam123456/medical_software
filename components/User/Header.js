@@ -16,14 +16,20 @@ import {
   ArrowPathIcon,
   Bars3Icon,
   ChartPieIcon,
+  ClipboardDocumentListIcon,
   CursorArrowRaysIcon,
   FingerPrintIcon,
+  ShoppingBagIcon,
+  ShoppingCartIcon,
   SquaresPlusIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
 import Cookies from 'js-cookie'
 import { useRouter } from 'next/router'
+import MyOrdersModal from '../order/MyOrdersModal'
+import CartModal from '../order/CartModal'
+import axios from 'axios';
 
 const products = [
   { name: 'Analytics', description: 'Get a better understanding of your traffic', href: '#', icon: ChartPieIcon },
@@ -37,22 +43,51 @@ const callsToAction = [
   { name: 'Contact sales', href: '#', icon: PhoneIcon },
 ]
 
-const Header=()=> {
+const Header=({losdingState,orderRefresh})=> {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [checkLoginStatus,setCheckLoginStatus] =useState("")
+  const [showOrdersModal, setShowOrdersModal] = useState(false);
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [cart, setCart] = useState([]);
+  const [mobile,setMobile]=useState("")
   const router = useRouter()
 
   useEffect(()=>{
     if(Cookies.get("userLoggedIn")){
         setCheckLoginStatus(Cookies.get("userLoggedIn"))
     }
+    if(Cookies.get("mobile")){
+        setMobile(Cookies.get("mobile"))
+    }
   },[])
+  useEffect(() => {
+    if (mobile) {
+      axios.get(`/api/order/cart?mobile=${mobile}`)
+        .then(res => setCart(res.data))
+        .catch(err => {
+          console.error("Cart fetch failed:", err);
+          setCart([]);
+        });
+    }
+  }, [mobile,losdingState]);
 
   const handleLogout=()=>{
     Cookies.remove("mobile")
     Cookies.remove("userLoggedIn")
     router.push("/user/login")
   }
+
+  const removeFromCart = async (index) => {
+    const product = cart[index];
+    try {
+      await axios.delete('/api/order/cart', {
+        data: { productId: product._id, mobile }
+      });
+      setCart(prev => prev.filter((_, i) => i !== index));
+    } catch (err) {
+      toast.error("Failed to remove item");
+    }
+  };
 
   return (
     <header className="bg-yellow-50">
@@ -72,7 +107,19 @@ const Header=()=> {
             {/* <div className='text-[10px]  text-black -mt-1 border-t-[0.5px] border-gray-400'>ENTERPRISE</div> */}
           </div>
         </div>
-        <div className="flex lg:hidden">
+        <div className="flex items-center gap-4 lg:hidden">
+        <div className="relative cursor-pointer" onClick={() => setShowCartModal(true)}>
+    <ShoppingCartIcon className='w-6 h-6' />
+    {cart.length > 0 && (
+      <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5">
+        {cart.length}
+      </span>
+    )}
+  </div>
+  <div className=" cursor-pointer" onClick={() => setShowOrdersModal(true)}>
+  <ShoppingBagIcon className='w-6 h-6' />
+</div>
+
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
@@ -137,7 +184,20 @@ const Header=()=> {
             Company
           </a> */}
         </PopoverGroup>
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+        <div className="hidden lg:flex gap-4 lg:flex-1 lg:justify-end items-center">
+       
+  <div className="relative cursor-pointer" onClick={() => setShowCartModal(true)}>
+    <ShoppingCartIcon className='w-6 h-6' />
+    {cart.length > 0 && (
+      <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5">
+        {cart.length}
+      </span>
+    )}
+  </div>
+  <div className=" cursor-pointer" onClick={() => setShowOrdersModal(true)}>
+  <ShoppingBagIcon className='w-6 h-6' />
+</div>
+
           {checkLoginStatus?<div onClick={handleLogout} className="cursor-pointer text-sm/6 font-semibold text-gray-900">
             Log out <span aria-hidden="true">&rarr;</span>
           </div>
@@ -227,6 +287,24 @@ const Header=()=> {
           </div>
         </DialogPanel>
       </Dialog>
+      {showCartModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="bg-white max-w-3xl w-full p-4 rounded shadow-lg relative">
+      <button
+        className="absolute top-2 right-2 text-gray-600 hover:text-black"
+        onClick={() => setShowCartModal(false)}
+      >
+        ✖
+      </button>
+
+      <CartModal cart={cart} removeFromCart={removeFromCart} />
+     
+    </div>
+  </div>
+)}
+ {showOrdersModal && (
+  <MyOrdersModal mobile={mobile} onClose={() => setShowOrdersModal(false)} orderRefresh={orderRefresh}/>
+)}
     </header>
   )
 }

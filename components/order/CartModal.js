@@ -13,6 +13,7 @@ const CartModal=({ cart, removeFromCart })=> {
         <p>No items in cart</p>
       ) : (
         <>
+        <div className='overflow-auto'>
           <table className="w-full text-sm border mb-4">
             <thead>
               <tr className="bg-gray-100">
@@ -35,7 +36,7 @@ const CartModal=({ cart, removeFromCart })=> {
                   <td className="border p-2">{item.expiry}</td>
                   <td className="border p-2 text-center">{item.quantity}</td>
                   <td className="border p-2 text-right">₹{item.price}</td>
-                  <td className="border p-2 text-right">₹{item.total}</td>
+                  <td className="border p-2 text-right">₹{item?.total?.toFixed(2)}</td>
                   <td className="border p-2 text-center">
                     <button
                       onClick={() => removeFromCart(idx)}
@@ -48,12 +49,13 @@ const CartModal=({ cart, removeFromCart })=> {
               ))}
             </tbody>
           </table>
+          </div>
 
           <div className="text-right space-y-1">
             <p>Subtotal: ₹{grandTotal.toFixed(2)}</p>
             <p>CGST (6%): ₹{cgst.toFixed(2)}</p>
             <p>SGST (6%): ₹{sgst.toFixed(2)}</p>
-            <p className="font-semibold text-lg">Total: ₹{totalWithGST.toFixed(2)}</p>
+            <p className="font-semibold text-lg">Total: ₹{Math.ceil(totalWithGST)}</p>
           </div>
         </>
       )}

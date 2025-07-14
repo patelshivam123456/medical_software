@@ -123,6 +123,9 @@ const Header=({isLoggedStatus})=> {
           {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/admin/return" className="text-sm/6 font-semibold text-gray-900">
             Return
           </a>}
+          {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/admin/online-order" className="text-sm/6 font-semibold text-gray-900">
+            Online Order
+          </a>}
           {(checkLoginType==="admin"||checkLoginType==="sales")&&<a href="/admin/client" className="text-sm/6 font-semibold text-gray-900">
             Client
           </a>}
@@ -263,6 +266,14 @@ const Header=({isLoggedStatus})=> {
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
                 Return
+              </a>
+            </div>}
+            {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">
+              <a
+                href="/admin/online-order"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Online Order
               </a>
             </div>}
             {(checkLoginType==="admin"||checkLoginType==="sales")&&<div className="space-y-2 py-6">

@@ -12,30 +12,31 @@ export default async function handler(req, res) {
     return res.status(200).json(cart.map(item => ({
       ...item.product,
       quantity: item.quantity,
+      price:item.price,
       _id: item.productId
     })));
   }
 
   if (req.method === 'POST') {
-    const { _id, quantity, rate, ...product } = req.body;
-    if (!_id || !quantity || !rate) {
+    const { _id, quantity,price, ...product } = req.body;
+    if (!_id || !quantity || !price) {
       return res.status(400).json({ message: 'Missing product data' });
     }
   
-    const total = quantity * rate;
+    const total = price /quantity;
   
     const existing = await Cart.findOne({ mobile, productId: _id });
     if (existing) {
       existing.quantity = quantity;
       existing.total = total;
-      existing.rate = rate;
+      existing.price = price;
       await existing.save();
     } else {
       await Cart.create({
         mobile,
         productId: _id,
         quantity,
-        rate,
+        price,
         total,
         product
       });
