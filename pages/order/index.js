@@ -10,6 +10,7 @@ import Header from '@/components/User/Header';
 import PersonalDetailsForm from '@/components/order/PersonalDetailsForm';
 import PaymentForm from '@/components/order/PaymentForm';
 import MyOrdersModal from '@/components/order/MyOrdersModal';
+import SuccessModal from '@/components/Modal/SuccessModal';
 // import PersonalDetailsForm and PaymentForm as needed
 
 const OrderPage=() =>{
@@ -25,9 +26,15 @@ const OrderPage=() =>{
   const [showOrdersModal, setShowOrdersModal] = useState(false);
   const [losdingState,setLoadingState] = useState(false)
   const [orderRefresh,setOrderRefresh] = useState(false)
+  const [successOpen,setSuccessOpen] = useState(false)
+  
 
   // Step 1: Set mobile & fetch products
   useEffect(() => {
+    // if(Cookies.get("OrderId")){
+    //   setOrderId(Cookies.get("OrderId"))
+    // }
+
     const mob = Cookies.get("mobile");
     if (mob) {
       setMobile(mob);
@@ -112,6 +119,7 @@ const OrderPage=() =>{
     try {
       const res = await axios.post('/api/order', { products: cart, registeredMobile: mobile, });
       setOrderId(res.data._id);
+      // Cookies.set("Order_id",res.data._id)
       toast.success('Products saved');
       setStep(2);
     } catch (err) {
@@ -182,11 +190,13 @@ const OrderPage=() =>{
       });
   
       await axios.delete('/api/order/cart', { data: { mobile } });
-  
+      
       toast.success('Order placed successfully');
       setCart([]);
+      setSuccessOpen(true)
       setStep(1);
       setOrderRefresh(true)
+      setLoadingState(true)
     } catch (err) {
       console.error(err);
       toast.error('Payment failed');
@@ -196,7 +206,7 @@ const OrderPage=() =>{
 
   return (
     <>
-    <Header losdingState={losdingState} orderRefresh={orderRefresh}/>
+    <Header losdingState={losdingState} orderRefresh={orderRefresh} moveOnStep={()=>{saveStep1(),setShowCartModal(false)}} showCartModal={showCartModal} setShowCartModal={setShowCartModal}/>
     <div className="p-4 max-w-2xl mx-auto">
      <div className="flex justify-between items-center mb-4">
   <h1 className="text-2xl font-bold">Online Order</h1>
@@ -288,7 +298,7 @@ const OrderPage=() =>{
 
           {/* <CartModal cart={cart} removeFromCart={removeFromCart} /> */}
 <div className='flex justify-end'>
-          <button onClick={saveStep1} disabled={cart.length === 0} className="mt-4 bg-green-600 text-white px-6 py-2 rounded disabled:bg-gray-400">
+          <button onClick={saveStep1} disabled={cart.length === 0} className="cursor-pointer mt-4 bg-green-600 text-white px-6 py-2 rounded disabled:bg-gray-400">
             Save & Continue
           </button>
           </div>
@@ -297,6 +307,7 @@ const OrderPage=() =>{
 
       {step === 2 && <PersonalDetailsForm onSave={saveStep2} initialData={personalDetails} registeredMobile={mobile} />}
       {step === 3 && <PaymentForm onSave={saveStep3} />}
+      <SuccessModal confirmDeleteId={successOpen} setConfirmDeleteId={setSuccessOpen} confirmDelete={""}  title={"Your Order has been Successfully Completed"}/>
       {/* {showCartModal && (
   <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
     <div className="bg-white max-w-3xl w-full p-4 rounded shadow-lg relative">

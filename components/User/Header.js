@@ -43,11 +43,10 @@ const callsToAction = [
   { name: 'Contact sales', href: '#', icon: PhoneIcon },
 ]
 
-const Header=({losdingState,orderRefresh})=> {
+const Header=({losdingState,orderRefresh,moveOnStep,setShowCartModal,showCartModal})=> {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [checkLoginStatus,setCheckLoginStatus] =useState("")
   const [showOrdersModal, setShowOrdersModal] = useState(false);
-  const [showCartModal, setShowCartModal] = useState(false);
   const [cart, setCart] = useState([]);
   const [mobile,setMobile]=useState("")
   const router = useRouter()
@@ -61,9 +60,9 @@ const Header=({losdingState,orderRefresh})=> {
     }
   },[])
   useEffect(() => {
-    if (mobile) {
+    if (mobile||losdingState) {
       axios.get(`/api/order/cart?mobile=${mobile}`)
-        .then(res => setCart(res.data))
+        .then(res => {setCart(res.data)})
         .catch(err => {
           console.error("Cart fetch failed:", err);
           setCart([]);
@@ -297,7 +296,7 @@ const Header=({losdingState,orderRefresh})=> {
         ✖
       </button>
 
-      <CartModal cart={cart} removeFromCart={removeFromCart} />
+      <CartModal cart={cart} removeFromCart={removeFromCart} moveOnStep={moveOnStep}/>
      
     </div>
   </div>

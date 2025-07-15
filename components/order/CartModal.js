@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CartModal=({ cart, removeFromCart })=> {
+const CartModal=({ cart, removeFromCart,moveOnStep })=> {
   const grandTotal = cart.reduce((sum, item) => sum + (item.total || 0), 0);
   const cgst = grandTotal * 0.06;
   const sgst = grandTotal * 0.06;
@@ -59,6 +59,11 @@ const CartModal=({ cart, removeFromCart })=> {
           </div>
         </>
       )}
+      <div className='flex justify-end'>
+          <button onClick={moveOnStep} disabled={cart.length === 0} className="cursor-pointer mt-4 bg-green-600 text-white px-6 py-2 rounded disabled:bg-gray-400">
+            Continue
+          </button>
+          </div>
     </div>
   );
 }
