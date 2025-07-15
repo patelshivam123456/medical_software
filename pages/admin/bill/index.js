@@ -370,8 +370,11 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       hsm,
       strips,
     } = formFields;
+
   
-    const total = (parseFloat(rate || 0) / parseFloat(lessquantity || 0)).toFixed(2);
+    // const total = (parseFloat(rate || 0) / parseFloat(lessquantity || 0)).toFixed(2);
+
+    const total= ((Number(rate)/Number(packing?.split("*")[1]))*Number(lessquantity)).toFixed(2)
   
     if (
       !name ||

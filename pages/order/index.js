@@ -75,16 +75,18 @@ const OrderPage=() =>{
   
     const rate = selectedProduct?.price || 0;
     const alreadyExists = cart.some(item => item._id === selectedProduct._id);
-    console.log(cart,selectedProduct);
     
     if (alreadyExists) {
       toast.error("Item already exists in cart");
       return;
     }
+    const TotalLogic= (selectedProduct?.price/(Number(selectedProduct?.packaging?.split("*")[1]))*Number(quantity).toFixed(2))
+    
     const item = {
       ...selectedProduct,
       quantity: Number(quantity),
-      total: Number(rate)/Number(quantity) ,
+
+      total: Number(TotalLogic) ,
       mobile
     };
   
@@ -286,7 +288,7 @@ const OrderPage=() =>{
               <input type="number" className="mt-2 w-full border p-2 rounded" placeholder="Quantity" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
               <input
   type="text"
-  value={quantity && selectedProduct?.price ? (selectedProduct.price / quantity).toFixed(2) : ''}
+  value={quantity && selectedProduct?.price ?( ( selectedProduct.price/Number(selectedProduct.packaging.split("*")[1])) *quantity).toFixed(2) : ''}
   disabled
   className="w-full border p-2 rounded bg-gray-200"
   placeholder="Total"
