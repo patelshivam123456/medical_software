@@ -3,6 +3,13 @@ import mongoose from 'mongoose';
 const billSchema = new mongoose.Schema({
   billNo: { type: Number, required: true, unique: true },
   salesperson:{type:String},
+  paymenttype:{type:String},
+  ordertype:{type:String},
+  orderid:{type:String},
+  dispatchDate: {
+    type: Date,
+    default: null  
+  },
   tablets: [
     {
       name: String,

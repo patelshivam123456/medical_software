@@ -22,7 +22,11 @@ const ProductSchema = new mongoose.Schema({
   expiry: String,
   quantity: Number,
   price: Number,         // 💡 Added: price per unit
-  total: Number         // 💡 Added: quantity * rate
+  total: Number,
+  mg:String,
+  category:String,
+  packaging:String,
+  mrp:Number        
 }, { _id: false });
 
 const PersonalDetailsSchema = new mongoose.Schema({
@@ -53,7 +57,14 @@ const OrderSchema = new mongoose.Schema({
     sgst: Number,
     finalAmount: Number,
     submitstatus:String,
-  
+    dispatchDate: {
+      type: Date,
+      default: null  
+    },
+    statusUpdatedAt: {
+      type: Date,
+      default: null
+    },
     createdAt: {
       type: Date,
       default: Date.now

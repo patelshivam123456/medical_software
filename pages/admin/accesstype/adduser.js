@@ -150,6 +150,7 @@ const AddUser = (props)=> {
           <option value="admin">Admin</option>
           <option value="sales">Sales</option>
           <option value="stockiest">Stockiest</option>
+          <option value="delivery">Delivery</option>
         </select>
         </div>
         </div>

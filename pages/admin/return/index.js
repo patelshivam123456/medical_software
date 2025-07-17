@@ -22,6 +22,9 @@ const Index = (props) => {
   const [billNo, setBillNo] = useState("");
   const [newbillNo, setnewBillNo] = useState("");
   const [salesPerson, setSalesPerson] = useState("");
+  const [paymentType, setPaymentType] = useState("");
+  const [orderType, setOrderType] = useState("");
+  const [orderId, setOrderId] = useState("");
   const [returnPerson, setReturnPerson] = useState("");
   const [discount, setDiscount] = useState(0);
   const [gst, setGst] = useState(0);
@@ -399,6 +402,9 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       const response = await axios.post("/api/return", {
         billNo,
         salesperson:salesPerson,
+        paymenttype:paymentType,
+        ordertype:orderType,
+        orderid:orderId,
         returnperson:returnPerson,
         tablets:sanitizedTablets,
         discount:Number(discount),
@@ -419,6 +425,9 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       if (response.status === 201) {
         setBillNo("");
         setSalesPerson("")
+        setPaymentType("")
+        setOrderType("")
+        setOrderId("")
         setTablets([]);
         setDiscount(0);
         setSgst(0);
@@ -487,6 +496,9 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       setBillNo(bill.billNo);
       setnewBillNo(bill.newbillNo)
       setSalesPerson(bill.salesperson)
+      setPaymentType(bill.paymenttype)
+      setOrderType(bill.ordertype)
+      setOrderId(bill.orderid)
       setReturnPerson(bill.returnperson)
       setInputValue(bill.clientName);
       setDiscount(bill.discount || 0);
@@ -525,6 +537,9 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       setBillNo(bill.billNo);
       setnewBillNo(bill.newbillNo)
       setSalesPerson(bill.salesperson)
+      setSalesPerson(bill.salesperson)
+      setPaymentType(bill.paymenttype)
+      setOrderType(bill.ordertype)
       setReturnPerson(bill.returnperson)
       setInputValue(bill.clientName);
       setDiscount(bill.discount || 0);
@@ -560,6 +575,9 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       const res = await axios.put(`/api/return/${newbillNo}`, {
         billNo,
         salesperson:salesPerson,
+        paymenttype:paymentType,
+        ordertype:orderType,
+        orderid:orderId,
         returnperson:returnPerson,
         tablets,
         discount:Number(discount),
@@ -581,6 +599,9 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
         toast.success("Bill updated successfully");
         setBillNo("");
         setSalesPerson("")
+        setPaymentType("")
+        setOrderType("")
+        setOrderId("")
         setTablets([]);
         setDiscount(0);
         setSgst(0);
@@ -628,6 +649,9 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
   const handleResetForm = () => {
     setBillNo("");
     setSalesPerson("")
+    setPaymentType("")
+    setOrderType("")
+    setOrderId("")
     setTablets([]);
     setDiscount(0);
     setSgst(0);
@@ -889,7 +913,9 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
                 className="block w-full text-black bg-white border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
               />
             </div>
+          
             </div>
+            
             {!billNo && isEditingBill === "copy" ? (
               <div
                 onClick={handleResetForm}
@@ -912,7 +938,11 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
               </div>
             )}
           </div>
-          <div className="border px-4 py-3 -mt-4">
+          <div className="flex items-center gap-4 -mt-3 mb-2">
+         {paymentType&& <div className="flex items-center w-[30%] gap-2"><span className="text-sm font-semibold">Payment Method:</span> {paymentType}</div>}
+          {orderType&&<div className="flex items-center w-[30%] gap-2"><span className="text-sm font-semibold">Order Type:</span> {orderType}</div>}
+          {orderId&&<div className="flex items-center w-[30%] gap-2"><span className="text-sm font-semibold">Order Id:</span> {orderId}</div> }         </div>
+          <div className="border px-4 py-3">
             
             <div className="flex flex-wrap gap-4 items-end ">
    

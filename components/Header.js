@@ -120,6 +120,9 @@ const Header=({isLoggedStatus})=> {
           {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/admin/manage-stock" className="text-sm/6 font-semibold text-gray-900">
             Purchase
           </a>}
+          {(checkLoginType==="admin"||checkLoginType==="sales")&&<a href="/admin/mark-delivery" className="text-sm/6 font-semibold text-gray-900">
+            Online Order Bill
+          </a>}
           {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/admin/return" className="text-sm/6 font-semibold text-gray-900">
             Return
           </a>}
@@ -131,6 +134,9 @@ const Header=({isLoggedStatus})=> {
           </a>}
           {(checkLoginType==="admin")&&<a href="/admin/accesstype/adduser" className="text-sm/6 font-semibold text-gray-900">
             Login Access
+          </a>}
+          {(checkLoginType==="admin"||checkLoginType==="delivery")&&<a href="/admin/complete-delivery" className="text-sm/6 font-semibold text-gray-900">
+            Delivery person
           </a>}
           </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
@@ -252,6 +258,14 @@ const Header=({isLoggedStatus})=> {
                   Bill page
                 </a>
               </div>}
+              {(checkLoginType==="admin"||checkLoginType==="sales")&& <div className="space-y-2 py-6">
+                <a
+                  href="/admin/mark-delivery"
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                >
+                  Online Order Bill
+                </a>
+              </div>}
               {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">
               <a
                 href="/admin/manage-stock"
@@ -290,6 +304,14 @@ const Header=({isLoggedStatus})=> {
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
                 Login Access
+              </a>
+            </div>}
+            {(checkLoginType==="admin"||checkLoginType==="delivery")&&<div className="space-y-2 py-6">
+              <a
+                href="/admin/complete-delivery"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Delivery Person
               </a>
             </div>}
               {router.pathname.toLowerCase().includes("admin")&&<div className="py-6">

@@ -23,9 +23,12 @@ const Login = () => {
         if(res.data.loginType==="stockiest"){
           router.push("/admin/manage-stock")
         }
-        else if(res.data.loginType==="stockiest"){
+        else if(res.data.loginType==="sales"){
         router.push('/admin/bill')
         }
+        else if(res.data.loginType==="delivery"){
+          router.push('/admin/complete-delivery')
+          }
         else{
           router.push("/admin")
         }
@@ -106,6 +109,12 @@ export async function getServerSideProps(context) {
     return {
       props: {},
       redirect: { destination: '/admin/manage-stock' },
+    }
+  }
+  else if (context.req.cookies.loggedIn&&context.req.cookies.loginType==="delivery") {
+    return {
+      props: {},
+      redirect: { destination: '/admin/complete-delivery' },
     }
   }
 

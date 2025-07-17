@@ -8,7 +8,6 @@ const PersonalDetailsForm = ({ onSave, initialData, registeredMobile }) => {
     mobile: '',
     address1: '',
     address2: '',
-    city: '',
     pincode: '',
     state: '',
   });
@@ -18,50 +17,45 @@ const PersonalDetailsForm = ({ onSave, initialData, registeredMobile }) => {
   const [savedDetails, setSavedDetails] = useState([]);
 
   useEffect(() => {
-    if (initialData) {
+    if (initialData && !useSaved) {
       setFormData(initialData);
     }
-  }, [initialData]);
+  }, [initialData, useSaved]);
 
   useEffect(() => {
-  if (useSaved && registeredMobile) {
-    axios
-      .get(`/api/order?mobile=${registeredMobile}`)
-      .then((res) => {
-        const data = Array.isArray(res.data) ? res.data : [res.data];
-        const seen = new Set();
+    if (useSaved && registeredMobile) {
+      axios
+        .get(`/api/order?mobile=${registeredMobile}`)
+        .then((res) => {
+          const data = Array.isArray(res.data) ? res.data : [res.data];
+          const seen = new Set();
 
-        const uniqueDetails = data.filter((item) => {
-          const pd = item?.personalDetails;
-          if (!pd) return false;
-          const key = JSON.stringify(pd);
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
+          const uniqueDetails = data.filter((item) => {
+            const pd = item?.personalDetails;
+            if (!pd) return false;
+            const key = JSON.stringify(pd);
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
 
-        setSavedDetails(uniqueDetails);
-        setShowModal(true);
-      })
-      .catch((err) => console.error('Error loading saved personal details', err));
-  } else if (!useSaved) {
-    setFormData({
-      name: '',
-      mobile: '',
-      address1: '',
-      address2: '',
-      city: '',
-      pincode: '',
-      state: '',
-    });
-  }
-}, [useSaved, registeredMobile]);
+          setSavedDetails(uniqueDetails);
+          setShowModal(true);
+        })
+        .catch((err) => console.error('Error loading saved personal details', err));
+    }
+  }, [useSaved, registeredMobile]);
 
   const validate = () => {
     const errs = {};
-    for (const key in formData) {
-      if (!formData[key]) errs[key] = `${key} is required`;
-    }
+    const requiredFields = ['name', 'mobile', 'address1',  'pincode', 'state'];
+
+    requiredFields.forEach((field) => {
+      if (!formData[field] || formData[field].trim() === '') {
+        errs[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+      }
+    });
+
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -72,12 +66,9 @@ const PersonalDetailsForm = ({ onSave, initialData, registeredMobile }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!validate()&&useSaved) {
-    onSave(formData);
+    if (validate()) {
+      onSave(formData);
     }
-    else if(!validate()) {
-        onSave(formData);
-        }
   };
 
   const handleSelectSaved = (data) => {
@@ -87,7 +78,6 @@ const PersonalDetailsForm = ({ onSave, initialData, registeredMobile }) => {
       mobile: d.mobile || '',
       address1: d.address1 || '',
       address2: d.address2 || '',
-      city: d.city || '',
       pincode: d.pincode || '',
       state: d.state || '',
     });
@@ -102,7 +92,6 @@ const PersonalDetailsForm = ({ onSave, initialData, registeredMobile }) => {
       mobile: '',
       address1: '',
       address2: '',
-      city: '',
       pincode: '',
       state: '',
     });
@@ -136,10 +125,11 @@ const PersonalDetailsForm = ({ onSave, initialData, registeredMobile }) => {
             </div>
           ))}
         </div>
-<div className='flex justify-end'>
-        <button type="submit" className="bg-green-600 text-white px-6 py-2 rounded cursor-pointer">
-          Save & Continue
-        </button>
+
+        <div className='flex justify-end'>
+          <button type="submit" className="bg-green-600 text-white px-6 py-2 rounded cursor-pointer">
+            Save & Continue
+          </button>
         </div>
       </form>
 
@@ -150,33 +140,33 @@ const PersonalDetailsForm = ({ onSave, initialData, registeredMobile }) => {
             <h3 className="text-lg font-semibold mb-4">Select Saved Personal Details</h3>
 
             <div className="space-y-4">
-            {savedDetails.length > 0 ? (
-  savedDetails
-    .filter(detail => detail?.personalDetails) // ✅ Ensure it has personalDetails
-    .map((detail, index) => {
-      const d = detail.personalDetails;
-      return (
-        <label key={index} className="block p-4 border rounded cursor-pointer hover:bg-gray-100">
-          <input
-            type="radio"
-            name="selectedSaved"
-            className="mr-2"
-            onChange={() => handleSelectSaved(detail)}
-          />
-          <div>
-            <p><strong>Name:</strong> {d.name}</p>
-            <p><strong>Mobile:</strong> {d.mobile}</p>
-            <p><strong>Address:</strong> {d.address1}, {d.address2}</p>
-            <p><strong>State:</strong> {d.state}</p>
-            <p><strong>Pincode:</strong> {d.pincode}</p>
-          </div>
-        </label>
-      );
-    })
-) : (
-  <p>No saved details found.</p>
-)}
-
+              {savedDetails.length > 0 ? (
+                savedDetails
+                  .filter(detail => detail?.personalDetails)
+                  .map((detail, index) => {
+                    const d = detail.personalDetails;
+                    return (
+                      <label key={index} className="block p-4 border rounded cursor-pointer hover:bg-gray-100">
+                        <input
+                          type="radio"
+                          name="selectedSaved"
+                          className="mr-2"
+                          onChange={() => handleSelectSaved(detail)}
+                        />
+                        <div>
+                          <p><strong>Name:</strong> {d.name}</p>
+                          <p><strong>Mobile:</strong> {d.mobile}</p>
+                          <p><strong>Address:</strong> {d.address1}, {d.address2}</p>
+                          {/* <p><strong>City:</strong> {d.city}</p> */}
+                          <p><strong>State:</strong> {d.state}</p>
+                          <p><strong>Pincode:</strong> {d.pincode}</p>
+                        </div>
+                      </label>
+                    );
+                  })
+              ) : (
+                <p>No saved details found.</p>
+              )}
             </div>
 
             <div className="flex justify-between items-center mt-6">

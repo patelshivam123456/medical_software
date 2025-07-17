@@ -1,4 +1,3 @@
-// File: pages/order/index.js
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -11,7 +10,7 @@ import PersonalDetailsForm from '@/components/order/PersonalDetailsForm';
 import PaymentForm from '@/components/order/PaymentForm';
 import MyOrdersModal from '@/components/order/MyOrdersModal';
 import SuccessModal from '@/components/Modal/SuccessModal';
-// import PersonalDetailsForm and PaymentForm as needed
+
 
 const OrderPage=() =>{
   const [step, setStep] = useState(1);
@@ -21,19 +20,26 @@ const OrderPage=() =>{
   const [cart, setCart] = useState([]);
   const [orderId, setOrderId] = useState(null);
   const [mobile, setMobile] = useState('');
-  const [showCartModal, setShowCartModal] = useState(false);
+
   const [personalDetails, setPersonalDetails] = useState(null);
   const [showOrdersModal, setShowOrdersModal] = useState(false);
   const [losdingState,setLoadingState] = useState(false)
   const [orderRefresh,setOrderRefresh] = useState(false)
   const [successOpen,setSuccessOpen] = useState(false)
-  
+  const [tempCart, setTempCart] = useState([]);
+  const [submittedProducts, setSubmittedProducts] = useState([]);
 
-  // Step 1: Set mobile & fetch products
+  
   useEffect(() => {
-    // if(Cookies.get("OrderId")){
-    //   setOrderId(Cookies.get("OrderId"))
-    // }
+    const shouldContinue = localStorage.getItem('continueFromCart');
+    if (shouldContinue === 'true') {
+      // localStorage.removeItem('continueFromCart');
+      saveStep1(); // Auto trigger move to step 2
+    }
+  }, [cart]);
+
+  useEffect(() => {
+  
 
     const mob = Cookies.get("mobile");
     if (mob) {
@@ -58,7 +64,7 @@ const OrderPage=() =>{
       });
   }, []);
 
-  // Step 2: Fetch cart only after mobile is available
+
   useEffect(() => {
     if (mobile) {
       axios.get(`/api/order/cart?mobile=${mobile}`)
@@ -116,117 +122,323 @@ const OrderPage=() =>{
     }
   };
 
-  const saveStep1 = async () => {
-    if (cart.length === 0 || !mobile) return;
-    try {
-      const res = await axios.post('/api/order', { products: cart, registeredMobile: mobile, });
-      setOrderId(res.data._id);
-      // Cookies.set("Order_id",res.data._id)
-      toast.success('Products saved');
-      setStep(2);
-    } catch (err) {
-      toast.error('Error saving products');
-    }
-  };
-
-  // const saveStep2 = async (details) => {
+  // const saveStep1 = async () => {
+  //   if (cart.length === 0 || !mobile) return;
   //   try {
-  //     await axios.patch('/api/order', {
-  //       orderId,
-  //       registeredMobile: Cookies.get('mobile'),
-  //       data: {
-  //         personalDetails: details,
-  //       },
-  //     });
-  //     setPersonalDetails(details); // save in state
-  //     toast.success('Details saved');
-  //     setStep(3);
+  //     const res = await axios.post('/api/order', { products: cart, registeredMobile: mobile, });
+  //     setOrderId(res.data._id);
+  //     // Cookies.set("Order_id",res.data._id)
+  //     toast.success('Products saved');
+  //     setStep(2);
   //   } catch (err) {
-  //     toast.error('Error saving personal details');
+  //     toast.error('Error saving products');
   //   }
   // };
-  const saveStep2 = async (details) => {
-    const registeredMobile = Cookies.get('mobile'); // 🟢 get it from cookie
+
+
+  // const saveStep2 = async (details) => {
+  //   const registeredMobile = Cookies.get('mobile'); // 🟢 get it from cookie
   
+  //   await axios.patch('/api/order/draft', {
+  //     orderId,
+  //     registeredMobile, // 🟢 top-level
+  //     data: {
+  //       personalDetails: {
+  //         ...details,
+  //         registeredMobile  // 🟢 inside personalDetails
+  //       }
+  //     }
+  //   });
+  
+  //   setStep(3);
+  // };
+//   const saveStep1 = async () => {
+//     // const rawItems = localStorage.getItem('selectedCartItems');
+//     // const itemsToSave = rawItems ? JSON.parse(rawItems) : cart;
+
+//     const rawItems = localStorage.getItem('selectedCartItems');
+//     const itemsToSave = rawItems ? JSON.parse(rawItems) : tempCart;
+  
+//     if (itemsToSave.length === 0 || !mobile) return;
+  
+//     try {
+//       const res = await axios.post('/api/order', {
+//         products: itemsToSave,
+//         registeredMobile: mobile,
+//       });
+//       setOrderId(res.data._id);
+//       toast.success('Products saved');
+//       setStep(2);
+  
+//       // Cleanup after use
+//       localStorage.removeItem('selectedCartItems');
+//       localStorage.removeItem('continueFromCart');
+//     } catch (err) {
+//       toast.error('Error saving products');
+//     }
+//   };
+//   const saveStep2 = async (details) => {
+//     const registeredMobile = Cookies.get('mobile'); // get from cookie
+  
+//     await axios.patch('/api/order/draft', {
+//       orderId,
+//       registeredMobile,
+//       data: {
+//         personalDetails: {
+//           ...details,
+//           registeredMobile
+//         }
+//       }
+//     });
+  
+//     setPersonalDetails({
+//       ...details,
+//       registeredMobile
+//     });
+// // ✅ this line ensures form gets prefilled when going back
+//     setStep(3); // move to payment step
+//   };
+  
+//   const saveStep3 = async (payment) => {
+//     try {
+//       const grandTotal = cart.reduce((sum, item) => sum + (item.total || 0), 0);
+//       const gst = grandTotal * 0.12;
+//       const cgst = gst / 2;
+//       const sgst = gst / 2;
+//       const finalAmount = grandTotal + gst;
+//       const submitstatus="Pending"
+//       const registeredMobile = Cookies.get('mobile'); 
+
+//       const orderRes = await axios.get(`/api/order/${orderId}`);
+//       const order = orderRes.data;
+
+//       await axios.patch('/api/order/draft', {
+//         registeredMobile,
+//         orderId,
+//         data: {
+//           products: order.products,               
+//           personalDetails: order.personalDetails, 
+//           paymentDetails: payment,
+//           grandTotal,
+//           cgst,
+//           sgst,
+//           finalAmount,
+//           submitstatus,
+//         }
+//       });
+  
+//       await axios.delete('/api/order/cart', { data: { mobile } });
+      
+//       toast.success('Order placed successfully');
+//       setCart([]);
+//       setSuccessOpen(true)
+//       setStep(1);
+//       setOrderRefresh(true)
+//       setLoadingState(true)
+//     } catch (err) {
+//       console.error(err);
+//       toast.error('Payment failed');
+//     }
+//   };
+// const saveStep1 = async () => {
+//   const rawItems = localStorage.getItem('selectedCartItems');
+//   const itemsToSave = rawItems ? JSON.parse(rawItems) : tempCart;
+
+//   if (itemsToSave.length === 0 || !mobile) return;
+
+//   try {
+//     const res = await axios.post('/api/order', {
+//       products: itemsToSave,
+//       registeredMobile: mobile,
+//     });
+//     setOrderId(res.data._id);
+//     toast.success('Products saved');
+//     setStep(2);
+
+//     // 🟢 Track which flow was used
+//     const isCartFlow = localStorage.getItem('isCartFlow') === 'true';
+//     localStorage.setItem('usedCartFlow', isCartFlow ? 'true' : 'false');
+
+//     // Cleanup
+//     localStorage.removeItem('selectedCartItems');
+//     localStorage.removeItem('continueFromCart');
+//     localStorage.removeItem('isCartFlow');
+//   } catch (err) {
+//     toast.error('Error saving products');
+//   }
+// };
+const saveStep1 = async () => {
+  const rawItems = localStorage.getItem('selectedCartItems');
+  const itemsToSave = rawItems ? JSON.parse(rawItems) : tempCart;
+
+  if (itemsToSave.length === 0 || !mobile) return;
+
+  try {
+    const res = await axios.post('/api/order', {
+      products: itemsToSave,
+      registeredMobile: mobile,
+    });
+
+    setOrderId(res.data._id);
+    setSubmittedProducts(res.data.products); // 🟢 Save submitted products
+
+    toast.success('Products saved');
+    setStep(2);
+
+    // 🟢 Track which flow was used
+    const isCartFlow = localStorage.getItem('isCartFlow') === 'true';
+    localStorage.setItem('usedCartFlow', isCartFlow ? 'true' : 'false');
+
+    // Cleanup
+    localStorage.removeItem('selectedCartItems');
+    localStorage.removeItem('continueFromCart');
+    localStorage.removeItem('isCartFlow');
+  } catch (err) {
+    toast.error('Error saving products');
+  }
+};
+
+const saveStep2 = async (details) => {
+  const registeredMobile = Cookies.get('mobile');
+
+  await axios.patch('/api/order/draft', {
+    orderId,
+    registeredMobile,
+    data: {
+      personalDetails: {
+        ...details,
+        registeredMobile,
+      },
+    },
+  });
+
+  setPersonalDetails({
+    ...details,
+    registeredMobile,
+  });
+
+  setStep(3);
+};
+
+// const saveStep3 = async (payment) => {
+//   try {
+//     const registeredMobile = Cookies.get('mobile');
+//     const usedCartFlow = localStorage.getItem('usedCartFlow') === 'true';
+
+//     // Get order data
+//     const orderRes = await axios.get(`/api/order/${orderId}`);
+//     const order = orderRes.data;
+
+//     // Use correct source for total calculation
+//     const sourceData = usedCartFlow ? cart : order.products;
+
+//     const grandTotal = sourceData.reduce((sum, item) => sum + (item.total || 0), 0);
+//     const gst = grandTotal * 0.12;
+//     const cgst = gst / 2;
+//     const sgst = gst / 2;
+//     const finalAmount = grandTotal + gst;
+//     const submitstatus = 'Pending';
+
+//     await axios.patch('/api/order/draft', {
+//       registeredMobile,
+//       orderId,
+//       data: {
+//         products: order.products,
+//         personalDetails: order.personalDetails,
+//         paymentDetails: payment,
+//         grandTotal,
+//         cgst,
+//         sgst,
+//         finalAmount,
+//         submitstatus,
+//       },
+//     });
+
+//     // 🟢 Delete cart only if cart modal was used
+//     if (usedCartFlow) {
+//       await axios.delete('/api/order/cart', { data: { mobile } });
+//     }
+
+//     toast.success('Order placed successfully');
+//     setCart([]);
+//     setSuccessOpen(true);
+//     setStep(1);
+//     setOrderRefresh(true);
+//     setLoadingState(true);
+
+//     // Cleanup
+//     localStorage.removeItem('usedCartFlow');
+//   } catch (err) {
+//     console.error(err);
+//     toast.error('Payment failed');
+//   }
+// };
+
+const saveStep3 = async (payment) => {
+  try {
+    const itemsToSubmit = submittedProducts.length > 0 ? submittedProducts : cart;
+
+    const grandTotal = itemsToSubmit.reduce((sum, item) => sum + (item.total || 0), 0);
+    const gst = grandTotal * 0.12;
+    const cgst = gst / 2;
+    const sgst = gst / 2;
+    const finalAmount = grandTotal + gst;
+    const submitstatus = "Pending";
+    const registeredMobile = Cookies.get('mobile');
+
+    const orderRes = await axios.get(`/api/order/${orderId}`);
+    const order = orderRes.data;
+
     await axios.patch('/api/order/draft', {
+      registeredMobile,
       orderId,
-      registeredMobile, // 🟢 top-level
       data: {
-        personalDetails: {
-          ...details,
-          registeredMobile  // 🟢 inside personalDetails
-        }
+        products: itemsToSubmit,
+        personalDetails: order.personalDetails,
+        paymentDetails: payment,
+        grandTotal,
+        cgst,
+        sgst,
+        finalAmount,
+        submitstatus,
       }
     });
-  
-    setStep(3);
-  };
-  
-  const saveStep3 = async (payment) => {
-    try {
-      const grandTotal = cart.reduce((sum, item) => sum + (item.total || 0), 0);
-      const gst = grandTotal * 0.12;
-      const cgst = gst / 2;
-      const sgst = gst / 2;
-      const finalAmount = grandTotal + gst;
-      const submitstatus="Pending"
-      const registeredMobile = Cookies.get('mobile'); 
-      // Fetch order data before update
-      const orderRes = await axios.get(`/api/order/${orderId}`);
-      const order = orderRes.data;
-  
-      // ✅ Send all together in PATCH
-      await axios.patch('/api/order/draft', {
-        registeredMobile,
-        orderId,
-        data: {
-          products: order.products,               // use stored products
-          personalDetails: order.personalDetails, // use stored personal info
-          paymentDetails: payment,
-          grandTotal,
-          cgst,
-          sgst,
-          finalAmount,
-          submitstatus,
-        }
-      });
-  
-      await axios.delete('/api/order/cart', { data: { mobile } });
-      
-      toast.success('Order placed successfully');
-      setCart([]);
-      setSuccessOpen(true)
-      setStep(1);
-      setOrderRefresh(true)
-      setLoadingState(true)
-    } catch (err) {
-      console.error(err);
-      toast.error('Payment failed');
+
+    // ✅ Delete only the submitted items (if used cart modal)
+    const usedCartFlow = localStorage.getItem('usedCartFlow') === 'true';
+    if (usedCartFlow) {
+      for (const item of itemsToSubmit) {
+        await axios.delete('/api/order/cart', {
+          data: { mobile: registeredMobile, productId: item._id }, // ✅ FIXED HERE
+        });
+      }
     }
-  };
-  
+
+    toast.success('Order placed successfully');
+    setCart([]);
+    setSubmittedProducts([]);
+    localStorage.removeItem('usedCartFlow');
+    setSuccessOpen(true);
+    setStep(1);
+    setOrderRefresh(true);
+    setLoadingState(true);
+  } catch (err) {
+    console.error(err);
+    toast.error('Payment failed');
+  }
+};
+
+
+
 
   return (
     <>
-    <Header losdingState={losdingState} orderRefresh={orderRefresh} moveOnStep={()=>{saveStep1(),setShowCartModal(false)}} showCartModal={showCartModal} setShowCartModal={setShowCartModal}/>
+    <Header losdingState={losdingState} orderRefresh={orderRefresh}  />
     <div className="p-4 max-w-2xl mx-auto">
      <div className="flex justify-between items-center mb-4">
   <h1 className="text-2xl font-bold">Online Order</h1>
 
-  {/* Cart Icon with Count */}
-  {/* <div className='flex items-center gap-4'>
-  <div className="relative cursor-pointer" onClick={() => setShowCartModal(true)}>
-    <ShoppingBagIcon className='w-12 h-12' />
-    {cart.length > 0 && (
-      <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5">
-        {cart.length}
-      </span>
-    )}
-  </div>
-  <div className=" cursor-pointer" onClick={() => setShowOrdersModal(true)}>
-  <ClipboardDocumentListIcon className='w-12 h-12' />
-</div>
-  </div> */}
+
 </div>
 
 <div className="flex mb-6">
@@ -237,7 +449,7 @@ const OrderPage=() =>{
   ].map((tab, index) => (
     <button
       key={tab.step}
-      onClick={() => step >= tab.step && setStep(tab.step)}
+      onClick={() => {step >= tab.step && setStep(tab.step);localStorage.clear()}}
       disabled={step < tab.step}
       className={`px-6 py-2 text-sm font-medium border 
         ${index === 0 ? 'rounded-l-lg' : ''}
@@ -258,7 +470,7 @@ const OrderPage=() =>{
             onChange={(e) => {
               const value = e.target.value;
               if (!value) {
-                // ⛔ Reset everything when "Select Product" is chosen
+               
                 setSelectedProduct(null);
                 setQuantity('');
                 return;
@@ -295,39 +507,97 @@ const OrderPage=() =>{
 />
 
               <button onClick={addToCart} className="mt-2 bg-green-600 text-white px-4 py-2 rounded">Add to Cart</button>
+
+              <button
+  type="button"
+  onClick={() => {
+    if (!selectedProduct || !quantity) {
+      toast.error("Select a product and quantity");
+      return;
+    }
+
+    const TotalLogic = (selectedProduct?.price / Number(selectedProduct?.packaging?.split("*")[1])) * Number(quantity);
+
+    const item = {
+      ...selectedProduct,
+      quantity: Number(quantity),
+      total: Number(TotalLogic),
+    };
+
+    const alreadyExists = tempCart.some((x) => x._id === item._id);
+    if (alreadyExists) {
+      toast.error("Item already added to temporary list");
+      return;
+    }
+
+    setTempCart(prev => [...prev, item]);
+    setSelectedProduct(null);
+    setQuantity('');
+    toast.success("Item added to temporary list");
+  }}
+  className="mt-2 ml-2 bg-yellow-500 text-white px-4 py-2 rounded"
+>
+  Add More
+</button>
             </div>
          
 
-          {/* <CartModal cart={cart} removeFromCart={removeFromCart} /> */}
+       
 <div className='flex justify-end'>
-          <button onClick={saveStep1} disabled={cart.length === 0} className="cursor-pointer mt-4 bg-green-600 text-white px-6 py-2 rounded disabled:bg-gray-400">
+          <button onClick={saveStep1} disabled={tempCart.length === 0} className="cursor-pointer mt-4 bg-green-600 text-white px-6 py-2 rounded disabled:bg-gray-400">
             Save & Continue
           </button>
           </div>
+          {tempCart.length > 0 && (
+  <div className="mt-6">
+    <h2 className="text-lg font-semibold mb-2">Added Items (Not Saved)</h2>
+    <table className="w-full border text-sm">
+      <thead className="bg-gray-100">
+        <tr>
+          <th className="border p-2">Name</th>
+          <th className="border p-2">Company</th>
+          <th className="border p-2">Batch</th>
+          <th className="border p-2">Qty</th>
+          <th className="border p-2">Rate</th>
+          <th className="border p-2">Total</th>
+          <th className="border p-2">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {tempCart.map((item, index) => (
+          <tr key={index}>
+            <td className="border p-2">{item.name}</td>
+            <td className="border p-2">{item.company}</td>
+            <td className="border p-2">{item.batch}</td>
+            <td className="border p-2 text-center">{item.quantity}</td>
+            <td className="border p-2 text-right">₹{item.price}</td>
+            <td className="border p-2 text-right">₹{item.total.toFixed(2)}</td>
+            <td className="border p-2 text-center">
+              <button
+                onClick={() => {
+                  const updated = [...tempCart];
+                  updated.splice(index, 1);
+                  setTempCart(updated);
+                }}
+                className="text-red-600 hover:underline"
+              >
+                Remove
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
         </div>
       )}
 
       {step === 2 && <PersonalDetailsForm onSave={saveStep2} initialData={personalDetails} registeredMobile={mobile} />}
       {step === 3 && <PaymentForm onSave={saveStep3} />}
       <SuccessModal confirmDeleteId={successOpen} setConfirmDeleteId={setSuccessOpen} confirmDelete={""}  title={"Your Order has been Successfully Completed"}/>
-      {/* {showCartModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-    <div className="bg-white max-w-3xl w-full p-4 rounded shadow-lg relative">
-      <button
-        className="absolute top-2 right-2 text-gray-600 hover:text-black"
-        onClick={() => setShowCartModal(false)}
-      >
-        ✖
-      </button>
-
-      <CartModal cart={cart} removeFromCart={removeFromCart} />
-     
-    </div>
-  </div>
-)}
- {showOrdersModal && (
-  <MyOrdersModal mobile={mobile} onClose={() => setShowOrdersModal(false)} />
-)} */}
+      
     </div>
     </>
   );

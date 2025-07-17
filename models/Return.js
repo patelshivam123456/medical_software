@@ -5,6 +5,13 @@ const returnBillSchema = new mongoose.Schema({
   newbillNo:{ type: Number, required: true, unique: true },
   salesperson:{type:String},
   returnperson:{type:String},
+  paymenttype:{type:String},
+  ordertype:{type:String},
+  orderid:{type:String},
+  dispatchDate: {
+    type: Date,
+    default: null  
+  },
   tablets: [
     {
       name: String,

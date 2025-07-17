@@ -46,15 +46,28 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'DELETE') {
-    const { productId } = req.body;
+    const { productId, productIds } = req.body;
+  
+    if (Array.isArray(productIds) && productIds.length > 0) {
+      // ✅ Delete multiple selected items only
+      await Cart.deleteMany({
+        mobile,
+        productId: { $in: productIds },
+      });
+      return res.status(200).json({ message: 'Selected items removed' });
+    }
+  
     if (productId) {
+      // ✅ Delete one item
       await Cart.deleteOne({ mobile, productId });
       return res.status(200).json({ message: 'Item removed' });
-    } else {
-      await Cart.deleteMany({ mobile });
-      return res.status(200).json({ message: 'Cart cleared' });
     }
+  
+    // ✅ Clear all (only used when needed)
+    await Cart.deleteMany({ mobile });
+    return res.status(200).json({ message: 'Cart cleared' });
   }
+  
 
   return res.status(405).json({ message: 'Method Not Allowed' });
 }

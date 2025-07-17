@@ -21,6 +21,9 @@ const Index = (props) => {
   const router = useRouter();
   const [billNo, setBillNo] = useState("");
   const [salesPerson, setSalesPerson] = useState("");
+  const [paymentType, setPaymentType] = useState("");
+  const [orderType, setOrderType] = useState("Mannual");
+  const [orderId, setOrderId] = useState("");
   const [discount, setDiscount] = useState(0);
   const [gst, setGst] = useState(0);
   const [cgst, setCgst] = useState(0);
@@ -115,6 +118,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         bill.branch,
         bill.branchName,
         bill.salesperson,
+        bill.paymenttype,
+        bill.ordertype,
+        bill.orderid,
         bill.title,
         bill.createdAt,
         bill.updatedAt,
@@ -152,6 +158,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         bill.branch,
         bill.branchName,
         bill.salesperson,
+        bill.paymenttype,
+        bill.ordertype,
+        bill.orderid,
         bill.title,
         bill.createdAt,
         bill.updatedAt,
@@ -416,7 +425,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       category: category.trim(),
       free: Number(free),
       hsm: hsm.trim(),
-      strips:Number(strip),
+      strips:strip,
     };
   
     const isDuplicate = tablets.some((tablet, index) => {
@@ -537,6 +546,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       const response = await axios.post("/api/bills", {
         // billNo,
         salesperson:salesPerson,
+        paymenttype:paymentType,
+        ordertype:orderType,
+        orderid:orderId,
         tablets,
         discount:Number(discount),
         sgst:Number(sgst),
@@ -556,6 +568,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       if (response.status === 201) {
         setBillNo("");
         setSalesPerson("")
+        setPaymentType("")
+        setOrderType("")
+        setOrderId("")
         setTablets([]);
         setDiscount(0);
         setSgst(0);
@@ -626,6 +641,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       const res = await axios.get(`/api/bills/${billNo}`);
       const bill = res.data.bill;
       setSalesPerson(bill.salesperson||"")
+      setPaymentType(bill.paymenttype||"")
+      setOrderType(bill.ordertype||"")
+      setOrderId(bill.orderid||"")
       setInputValue(bill.clientName);
       setDiscount(bill.discount || 0);
       setGst(bill.gst || 0);
@@ -654,6 +672,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       const bill = res.data.bill;
       setBillNo(bill.billNo);
       setSalesPerson(bill.salesperson)
+      setPaymentType(bill.paymenttype)
+      setOrderType(bill.ordertype)
+      setOrderId(bill.orderid)
       setInputValue(bill.clientName);
       setDiscount(bill.discount || 0);
       setGst(bill.gst || 0);
@@ -688,6 +709,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       const res = await axios.put(`/api/bills/${billNo}`, {
         billNo,
         salesperson:salesPerson,
+        paymenttype:paymentType,
+        ordertype:orderType,
+        orderid:orderId,
         tablets,
         discount:Number(discount),
         sgst:Number(sgst),
@@ -708,6 +732,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         toast.success("Bill updated successfully");
         setBillNo("");
         setSalesPerson("")
+        setPaymentType("")
+        setOrderType("")
+        setOrderId("")
         setTablets([]);
         setDiscount(0);
         setSgst(0);
@@ -763,6 +790,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
   const handleResetForm = () => {
     setBillNo("");
     setSalesPerson("")
+    setPaymentType("")
+    setOrderType("")
+    setOrderId("")
     setTablets([]);
     setDiscount(0);
     setSgst(0);
@@ -967,17 +997,32 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       );
   }, [searchTerm, activeBills, filterType, customDateRange]);
 
-  const calculateStrips=(packing, quantity)=> {
-    if (!packing || !quantity) return 0;
+  // const calculateStrips=(packing, quantity)=> {
+  //   if (!packing || !quantity) return 0;
 
+  //   const parts = packing.split("*");
+  //   if (parts.length !== 2) return 0;
+  
+  //   const multiplier = parseInt(parts[1], 10);
+  //   if (isNaN(multiplier) || multiplier === 0) return 0;
+  
+  //   return Math.floor(quantity / multiplier);
+  // }
+
+  const calculateStrips = (packing, quantity) => {
+    if (!packing || !quantity) return "0";
+  
     const parts = packing.split("*");
-    if (parts.length !== 2) return 0;
+    if (parts.length !== 2) return "0";
   
     const multiplier = parseInt(parts[1], 10);
-    if (isNaN(multiplier) || multiplier === 0) return 0;
+    if (isNaN(multiplier) || multiplier === 0) return "0";
   
-    return Math.floor(quantity / multiplier);
-  }
+    const fullStrips = Math.floor(quantity / multiplier);
+    const remaining = quantity % multiplier;
+  
+    return remaining === 0 ? `${fullStrips}` : `${fullStrips}*${remaining}`;
+  };
   
   
   return (
@@ -1017,6 +1062,35 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                 onChange={(e) => setSalesPerson(e.target.value)}
                 className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
               />
+            </div>
+            <div className="w-full md:w-[50%] lg:mb-6">
+              <label>Payment Type:</label>
+              <select
+                type="text"
+                required
+                value={paymentType}
+                onChange={(e) => setPaymentType(e.target.value)}
+                className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
+              >
+                <option value={""}>--Select Payment Type--</option>
+                <option value={"CASH"}>CASH</option>
+                <option value={"ONLINE"}>ONLINE</option>
+                </select>
+            </div>
+            <div className="w-full md:w-[50%] lg:mb-6">
+              <label>Order Type:</label>
+              <select
+                type="text"
+                required
+                disabled
+                value={orderType}
+                onChange={(e) => setOrderType(e.target.value)}
+                className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
+              >
+                <option value={""} disabled>--Select Order Type--</option>
+                <option value={"Mannual"}>Mannual</option>
+                <option value={"Online"}>Online</option>
+                </select>
             </div>
             </div>
             {!billNo && isEditingBill === "copy" ? (
@@ -1738,7 +1812,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
     <thead className="bg-orange-500 text-white text-sm">
       <tr>
         <th className="p-2 text-left">Bill No</th>
+        <th className="p-2 text-left">Order Type</th>
         <th className="p-2 text-left min-w-[200px]">Client</th>
+        <th className="p-2 text-left">Payment Mode</th>
         <th className="p-2 text-left">Mobile</th>
         <th className="p-2 text-left">Created At</th>
         <th className="p-2 text-left">Updated At</th>
@@ -1750,7 +1826,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         filteredBills.map((bill, idx) => (
           <tr key={idx} className="border-t border-gray-200 hover:bg-gray-100">
             <td className="p-2 font-semibold text-[#f3ab37]">SG000{bill.billNo}</td>
+            <td className="p-2 font-semibold text-[#f3ab37]">{bill.ordertype}</td>
             <td className="p-2 min-w-[200px]">{bill.clientName || "-"}</td>
+            <td className="p-2">{bill.paymenttype || "-"}</td>
             <td className="p-2">{bill.mobile || "-"}</td>
             <td className="p-2">{new Date(bill.createdAt).toLocaleDateString()}</td>
             <td className="p-2">{new Date(bill.updatedAt).toLocaleDateString()}</td>

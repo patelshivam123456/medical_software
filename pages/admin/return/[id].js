@@ -134,8 +134,15 @@ const totalInWords = toWords(roundedGrandTotal);
           </div>
         </div>
         <div className="flex  gap-2 border mt-2 px-3">
-          <div className="w-[35%]">
-          <div className="text-sm">Return Person: {billdata.returnperson}</div>
+          <div className="w-[35%] flex justify-between">
+            <div>
+          {billdata.returnperson&&<div className="text-sm">Return Person: {billdata.returnperson}</div>}
+          {billdata.paymenttype&&<div className="text-sm">Payment Method: {billdata.paymenttype}</div>}
+          </div>
+          <div>
+          {billdata.ordertype&&<div className="text-sm">Order Type: {billdata.ordertype}</div>}
+          {billdata.orderid&&<div className="text-sm">Order Id: {billdata.orderid}</div>}
+          </div>
           </div>
           <div className="w-[65%] flex gap-4 ">
             <div
