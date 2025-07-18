@@ -134,7 +134,7 @@ const CartModal = ({ cart, removeFromCart }) => {
     <div className="border rounded p-4 bg-white">
       <div className='flex justify-between items-center'>
       <h2 className="text-lg font-semibold mb-2">Cart Items</h2>
-      <div className='text-lg italic text-red-600 font-semibold'>Non-Returnable Item</div>
+      {cart.length > 0&&<div className='text-lg italic text-red-600 font-semibold'>Non-Returnable Item</div>}
       </div>
       {cart.length === 0 ? (
         <p>No items in cart</p>

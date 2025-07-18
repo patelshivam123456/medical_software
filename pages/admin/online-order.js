@@ -27,7 +27,7 @@ const OnlineOrder = (props) => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const url = tab === 'pending' ? '/api/order/admin' : '/api/order/approve';
+      const url = tab === 'pending' ? '/api/order/admin' :tab==="approved"? '/api/order/approve':'/api/order/cancelorder';
       const res = await axios.get(url);
       const filtered = Array.isArray(res.data) ? res.data : [];
       setOrders(filtered);
@@ -68,16 +68,22 @@ const OnlineOrder = (props) => {
       {/* Tabs */}
       <div className="flex space-x-4 mb-4">
         <button
-          className={`px-4 py-2 rounded ${tab === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+          className={`px-4 py-2 rounded cursor-pointer ${tab === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
           onClick={() => setTab('pending')}
         >
           Pending
         </button>
         <button
-          className={`px-4 py-2 rounded ${tab === 'approved' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
+          className={`px-4 py-2 rounded cursor-pointer ${tab === 'approved' ? 'bg-green-600 text-white' : 'bg-green-400 text-white'}`}
           onClick={() => setTab('approved')}
         >
           Approved
+        </button>
+        <button
+          className={`px-4 py-2 rounded cursor-pointer ${tab === 'cancelled' ? 'bg-red-600 text-white' : 'bg-red-300 text-white'}`}
+          onClick={() => setTab('cancelled')}
+        >
+          Cancelled
         </button>
       </div>
 
@@ -155,7 +161,7 @@ const OnlineOrder = (props) => {
                   </td>
 
                   {/* Status */}
-                  <td className="border px-3 py-2 text-center">
+                  <td className={`border px-3 py-2 text-center ${order.submitstatus==="Cancel"?'text-red-500 font-semibold':"text-black"}`}>
                     {order.submitstatus || 'Pending'}
                   </td>
 

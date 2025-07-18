@@ -23,6 +23,7 @@ import { useRouter } from 'next/router'
 import MyOrdersModal from '../order/MyOrdersModal'
 import CartModal from '../order/CartModal'
 import axios from 'axios';
+import { toast } from 'react-toastify'
 
 
 
@@ -44,7 +45,7 @@ const Header=({losdingState,orderRefresh,moveOnStep})=> {
     }
   },[])
   useEffect(() => {
-    if (mobile||losdingState) {
+    if (losdingState) {
       axios.get(`/api/order/cart?mobile=${mobile}`)
         .then(res => {setCart(res.data)})
         .catch(err => {
@@ -52,7 +53,17 @@ const Header=({losdingState,orderRefresh,moveOnStep})=> {
           setCart([]);
         });
     }
-  }, [mobile,losdingState]);
+  }, [losdingState]);
+  useEffect(() => {
+    if (mobile) {
+      axios.get(`/api/order/cart?mobile=${mobile}`)
+        .then(res => {setCart(res.data)})
+        .catch(err => {
+          console.error("Cart fetch failed:", err);
+          setCart([]);
+        });
+    }
+  }, [mobile]);
 
   const handleLogout=()=>{
     Cookies.remove("mobile")
@@ -67,6 +78,13 @@ const Header=({losdingState,orderRefresh,moveOnStep})=> {
         data: { productId: product._id, mobile }
       });
       setCart(prev => prev.filter((_, i) => i !== index));
+      toast.success("Item removed from cart")
+      axios.get(`/api/order/cart?mobile=${mobile}`)
+        .then(res => {setCart(res.data)})
+        .catch(err => {
+          console.error("Cart fetch failed:", err);
+          setCart([]);
+        });
     } catch (err) {
       toast.error("Failed to remove item");
     }

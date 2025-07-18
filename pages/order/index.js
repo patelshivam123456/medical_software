@@ -10,6 +10,7 @@ import PersonalDetailsForm from '@/components/order/PersonalDetailsForm';
 import PaymentForm from '@/components/order/PaymentForm';
 import MyOrdersModal from '@/components/order/MyOrdersModal';
 import SuccessModal from '@/components/Modal/SuccessModal';
+import { useRouter } from 'next/router';
 
 
 const OrderPage=() =>{
@@ -28,7 +29,7 @@ const OrderPage=() =>{
   const [successOpen,setSuccessOpen] = useState(false)
   const [tempCart, setTempCart] = useState([]);
   const [submittedProducts, setSubmittedProducts] = useState([]);
-
+  const router=useRouter()
   
   useEffect(() => {
     const shouldContinue = localStorage.getItem('continueFromCart');
@@ -99,11 +100,11 @@ const OrderPage=() =>{
     try {
       await axios.post('/api/order/cart', item);
       setCart(prev => [...prev, item]);
+      setLoadingState(true)
       setSelectedProduct(null);
       setQuantity('');
       setSelectedProduct("")
       toast.success("Item added in successfully")
-      setLoadingState(true)
     } catch (err) {
       toast.error("Failed to add to cart");
     }
@@ -267,15 +268,53 @@ const OrderPage=() =>{
 //     toast.error('Error saving products');
 //   }
 // };
+// const saveStep1 = async () => {
+//   const rawItems = localStorage.getItem('selectedCartItems');
+//   const itemsToSave = rawItems ? JSON.parse(rawItems) : tempCart;
+// console.log(itemsToSave,"itemsToSave");
+
+//   if (itemsToSave.length === 0 || !mobile) return;
+
+//   try {
+//     const res = await axios.post('/api/order', {
+//       products: itemsToSave,
+//       registeredMobile: mobile,
+//     });
+
+//     setOrderId(res.data._id);
+//     setSubmittedProducts(res.data.products); // 🟢 Save submitted products
+
+//     toast.success('Products saved');
+//     setStep(2);
+
+//     // 🟢 Track which flow was used
+//     const isCartFlow = localStorage.getItem('isCartFlow') === 'true';
+//     localStorage.setItem('usedCartFlow', isCartFlow ? 'true' : 'false');
+
+//     // Cleanup
+//     localStorage.removeItem('selectedCartItems');
+//     localStorage.removeItem('continueFromCart');
+//     localStorage.removeItem('isCartFlow');
+//   } catch (err) {
+//     toast.error('Error saving products');
+//   }
+// };
 const saveStep1 = async () => {
   const rawItems = localStorage.getItem('selectedCartItems');
   const itemsToSave = rawItems ? JSON.parse(rawItems) : tempCart;
+  console.log(itemsToSave, "itemsToSave");
 
   if (itemsToSave.length === 0 || !mobile) return;
 
+  // Adding productId to each item in the itemsToSave array
+  const updatedItems = itemsToSave.map(item => ({
+    ...item,
+    productId: item._id  // Adding productId key with the _id value
+  }));
+
   try {
     const res = await axios.post('/api/order', {
-      products: itemsToSave,
+      products: updatedItems,
       registeredMobile: mobile,
     });
 
@@ -297,6 +336,8 @@ const saveStep1 = async () => {
     toast.error('Error saving products');
   }
 };
+
+console.log(submittedProducts,"uuuuuuuuuuuuuu");
 
 const saveStep2 = async (details) => {
   const registeredMobile = Cookies.get('mobile');
@@ -374,6 +415,60 @@ const saveStep2 = async (details) => {
 //   }
 // };
 
+// const saveStep3 = async (payment) => {
+//   try {
+//     const itemsToSubmit = submittedProducts.length > 0 ? submittedProducts : cart;
+
+//     const grandTotal = itemsToSubmit.reduce((sum, item) => sum + (item.total || 0), 0);
+//     const gst = grandTotal * 0.12;
+//     const cgst = gst / 2;
+//     const sgst = gst / 2;
+//     const finalAmount = grandTotal + gst;
+//     const submitstatus = "Pending";
+//     const registeredMobile = Cookies.get('mobile');
+
+//     const orderRes = await axios.get(`/api/order/${orderId}`);
+//     const order = orderRes.data;
+
+//     await axios.patch('/api/order/draft', {
+//       registeredMobile,
+//       orderId,
+//       data: {
+//         products: itemsToSubmit,
+//         personalDetails: order.personalDetails,
+//         paymentDetails: payment,
+//         grandTotal,
+//         cgst,
+//         sgst,
+//         finalAmount,
+//         submitstatus,
+//       }
+//     });
+
+//     // ✅ Delete only the submitted items (if used cart modal)
+//     const usedCartFlow = localStorage.getItem('usedCartFlow') === 'true';
+//     if (usedCartFlow) {
+//       for (const item of itemsToSubmit) {
+//         await axios.delete('/api/order/cart', {
+//           data: { mobile: registeredMobile, productId: item._id }, // ✅ FIXED HERE
+//         });
+//       }
+//     }
+
+//     toast.success('Order placed successfully');
+//     setCart([]);
+//     setSubmittedProducts([]);
+//     localStorage.removeItem('usedCartFlow');
+//     setSuccessOpen(true);
+//     setStep(1);
+//     setOrderRefresh(true);
+//     setLoadingState(true);
+//   } catch (err) {
+//     console.error(err);
+//     toast.error('Payment failed');
+//   }
+// };
+
 const saveStep3 = async (payment) => {
   try {
     const itemsToSubmit = submittedProducts.length > 0 ? submittedProducts : cart;
@@ -404,14 +499,18 @@ const saveStep3 = async (payment) => {
       }
     });
 
-    // ✅ Delete only the submitted items (if used cart modal)
+    // ✅ Delete only the submitted items if used cart modal
     const usedCartFlow = localStorage.getItem('usedCartFlow') === 'true';
     if (usedCartFlow) {
-      for (const item of itemsToSubmit) {
-        await axios.delete('/api/order/cart', {
-          data: { mobile: registeredMobile, productId: item._id }, // ✅ FIXED HERE
-        });
-      }
+      console.log(itemsToSubmit,"aaaaaaaaaaaa");
+      const productIdsToDelete = itemsToSubmit.map(item => item.productId);
+      console.log(productIdsToDelete,"bbbbbbbbbbbbb");
+      await axios.delete('/api/order/cart', {
+        data: {
+          mobile: registeredMobile,
+          productIds: productIdsToDelete,
+        },
+      });
     }
 
     toast.success('Order placed successfully');
@@ -422,12 +521,12 @@ const saveStep3 = async (payment) => {
     setStep(1);
     setOrderRefresh(true);
     setLoadingState(true);
+    router.push("/")
   } catch (err) {
     console.error(err);
     toast.error('Payment failed');
   }
 };
-
 
 
 

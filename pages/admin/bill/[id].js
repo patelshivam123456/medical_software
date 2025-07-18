@@ -75,6 +75,21 @@ const BillDetailPage = (props) => {
     });
   };
 
+  const calculateStrips = (packing, quantity) => {
+    if (!packing || !quantity) return "0";
+  
+    const parts = packing.split("*");
+    if (parts.length !== 2) return "0";
+  
+    const multiplier = parseInt(parts[1], 10);
+    if (isNaN(multiplier) || multiplier === 0) return "0";
+  
+    const fullStrips = Math.floor(quantity / multiplier);
+    const remaining = quantity % multiplier;
+  
+    return remaining === 0 ? `${fullStrips}` : `${fullStrips}*${remaining}`;
+  };
+
   return (
     <>
       <Header isLoggedStatus={isLoggedCheck} />
@@ -229,7 +244,7 @@ const BillDetailPage = (props) => {
               >
                 <tr>
                   <th className="border px-3 py-2 text-left">Sn.</th>
-                  <th className="border px-3 py-2 text-left">Qty.</th>
+                  {/* <th className="border px-3 py-2 text-left">Qty.</th> */}
                   <th className="border px-3 py-2 text-left">Free</th>
                   <th className="border px-3 py-2 text-left">Pack</th>
                   <th className="border px-3 py-2 text-left">Strips</th>
@@ -251,10 +266,10 @@ const BillDetailPage = (props) => {
                 {billdata.tablets.map((t, i) => (
                   <tr key={t._id || i}>
                     <td className="px-3 pb-1">{i + 1}</td>
-                    <td className="px-3 pb-1 text-right">{t.lessquantity}</td>
+                    {/* <td className="px-3 pb-1 text-right">{t.lessquantity}</td> */}
                     <td className="px-3 pb-1 text-right">{t.free}</td>
                     <td className="px-3 pb-1">{t.packing}</td>
-                    <td className="px-3 pb-1">{t.strips}</td>
+                    <td className="px-3 pb-1">{calculateStrips(t.packing, parseInt(t.lessquantity || 0))}</td>
                     <td className="px-3 pb-1 min-w-[280px]">{t.name}</td>
                     <td className="px-3 pb-1">{t.batch}</td>
                     <td className="px-3 pb-1">{t.expiry}</td>

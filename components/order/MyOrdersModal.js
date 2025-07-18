@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import ConfirmationModal from '../Modal/ConfirmationModal';
+import { toast } from 'react-toastify';
 
 export default function MyOrdersModal({ mobile, onClose, orderRefresh }) {
   const [orders, setOrders] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
+   const [open,setOpen] = useState(false)
+    const [orderId,setOrderId]=useState("")
+    const [loading,setLoading]=useState(false)
 
   useEffect(() => {
     if (mobile) {
@@ -32,7 +37,8 @@ export default function MyOrdersModal({ mobile, onClose, orderRefresh }) {
     cgst: order.cgst || calculateTotal(order.products).cgst,
     sgst: order.sgst || calculateTotal(order.products).sgst,
     total: order.finalAmount || calculateTotal(order.products).total,
-    submitstatus: order.submitstatus || ""
+    submitstatus: order.submitstatus || "",
+    orderid:order._id||""
   } : {};
 
   const dileveryStatus = (status) => {
@@ -41,7 +47,39 @@ export default function MyOrdersModal({ mobile, onClose, orderRefresh }) {
       case "Approved": return "Order Approved";
       case "mark_delivery": return "Ready for Dispatch";
       case "Complete": return "Delivered Successfully";
+      case "Cancel": return "Cancelled";
       default: return "Processing";
+    }
+  };
+
+  const cancelOrder = async () => {
+    setLoading(true)
+    try {
+      const res = await axios.put('/api/order/cancelorder', { orderId });
+      if (res.status === 200) {
+        toast.success('Order cancelled');
+        setOpen(false)
+        setLoading(false)
+        axios
+        .get(`/api/order?mobile=${mobile}`)
+        .then((res) => {
+          const allOrders = res.data || [];
+          const completedOrders = allOrders.filter(
+            (order) => typeof order.grandTotal === 'number' && order.grandTotal > 0
+          );
+          setOrders(completedOrders);
+        })
+        
+    
+      } else {
+        setOpen(false)
+        setLoading(false)
+        toast.error('Something went wrong');
+      }
+    } catch (err) {
+      setLoading(false)
+      console.error('Approve error:', err);
+      toast.error('Failed to approve order');
     }
   };
 
@@ -101,14 +139,24 @@ export default function MyOrdersModal({ mobile, onClose, orderRefresh }) {
 
         {order ? (
           <>
-            <div className="mb-4 text-right">
+           {totals.submitstatus === "Complete" && <div className="mb-4 text-right">
               <button
                 onClick={downloadInvoice}
                 className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
               >
                 Download Invoice
               </button>
-            </div>
+            </div>}
+
+            {(totals.submitstatus === "Pending"||totals.submitstatus === "Approved")&&<div className="mb-4 text-right">
+              <button
+                onClick={()=>{setOpen(true);setOrderId(totals.orderid)}}
+                className="bg-red-600 text-white px-4 py-1 rounded hover:bg-green-700"
+              >
+                Cancel Order
+              </button>
+            </div>}
+            {totals.submitstatus==="Cancel"&&<div className='text-lg text-red-500 text-right italic'>Order Cancelled</div>}
 
             <div id="order-invoice">
               <h3 className="text-xl font-bold mb-2">Order #{orders.length - activeIndex}</h3>
@@ -125,6 +173,7 @@ export default function MyOrdersModal({ mobile, onClose, orderRefresh }) {
                   <div className="italic text-red-600 font-semibold">Non-Returnable Item</div>
                   <p><strong>Order Date:</strong> {new Date(order.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "2-digit" })}</p>
                   {order?.dispatchDate && <p><strong>Dispatch Date:</strong> {new Date(order?.dispatchDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "2-digit" })}</p>}
+                  {order?.submitstatus==="Cancel" && <p><strong>Order Cancel date:</strong> {new Date(order?.statusUpdatedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "2-digit" })}</p>}
                   <p><strong>Order ID:</strong> {order?._id || '-'}</p>
                 </div>
               </div>
@@ -197,6 +246,10 @@ export default function MyOrdersModal({ mobile, onClose, orderRefresh }) {
         ) : (
           <p className="text-center text-gray-500">No completed orders found.</p>
         )}
+      </div>
+      <div>
+        <ConfirmationModal loading={loading} title={"Are you sure want to cancel this Order?"}
+        confirmDeleteId={open} setConfirmDeleteId={setOpen} confirmDelete={cancelOrder}/>
       </div>
     </div>
   );

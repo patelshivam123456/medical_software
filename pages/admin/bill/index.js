@@ -425,7 +425,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       category: category.trim(),
       free: Number(free),
       hsm: hsm.trim(),
-      strips:strip,
+      strips:Number(strip),
     };
   
     const isDuplicate = tablets.some((tablet, index) => {
