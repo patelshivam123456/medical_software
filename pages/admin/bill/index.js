@@ -211,20 +211,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       setSgst(Number(gst) / 2);
     }
   }, [gst]);
-  // useEffect(() => {
-  //   const updatedFields = { ...formFields };
-  //   if (discount > 0) {
-  //     updatedFields.discount = discount;
-  //   } else if (discount === "") {
-  //     updatedFields.discount = 10;
-  //   }
-  //   if (gst === "" || gst === "0" || Number(gst) === 0) {
-  //     updatedFields.gst = 12;
-  //   } else {
-  //     updatedFields.gst = gst;
-  //   }
-  //   setFormFields(updatedFields);
-  // }, [discount, gst]);
+ 
 
   const filteredBillNumbers = useMemo(() => {
     return billNumbers.filter((num) =>
@@ -232,24 +219,19 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
     );
   }, [searchTerm, billNumbers]);
 
-  // useEffect(() => {
-  //   const quantity = parseFloat(formFields.lessquantity) || 0;
-  //   const rate = parseFloat(formFields.rate) || 0;
-  //   const total = quantity * rate;
-  //   setFormFields((prev) => ({ ...prev, total: total.toFixed(2) }));
-  // }, [formFields.lessquantity,formFields.rate]);
+ 
 
   useEffect(() => {
-    const quantity = Number(formFields.lessquantity);
+    const strip = Number(formFields.strips);
   
-    if (quantity > 0 && editingIndex === null) {
+    if (strip> 0 && editingIndex === null) {
       const timer = setTimeout(() => {
         addMoreTablet();
       }, 1200);
   
       return () => clearTimeout(timer);
     }
-  }, [formFields.lessquantity]);
+  }, [formFields.strips]);
   
 
   const handleExpiryChange = (e) => {
@@ -260,106 +242,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
     setFormFields({ ...formFields, expiry: value });
   };
 
-  // useEffect(() => {
-  //   const quantity = Number(formFields.lessquantity);
-
-  //   if (quantity > 0 && editingIndex === null) {
-  //     const timer = setTimeout(() => {
-  //       addMoreTablet();
-  //     }, 1200);
-  //     return () => clearTimeout(timer); 
-  //   }
-  // }, [formFields.lessquantity]);
-
-  // const addMoreTablet = () => {
-  //   const {
-  //     name,
-  //     company,
-  //     salt,
-  //     quantity,
-  //     packing,
-  //     batch,
-  //     expiry,
-  //     price,
-  //     discount,
-  //     rate,
-  //     total,
-  //     gst,
-  //     lessquantity,
-  //     category,
-  //     free,
-  //     hsm,
-  //   } = formFields;
-
-  //   if (
-  //     !name ||
-  //     !company ||
-  //     !salt ||
-  //     !packing ||
-  //     !batch ||
-  //     !expiry ||
-  //     !price ||
-  //     !rate ||
-  //     !total ||
-  //     !gst ||
-  //     !lessquantity ||
-  //     !category
-  //   ) {
-  //     toast.error("Please fill all fields before adding.");
-  //     return;
-  //   }
-
-  //   const newTablet = {
-  //     name,
-  //     company,
-  //     salt,
-  //     quantity: Number(quantity),
-  //     packing,
-  //     batch,
-  //     expiry,
-  //     price: Number(price),
-  //     discount: Number(discount),
-  //     rate: Number(rate),
-  //     sgst: Number(gst) / 2,
-  //     cgst: Number(gst) / 2,
-  //     total: Number(total),
-  //     gst: Number(gst),
-  //     lessquantity: Number(lessquantity),
-  //     category,
-  //     free: Number(free),
-  //     hsm,
-  //   };
-
-  //   if (editingIndex !== null) {
-  //     const updatedTablets = [...tablets];
-  //     updatedTablets[editingIndex] = newTablet;
-  //     setTablets(updatedTablets);
-  //     setEditingIndex(null);
-  //   } else {
-  //     setTablets([...tablets, newTablet]);
-  //   }
-
-  //   setFormFields({
-  //     name: "",
-  //     company: "",
-  //     salt: "",
-  //     quantity: 0,
-  //     packing: "",
-  //     batch: "",
-  //     expiry: "",
-  //     price: 0,
-  //     discount: 0,
-  //     rate: 0,
-  //     total: 0.0,
-  //     gst: Number(formFields.gst),
-  //     lessquantity: 0,
-  //     category: "",
-  //     free: 0,
-  //     hsm: "",
-  //   });
-
-  //   setShowSuggestions(false);
-  // };
+ 
   const addMoreTablet = () => {
     const {
       name,
@@ -383,7 +266,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
   
     // const total = (parseFloat(rate || 0) / parseFloat(lessquantity || 0)).toFixed(2);
 
-    const total= ((Number(rate)/Number(packing?.split("*")[1]))*Number(lessquantity)).toFixed(2)
+    const total= (Number(rate)*(Number(strips))).toFixed(2)
   
     if (
       !name ||
@@ -396,8 +279,8 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       !rate ||
       !total ||
       !gst ||
-      !lessquantity ||
-      !category
+       
+      !category||!strips
     ) {
       toast.error("Please fill all fields before adding.");
       return;
@@ -405,6 +288,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
   
     // ✅ Calculate strips
     const strip = calculateStrips(packing, parseInt(lessquantity));
+    const quantityCount= Number(packing?.split("*")[1])*(Number(strips)+Number(free))
   
     const newTablet = {
       name: name.trim(),
@@ -421,11 +305,11 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       cgst: Number(gst) / 2,
       total: Number(total),
       gst: Number(gst),
-      lessquantity: Number(lessquantity),
+      lessquantity: Number(quantityCount),
       category: category.trim(),
       free: Number(free),
       hsm: hsm.trim(),
-      strips:Number(strip),
+      strips:Number(strips),
     };
   
     const isDuplicate = tablets.some((tablet, index) => {
@@ -474,6 +358,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       category: "",
       free: 0,
       hsm: "",
+      strips:0
     });
   
     setShowSuggestions(false);
@@ -500,6 +385,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       category: tablet.category,
       free: tablet.free,
       hsm: tablet.hsm,
+      strips:tablet.strips
     });
     setEditingIndex(index);
   };
@@ -525,6 +411,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       category: "",
       free: 0,
       hsm: "",
+      strips:0
     });
   };
 
@@ -826,6 +713,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       category: "",
       free: 0,
       hsm: "",
+      strips:0
     });
     toast.success("Reset successfully");
   };
@@ -966,6 +854,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       category: "",
       free: 0,
       hsm: "",
+      strips:0
     });
   };
 
@@ -1170,7 +1059,8 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                             price: t.mrp,
                             total: (1 * (t.rate || t.price || 0)).toFixed(2),
                             lessquantity:"",
-                            free:""
+                            free:"",
+                            strips:""
                           });
                           setShowSuggestions(false);
                         }}
@@ -1395,7 +1285,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                 />
               </div>
 
-              <div className="w-full md:w-[10%] ">
+              {/* <div className="w-full md:w-[10%] ">
                 <label>Quantity</label>
                 <input
                   type="number"
@@ -1404,6 +1294,22 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                     setFormFields({
                       ...formFields,
                       lessquantity: e.target.value,
+                    })
+                  }
+                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  required
+                />
+              </div> */}
+
+              <div className="w-full md:w-[10%] ">
+                <label>Strips</label>
+                <input
+                  type="number"
+                  value={formFields.strips}
+                  onChange={(e) =>
+                    setFormFields({
+                      ...formFields,
+                      strips: e.target.value,
                     })
                   }
                   className="border p-2 w-full bg-white text-black outline-none rounded-sm"

@@ -13,11 +13,12 @@ const TabletSchema = new mongoose.Schema({
   mg: { type: String, trim: true },
   batch: { type: String, trim: true },
   expiry: { type: String, trim: true },
+  strips:{type:Number},
 }, {
   timestamps: true,
 });
 
 // Compound unique index to prevent duplicate name + packaging
-TabletSchema.index({ name: 1, packaging: 1 }, { unique: true });
+TabletSchema.index({ batch: 1 }, { unique: true });
 
 export default mongoose.models.Tablet || mongoose.model('Tablet', TabletSchema);

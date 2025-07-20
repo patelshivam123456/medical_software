@@ -23,7 +23,7 @@ import {
   SquaresPlusIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
-// import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
+import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
 
 
 
@@ -44,6 +44,23 @@ const Header=({isLoggedStatus})=> {
     Cookies.remove("loginType")
     router.push("/admin")
   }
+
+  const Sales_Person = [
+    { name: 'Create Client Bill', href: '/admin/bill', icon: ChartPieIcon },
+    { name: 'Sell Return',  href: '/admin/return', icon: CursorArrowRaysIcon },
+    { name: 'Online Order Bill',  href: '/admin/mark-delivery', icon: FingerPrintIcon },
+    { name: 'Add Client',  href: '/admin/client', icon: SquaresPlusIcon },
+    { name: 'Login Access',  href: '/admin/accesstype', icon: ArrowPathIcon },
+    { name: 'User Login/Signup Details',  href: '/admin/register-person', icon: ArrowPathIcon },
+  ]
+  const Stockiest_Person = [
+    { name: 'Purchase', href: '/admin/purchase', icon: ChartPieIcon },
+    { name: 'Check Stock',  href: '/admin/manage-stock', icon: CursorArrowRaysIcon },
+    { name: 'Online Order',  href: '/admin/online-order', icon: FingerPrintIcon },
+    { name: 'Add New Pharam',  href: '/admin/add-new-pharam', icon: SquaresPlusIcon },
+    { name: 'Return Purchase',  href: '/admin/purchase-return', icon: ArrowPathIcon },
+    // { name: 'User Login/Signup Details',  href: '/admin/register-person', icon: ArrowPathIcon },
+  ]
 
   return (
     <header className="bg-white sticky top-0 z-40 shadow-2xl">
@@ -113,30 +130,105 @@ const Header=({isLoggedStatus})=> {
           
           } */}
           {(router.pathname.toLowerCase().includes("admin")&&isLoggedStatus)&&<>
+          
           <PopoverGroup className="hidden lg:flex lg:gap-x-12">
-           {(checkLoginType==="admin"||checkLoginType==="sales")&& <a href="/admin/bill" className="text-sm/6 font-semibold text-gray-900">
-            Bill page
+          {checkLoginType==="admin"&&
+          <><Popover className="relative">
+            <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 outline-none">
+              Sales Person
+              <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400" />
+            </PopoverButton>
+
+            <PopoverPanel
+              transition
+              className="absolute left-1/2 z-10 mt-3 w-screen max-w-md -translate-x-1/2 overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 transition data-closed:translate-y-1 data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
+            >
+              <div className="p-4">
+                {Sales_Person.map((item) => (
+                  <div
+                    key={item.name}
+                    className="group relative flex items-center gap-x-6 rounded-lg px-4 py-2 text-sm/6 hover:bg-gray-50"
+                  >
+                    
+                    <div className="flex-auto">
+                      <a href={item.href} className="block font-semibold text-gray-900">
+                        {item.name}
+                       
+                      </a>
+                     
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+            </PopoverPanel>
+          </Popover></>}
+          {checkLoginType==="admin"&&
+          <><Popover className="relative">
+            <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 outline-none">
+              Stock Manager Person
+              <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400" />
+            </PopoverButton>
+
+            <PopoverPanel
+              transition
+              className="absolute left-1/2 z-10 mt-3 w-screen max-w-md -translate-x-1/2 overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 transition data-closed:translate-y-1 data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
+            >
+              <div className="p-4">
+                {Stockiest_Person.map((item) => (
+                  <div
+                    key={item.name}
+                    className="group relative flex items-center gap-x-6 rounded-lg px-4 py-2 text-sm/6 hover:bg-gray-50"
+                  >
+                    
+                    <div className="flex-auto">
+                      <a href={item.href} className="block font-semibold text-gray-900">
+                        {item.name}
+                       
+                      </a>
+                     
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+            </PopoverPanel>
+          </Popover></>}
+           {checkLoginType==="sales"&& <a href="/admin/bill" className="text-sm/6 font-semibold text-gray-900">
+            Create Bill
           </a>}
-          {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/admin/manage-stock" className="text-sm/6 font-semibold text-gray-900">
+          {checkLoginType==="stockiest"&&<a href="/admin/purchase" className="text-sm/6 font-semibold text-gray-900">
             Purchase
           </a>}
-          {(checkLoginType==="admin"||checkLoginType==="sales")&&<a href="/admin/mark-delivery" className="text-sm/6 font-semibold text-gray-900">
+          {checkLoginType==="stockiest"&&<a href="/admin/purchase-return" className="text-sm/6 font-semibold text-gray-900">
+            Purchase Return
+          </a>}
+          {checkLoginType==="stockiest"&&<a href="/admin/manage-stock" className="text-sm/6 font-semibold text-gray-900">
+            Check  Stock
+          </a>}
+          {checkLoginType==="stockiest"&&<a href="/admin/add-new-pharam" className="text-sm/6 font-semibold text-gray-900">
+            Add New Pharam
+          </a>}
+          {checkLoginType==="sales"&&<a href="/admin/mark-delivery" className="text-sm/6 font-semibold text-gray-900">
             Online Order Bill
           </a>}
-          {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/admin/return" className="text-sm/6 font-semibold text-gray-900">
-            Return
+          {checkLoginType==="sales"&&<a href="/admin/return" className="text-sm/6 font-semibold text-gray-900">
+            Sell Return
           </a>}
-          {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<a href="/admin/online-order" className="text-sm/6 font-semibold text-gray-900">
+          {checkLoginType==="stockiest"&&<a href="/admin/online-order" className="text-sm/6 font-semibold text-gray-900">
             Online Order
           </a>}
-          {(checkLoginType==="admin"||checkLoginType==="sales")&&<a href="/admin/client" className="text-sm/6 font-semibold text-gray-900">
+          {checkLoginType==="sales"&&<a href="/admin/client" className="text-sm/6 font-semibold text-gray-900">
             Client
           </a>}
-          {(checkLoginType==="admin")&&<a href="/admin/accesstype/adduser" className="text-sm/6 font-semibold text-gray-900">
+          {checkLoginType==="admin"&&<a href="/admin/accesstype/adduser" className="text-sm/6 font-semibold text-gray-900">
             Login Access
           </a>}
           {(checkLoginType==="admin"||checkLoginType==="delivery")&&<a href="/admin/complete-delivery" className="text-sm/6 font-semibold text-gray-900">
             Delivery person
+          </a>}
+          {(checkLoginType==="admin")&&<a href="/admin/register-person" className="text-sm/6 font-semibold text-gray-900">
+            User Register/Login details
           </a>}
           </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
@@ -255,9 +347,17 @@ const Header=({isLoggedStatus})=> {
                   href="/admin/bill"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
                 >
-                  Bill page
+                 Create Bill
                 </a>
               </div>}
+              {(checkLoginType==="admin"||checkLoginType==="sales")&&<div className="space-y-2 py-6">
+              <a
+                href="/admin/return"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+               Sell Return
+              </a>
+            </div>}
               {(checkLoginType==="admin"||checkLoginType==="sales")&& <div className="space-y-2 py-6">
                 <a
                   href="/admin/mark-delivery"
@@ -266,9 +366,17 @@ const Header=({isLoggedStatus})=> {
                   Online Order Bill
                 </a>
               </div>}
-              {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">
+              {(checkLoginType==="admin"||checkLoginType==="sales")&&<div className="space-y-2 py-6">
               <a
-                href="/admin/manage-stock"
+                href="/admin/client"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Add Client
+              </a>
+            </div>}
+            {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">
+              <a
+                href="/admin/purchase"
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
                 Purchase
@@ -276,12 +384,21 @@ const Header=({isLoggedStatus})=> {
             </div>}
             {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">
               <a
-                href="/admin/return"
+                href="/admin/purchase-return"
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
-                Return
+                Purchase Return
               </a>
             </div>}
+              {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">
+              <a
+                href="/admin/manage-stock"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Check Stock
+              </a>
+            </div>}
+            
             {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">
               <a
                 href="/admin/online-order"
@@ -290,14 +407,15 @@ const Header=({isLoggedStatus})=> {
                 Online Order
               </a>
             </div>}
-            {(checkLoginType==="admin"||checkLoginType==="sales")&&<div className="space-y-2 py-6">
+            {(checkLoginType==="admin"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">
               <a
-                href="/admin/client"
+                href="/admin/add-new-pharam"
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
-                Client
+                Add New Pharam
               </a>
             </div>}
+            
             {(checkLoginType==="admin")&&<div className="space-y-2 py-6">
               <a
                 href="/admin/accesstype/adduser"

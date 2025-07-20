@@ -19,10 +19,12 @@ const BillDetailPage=(props)=> {
   const [isLoggedCheck,setIsLoggedCheck] = useState('')
 
   const { data, error } = useSWR(
-    () => (id ? `/api/return/${id}` : null),
+    () => (id ? `/api/purchase-return/${id}` : null),
     fetcher
   );
-  const billdata = data?.bill;
+  const billdata = data?.returnEntry;
+  console.log(billdata,"lllllllllllllll");
+  
   useEffect(() => {
     if (billdata?.tablets?.length) {
       const total = billdata.tablets.reduce(
@@ -68,7 +70,7 @@ const totalInWords = toWords(roundedGrandTotal);
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Invoice-${data.bill.newbillNo}.pdf`);
+      pdf.save(`Invoice-${billdata.clientName}.pdf`);
       setDownloading(false)
     });
   };
@@ -136,7 +138,7 @@ const totalInWords = toWords(roundedGrandTotal);
           </div>
           <div className="w-1/2">
             <div className="text-lg" style={{fontWeight:"bold"}}>
-              {billdata.title + " " + billdata.clientName}
+              {billdata.clientName}
             </div>
             <div className="">{billdata.address1}</div>
             <div>{billdata.address2 || ""}</div>
@@ -168,9 +170,9 @@ const totalInWords = toWords(roundedGrandTotal);
             <div className="w-[65%] flex  justify-between pb-4 ">
               <div>
                 <div className="text-sm">
-                  Invoice No.: SJ000{billdata.newbillNo}
+                  Invoice No.: SJ000{billdata.billNo}
                 </div>
-                <div className="text-sm">Sales man: {billdata.salesperson}</div>
+                <div className="text-sm">Purchase Return: {billdata.salesperson}</div>
               </div>
               <div>
                 <div className="text-sm">
@@ -188,9 +190,9 @@ const totalInWords = toWords(roundedGrandTotal);
                     : ""}
                 </div>
                 <div className="text-sm">
-                  Due Date:{" "}
-                  {billdata?.createdAt
-                    ? new Date(billdata.createdAt).toLocaleString("en-IN", {
+                  Invoice Date:{" "}
+                  {billdata?.invoiceDate
+                    ? new Date(billdata.invoiceDate).toLocaleString("en-IN", {
                         timeZone: "Asia/Kolkata",
                         day: "2-digit",
                         month: "2-digit",
@@ -246,8 +248,8 @@ const totalInWords = toWords(roundedGrandTotal);
       <td className="px-3 pb-1">{t.batch}</td>
       <td className="px-3 pb-1">{t.expiry}</td>
       <td className="px-3 pb-1">{t.hsm}</td>
+      <td className="px-3 pb-1 text-right font-mono">{Number(t.mrp).toFixed(2)}</td>
       <td className="px-3 pb-1 text-right font-mono">{Number(t.price).toFixed(2)}</td>
-      <td className="px-3 pb-1 text-right font-mono">{Number(t.rate).toFixed(2)}</td>
       <td className="px-3 pb-1 text-right font-mono">{Number(t.discount).toFixed(2)}</td>
       <td className="px-3 pb-1">{t.sgst}</td>
       <td className="px-3 pb-1">{t.cgst}</td>

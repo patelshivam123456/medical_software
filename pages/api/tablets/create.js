@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   try {
     await connectToDB();
 
-    let { name,packaging,category,company,salt,quantity,purchase, price,mrp,mg,batch,expiry } = req.body;
+    let { name,packaging,category,company,salt,quantity,purchase, price,mrp,mg,batch,expiry,strips } = req.body;
 
     // Validate input
     if (!name || quantity == null || price == null) {
@@ -29,7 +29,8 @@ export default async function handler(req, res) {
     mrp=Number(mrp);
     mg=mg;
     batch=batch;
-    expiry=expiry
+    expiry=expiry;
+    strips=Number(strips)
 
     if (isNaN(quantity) || isNaN(price)||isNaN(purchase)) {
       return res.status(400).json({ success: false, message: 'Quantity and Price must be numbers' });
@@ -42,7 +43,7 @@ export default async function handler(req, res) {
     }
 
     // Create and save tablet
-    const tablet = new Tablet({ name,packaging,category,company,salt,quantity, purchase,price,mrp,mg,batch,expiry});
+    const tablet = new Tablet({ name,packaging,category,company,salt,quantity, purchase,price,mrp,mg,batch,expiry,strips});
     await tablet.save();
 
     return res.status(201).json({ success: true });

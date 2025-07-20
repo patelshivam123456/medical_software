@@ -34,6 +34,7 @@ export default async function handler(req, res) {
         address2,
         pinCode,
         state,
+        strips,free
       } = req.body;
 
       // ✅ 1. Validate Required Fields
@@ -111,6 +112,7 @@ export default async function handler(req, res) {
         address2,
         pinCode,
         state,
+        strips,free
       });
 
       try {
@@ -122,6 +124,8 @@ export default async function handler(req, res) {
 
       // ✅ 6. Update stock (increase quantity)
       for (const item of tablets) {
+        const str=Number(item.strips)
+        const Free=Number(item.free)
         const qty = Number(item.returnquantity);
 
         if (!Number.isFinite(qty)) {
@@ -132,8 +136,8 @@ export default async function handler(req, res) {
         }
 
         const updated = await Tablet.updateOne(
-          { name: item.name, packaging: item.packing },
-          { $inc: { quantity: qty } }
+          { batch: item.batch },
+          { $inc: { strips:(str+Free),quantity: qty } }
         );
 
         if (updated.modifiedCount === 0) {

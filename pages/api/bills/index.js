@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
     try {
-      const { salesperson,paymenttype,ordertype,orderid, dispatchDate,tablets, discount = 0,gst=0 ,cgst = 0, sgst = 0,title,clientName,mobile,branch,branchName,address1,address2,pinCode,state } = req.body;
+      const { salesperson,paymenttype,ordertype,orderid, dispatchDate,tablets, discount = 0,gst=0 ,cgst = 0, sgst = 0,title,clientName,mobile,branch,branchName,address1,address2,pinCode,state,strips } = req.body;
 
       // ✅ 1. Validate Request Body
       // if (!billNo || typeof billNo !== "string") {
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
       }
 
       // ✅ 4. Create Bill
-      const bill = new Bill({ billNo:nextBillNo,salesperson,paymenttype,ordertype,orderid,dispatchDate,tablets, discount,gst, cgst, sgst,title,clientName,mobile,branch,branchName,address1,address2,pinCode,state });
+      const bill = new Bill({ billNo:nextBillNo,salesperson,paymenttype,ordertype,orderid,dispatchDate,tablets, discount,gst, cgst, sgst,title,clientName,mobile,branch,branchName,address1,address2,pinCode,state,strips });
 
       try {
         await bill.save();
@@ -68,8 +68,9 @@ export default async function handler(req, res) {
       // ✅ 5. Update Tablet Stock
       for (const item of tablets) {
         const updated = await Tablet.updateOne(
-          { name: item.name, packaging: item.packing },
-          { $inc: { quantity: -(item.lessquantity+item.free) } }
+          { batch: item.batch },
+          { $inc: { strips:-(item.strips+item.free),
+            quantity: -item.lessquantity } }
         );
 
         if (updated.modifiedCount === 0) {

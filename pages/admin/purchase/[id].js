@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/router";
-import useSWR from "swr";
+
 import axios from "axios";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -9,50 +9,63 @@ import { toWords } from "number-to-words";
 import LoadingBtn from "@/components/Buttons/LoadingBtn";
 import Header from "@/components/Header";
 
-const fetcher = (url) => axios.get(url).then((res) => res.data);
+
 
 const BillDetailPage = (props) => {
   const router = useRouter();
   const { id } = router.query;
-  const [grandTotal, setGrandTotal] = useState(0);
+  const [grandtotal, setgrandtotal] = useState(0);
   const [downloading, setDownloading] = useState(false);
   const [isLoggedCheck, setIsLoggedCheck] = useState("");
+  const [billdata, setBillData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const { data, error } = useSWR(
-    () => (id ? `/api/bills/${id}` : null),
-    fetcher
-  );
-  const billdata = data?.bill;
-  useEffect(() => {
-    if (billdata?.tablets?.length) {
-      const total = billdata.tablets.reduce(
-        (sum, item) => sum + (parseFloat(item.total) || 0),
-        0
-      );
-      setGrandTotal(total);
+
+
+  const fetchPurchase = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`/api/new-purchase/${id}`); // ✅ Correct URL
+      setBillData(res.data.data);
+    } catch (err) {
+      console.error("❌ Failed to fetch purchase:", err);
+    } finally {
+      setLoading(false);
     }
-  }, [billdata]);
+  };
   useEffect(() => {
     if (props.isLoggedStatus) {
       setIsLoggedCheck(props.isLoggedStatus);
     }
   }, []);
 
-  if (error) return <div className="p-6">❌ Failed to load bill</div>;
-  if (!data) return <div className="p-6">Loading...</div>;
+  useEffect(() => {
+    if (id) {
+      fetchPurchase();
+    }
+  }, [id]);
+
+  if (loading) return <p>Loading...</p>;
+  if (!billdata) return <p>No bill found</p>;
+
+  console.log(billdata.gst);
+  
+
+//   if (error) return <div className="p-6">❌ Failed to load bill</div>;
+//   if (!data) return <div className="p-6">Loading...</div>;
 
   const discountAmount = billdata.discount
-    ? (grandTotal * billdata.discount) / 100
+    ? (billdata.grandtotal * billdata.discount) / 100
     : 0;
-  const subTotal = grandTotal - discountAmount;
+  const subTotal = billdata.grandtotal - discountAmount;
 
   const sgstAmount = billdata.gst ? (subTotal * billdata.sgst) / 100 : 0;
   const cgstAmount = billdata.gst ? (subTotal * billdata.cgst) / 100 : 0;
 
-  const grandTotalWithTax = subTotal + sgstAmount + cgstAmount;
+  const grandtotalWithTax = subTotal + sgstAmount + cgstAmount;
 
-  const roundedGrandTotal = Math.ceil(grandTotalWithTax);
-  const totalInWords = toWords(roundedGrandTotal);
+  const roundedgrandtotal = Math.ceil(grandtotalWithTax);
+  const totalInWords = toWords(roundedgrandtotal);
 
   const handleDownloadPDF = () => {
     setDownloading(true);
@@ -70,27 +83,28 @@ const BillDetailPage = (props) => {
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Invoice-${data.bill.billNo}.pdf`);
+      pdf.save(`Invoice-${billdata.billNo}.pdf`);
       setDownloading(false);
     });
   };
 
-  const calculateStrips = (packing, quantity) => {
-    if (!packing || !quantity) return "0";
+//   const calculateStrips = (packing, quantity) => {
+//     if (!packing || !quantity) return "0";
   
-    const parts = packing.split("*");
-    if (parts.length !== 2) return "0";
+//     const parts = packing.split("*");
+//     if (parts.length !== 2) return "0";
   
-    const multiplier = parseInt(parts[1], 10);
-    if (isNaN(multiplier) || multiplier === 0) return "0";
+//     const multiplier = parseInt(parts[1], 10);
+//     if (isNaN(multiplier) || multiplier === 0) return "0";
   
-    const fullStrips = Math.floor(quantity / multiplier);
-    const remaining = quantity % multiplier;
+//     const fullStrips = Math.floor(quantity / multiplier);
+//     const remaining = quantity % multiplier;
   
-    return remaining === 0 ? `${fullStrips}` : `${fullStrips}*${remaining}`;
-  };
+//     return remaining === 0 ? `${fullStrips}` : `${fullStrips}*${remaining}`;
+//   };
 
   return (
+    // <></>
     <>
       <Header isLoggedStatus={isLoggedCheck} />
       <div
@@ -152,7 +166,7 @@ const BillDetailPage = (props) => {
             </div>
             <div className="w-1/2">
               <div className="text-lg" style={{ fontWeight: "bold" }}>
-                {billdata.title + " " + billdata.clientName}
+                {billdata.clientName}
               </div>
               <div className="">{billdata.address1}</div>
               <div>{billdata.address2 || ""}</div>
@@ -211,9 +225,9 @@ const BillDetailPage = (props) => {
                     : ""}</div>
                   :
                   <div className="text-sm">
-                    Due Date:{" "}
-                    {billdata?.createdAt
-                      ? new Date(billdata.createdAt).toLocaleString("en-IN", {
+                    Invoice Date:{" "}
+                    {billdata?.invoiceDate
+                      ? new Date(billdata.invoiceDate).toLocaleString("en-IN", {
                           timeZone: "Asia/Kolkata",
                           day: "2-digit",
                           month: "2-digit",
@@ -245,7 +259,7 @@ const BillDetailPage = (props) => {
                 <tr>
                   <th className="border px-3 py-2 text-left">Sn.</th>
                   {/* <th className="border px-3 py-2 text-left">Qty.</th> */}
-                  {/* <th className="border px-3 py-2 text-left">Free</th> */}
+                  <th className="border px-3 py-2 text-left">Free</th>
                   <th className="border px-3 py-2 text-left">Pack</th>
                   <th className="border px-3 py-2 text-left">Strips</th>
                   <th className="border px-3 py-2 text-left min-w-[280px]">
@@ -267,7 +281,7 @@ const BillDetailPage = (props) => {
                   <tr key={t._id || i}>
                     <td className="px-3 pb-1">{i + 1}</td>
                     {/* <td className="px-3 pb-1 text-right">{t.lessquantity}</td> */}
-                    {/* <td className="px-3 pb-1 text-right">{t.free}</td> */}
+                    <td className="px-3 pb-1 text-right">{t.free}</td>
                     <td className="px-3 pb-1">{t.packing}</td>
                     <td className="px-3 pb-1">{t.strips}</td>
                     <td className="px-3 pb-1 min-w-[280px]">{t.name}</td>
@@ -275,10 +289,10 @@ const BillDetailPage = (props) => {
                     <td className="px-3 pb-1">{t.expiry}</td>
                     <td className="px-3 pb-1">{t.hsm}</td>
                     <td className="px-3 pb-1 text-right font-mono">
-                      {Number(t.price).toFixed(2)}
+                      {t.mrp}
                     </td>
                     <td className="px-3 pb-1 text-right font-mono">
-                      {Number(t.rate).toFixed(2)}
+                      {Number(t.price)}
                     </td>
                     <td className="px-3 pb-1 text-right font-mono">
                       {Number(t.discount).toFixed(2)}
@@ -323,23 +337,23 @@ const BillDetailPage = (props) => {
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 5
                         ? billdata.discount
-                          ? grandTotal.toFixed(2)
-                          : grandTotal.toFixed(2)
+                          ? billdata.grandtotal.toFixed(2)
+                          : billdata.grandtotal.toFixed(2)
                         : "00"}
                     </td>
                     <td className="border px-3 pt-1 pb-2">{"00"}</td>
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 5
                         ? billdata.discount
-                          ? ((grandTotal * billdata.discount) / 100).toFixed(2)
+                          ? ((billdata.grandtotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 5
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((billdata.grandtotal -
+                              ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.cgst) /
@@ -350,8 +364,8 @@ const BillDetailPage = (props) => {
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 5
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((billdata.grandtotal -
+                              ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.sgst) /
@@ -362,8 +376,8 @@ const BillDetailPage = (props) => {
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 5
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((billdata.grandtotal -
+                              ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.gst) /
@@ -379,23 +393,23 @@ const BillDetailPage = (props) => {
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 12
                         ? billdata.discount
-                          ? grandTotal.toFixed(2)
-                          : grandTotal.toFixed(2)
+                          ? billdata.grandtotal.toFixed(2)
+                          : billdata.grandtotal.toFixed(2)
                         : "00"}
                     </td>
                     <td className="border px-3 pt-1 pb-2">{"00"}</td>
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 12
                         ? billdata.discount
-                          ? ((grandTotal * billdata.discount) / 100).toFixed(2)
+                          ? ((billdata.grandtotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 12
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((billdata.grandtotal -
+                              ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.cgst) /
@@ -406,8 +420,8 @@ const BillDetailPage = (props) => {
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 12
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((billdata.grandtotal -
+                              ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.sgst) /
@@ -418,8 +432,8 @@ const BillDetailPage = (props) => {
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 12
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((billdata.grandtotal -
+                              ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.gst) /
@@ -435,23 +449,23 @@ const BillDetailPage = (props) => {
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 18
                         ? billdata.discount
-                          ? grandTotal.toFixed(2)
-                          : grandTotal.toFixed(2)
+                          ? billdata.grandtotal.toFixed(2)
+                          : billdata.grandtotal.toFixed(2)
                         : "00"}
                     </td>
                     <td className="border px-3 pt-1 pb-2">{"00"}</td>
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 18
                         ? billdata.discount
-                          ? ((grandTotal * billdata.discount) / 100).toFixed(2)
+                          ? ((billdata.grandtotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 18
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((billdata.grandtotal -
+                              ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.cgst) /
@@ -462,8 +476,8 @@ const BillDetailPage = (props) => {
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 18
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((billdata.grandtotal -
+                              ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.sgst) /
@@ -474,8 +488,8 @@ const BillDetailPage = (props) => {
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 18
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((billdata.grandtotal -
+                              ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.gst) /
@@ -491,23 +505,23 @@ const BillDetailPage = (props) => {
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 28
                         ? billdata.discount
-                          ? grandTotal.toFixed(2)
-                          : grandTotal.toFixed(2)
+                          ? billdata.grandtotal.toFixed(2)
+                          : billdata.grandtotal.toFixed(2)
                         : "00"}
                     </td>
                     <td className="border px-3 pt-1 pb-2">{"00"}</td>
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 28
                         ? billdata.discount
-                          ? ((grandTotal * billdata.discount) / 100).toFixed(2)
+                          ? ((billdata.grandtotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 28
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((billdata.grandtotal -
+                              ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.sgst) /
@@ -518,8 +532,8 @@ const BillDetailPage = (props) => {
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 28
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((billdata.grandtotal -
+                              ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.cgst) /
@@ -530,8 +544,8 @@ const BillDetailPage = (props) => {
                     <td className="border px-3 pt-1 pb-2">
                       {billdata.gst === 28
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((billdata.grandtotal -
+                              ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.gst) /
@@ -550,8 +564,8 @@ const BillDetailPage = (props) => {
                       billdata.gst === 18 ||
                       billdata.gst === 28
                         ? billdata.discount
-                          ? grandTotal.toFixed(2)
-                          : grandTotal.toFixed(2)
+                          ? grandtotal.toFixed(2)
+                          : grandtotal.toFixed(2)
                         : "00"}
                     </td>
                     <td className="border px-3 pt-1 pb-2 font-semibold">
@@ -563,7 +577,7 @@ const BillDetailPage = (props) => {
                       billdata.gst === 18 ||
                       billdata.gst === 28
                         ? billdata.discount
-                          ? ((grandTotal * billdata.discount) / 100).toFixed(2)
+                          ? ((grandtotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
@@ -573,8 +587,8 @@ const BillDetailPage = (props) => {
                       billdata.gst === 18 ||
                       billdata.gst === 28
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((grandtotal -
+                              ((grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.sgst) /
@@ -588,8 +602,8 @@ const BillDetailPage = (props) => {
                       billdata.gst === 18 ||
                       billdata.gst === 28
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((grandtotal -
+                              ((grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.cgst) /
@@ -603,8 +617,8 @@ const BillDetailPage = (props) => {
                       billdata.gst === 18 ||
                       billdata.gst === 28
                         ? (
-                            ((grandTotal -
-                              ((grandTotal * billdata.discount) / 100).toFixed(
+                            ((grandtotal -
+                              ((grandtotal * billdata.discount) / 100).toFixed(
                                 2
                               )) *
                               billdata.gst) /
@@ -617,22 +631,14 @@ const BillDetailPage = (props) => {
               </table>
             </div>
             <div className="w-[40%] space-y-3 pt-5">
-              <div className="flex justify-between px-7 text-sm">
-                <div className="font-medium">SUB TOTAL</div>
-                <div>
-                  {billdata.gst === 5 ||
-                  billdata.gst === 12 ||
-                  billdata.gst === 18 ||
-                  billdata.gst === 28
-                    ? billdata.discount
-                      ? (
-                          grandTotal -
-                          ((grandTotal * billdata.discount) / 100).toFixed(2)
-                        ).toFixed(2)
-                      : grandTotal.toFixed(2)
-                    : grandTotal.toFixed(2)}
-                </div>
-              </div>
+            <div className="flex justify-between px-7 text-sm">
+  <div className="font-medium">SUB TOTAL</div>
+  <div>
+    {billdata.discount && billdata.discount > 0
+      ? (billdata.grandtotal - (billdata.grandtotal * billdata.discount) / 100).toFixed(2)
+      : billdata.grandtotal.toFixed(2)}
+  </div>
+</div>
               <div className="flex justify-between  px-7 text-sm">
                 <div className="font-medium">SGST PAYBLE</div>
                 <div>
@@ -642,16 +648,16 @@ const BillDetailPage = (props) => {
                   billdata.gst === 28
                     ? billdata.discount
                       ? (
-                          ((grandTotal -
-                            ((grandTotal * billdata.discount) / 100).toFixed(
+                          ((billdata.grandtotal -
+                            ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                               2
                             )) *
                             billdata.cgst) /
                           100
                         ).toFixed(2)
                       : (
-                          ((grandTotal -
-                            ((grandTotal * billdata.discount) / 100).toFixed(
+                          ((billdata.grandtotal -
+                            ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                               2
                             )) *
                             billdata.cgst) /
@@ -669,16 +675,16 @@ const BillDetailPage = (props) => {
                   billdata.gst === 28
                     ? billdata.discount
                       ? (
-                          ((grandTotal -
-                            ((grandTotal * billdata.discount) / 100).toFixed(
+                          ((billdata.grandtotal -
+                            ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                               2
                             )) *
                             billdata.sgst) /
                           100
                         ).toFixed(2)
                       : (
-                          ((grandTotal -
-                            ((grandTotal * billdata.discount) / 100).toFixed(
+                          ((billdata.grandtotal -
+                            ((billdata.grandtotal * billdata.discount) / 100).toFixed(
                               2
                             )) *
                             billdata.sgst) /
@@ -729,7 +735,7 @@ const BillDetailPage = (props) => {
                     color: "black",
                   }}
                 >
-                  ₹{Math.ceil(grandTotalWithTax).toFixed(2)}
+                  ₹{Math.ceil(grandtotalWithTax).toFixed(2)}
                 </div>
               </div>
             </div>
@@ -793,7 +799,7 @@ export async function getServerSideProps(context) {
   }
 
   // Only allow admin or sales
-  if (loggedIn && loginType !== "admin" && loginType !== "sales") {
+  if (loggedIn && loginType !== "admin" && loginType !== "stockiest") {
     return {
       props: {},
       redirect: { destination: "/admin" },

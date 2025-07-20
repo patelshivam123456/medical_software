@@ -37,7 +37,7 @@ const ManageStockPage = (props) => {
   const [showSaltModal, setShowSaltModal] = useState(false);
   const [newSaltName, setNewSaltName] = useState("");
   const [saltError, setSaltError] = useState("");
-
+  const [strips,setStrips]= useState(0)
   const [quantity, setQuantity] = useState(0);
   const [price, setPrice] = useState();
   const [purchase, setPurchase] = useState();
@@ -64,6 +64,8 @@ const ManageStockPage = (props) => {
     category: "",
     company: "",
     salt: "",
+    mg:"",
+    strips:"",
     quantity: "",
     mrp: "",
     price: "",
@@ -228,6 +230,8 @@ const ManageStockPage = (props) => {
         category,
         company,
         salt,
+        mg,
+        strips:Number(strips),
         quantity: Number(quantity),
         price: Number(price),
         purchase: Number(purchase),
@@ -254,6 +258,8 @@ const ManageStockPage = (props) => {
       setCompany("");
       setSalt("");
       setSaltSearch("");
+      setMg("")
+      setStrips(0);
       setQuantity(0);
       setPrice("");
       setPurchase("");
@@ -278,6 +284,8 @@ const ManageStockPage = (props) => {
     setCategory(tab.category);
     setCompany(tab.company);
     setSalt(tab.salt);
+    setMg(tab.mg)
+    setStrips(tab.strips);
     setQuantity(tab.quantity);
     setPrice(tab.price);
     setPurchase(tab.purchase);
@@ -294,6 +302,7 @@ const ManageStockPage = (props) => {
     setCategory("");
     setCompany("");
     setSalt("");
+    setStrip(0);
     setQuantity(0);
     setPrice("");
     setPurchase("");
@@ -381,6 +390,8 @@ const ManageStockPage = (props) => {
         "Category",
         "Company",
         "Salt",
+        "Mg",
+        "Strips",
         "Quantity",
         "MRP",
         "Price",
@@ -396,6 +407,8 @@ const ManageStockPage = (props) => {
         tab.category,
         tab.company,
         tab.salt,
+        tab.mg,
+        tab.strips,
         tab.quantity,
         tab.mrp,
         tab.price,
@@ -602,6 +615,17 @@ const ManageStockPage = (props) => {
               </ul>
             )}
           </div>
+          <div className="w-full md:w-[30%] px-3 mb-6 md:mb-0">
+            <div className="pb-1 text-base">Strips</div>
+            <input
+              type="number"
+              value={strips}
+              onChange={(e) => setStrips(e.target.value)}
+              placeholder="Strips"
+              className="block w-full text-black bg-gray-200 border border-red-500 rounded py-3 px-4 mb-3 focus:outline-none focus:bg-white"
+              required
+            />
+          </div>
 
           <div className="w-full md:w-[30%] px-3 mb-6 md:mb-0">
             <div className="pb-1 text-base">Quantity</div>
@@ -733,6 +757,8 @@ const ManageStockPage = (props) => {
                 <th className="border p-2 text-black">Category</th>
                 <th className="border p-2 text-black">Company</th>
                 <th className="border p-2 text-black">Salt</th>
+                <th className="border p-2 text-black">Mg</th>
+                <th className="border p-2 text-black">Strips</th>
                 <th className="border p-2 text-black">Quantity</th>
                 <th className="border p-2 text-black">MRP</th>
                 <th className="border p-2 text-black">Purchase Price</th>
@@ -794,6 +820,22 @@ const ManageStockPage = (props) => {
                 <td className="border p-1">
                   <input
                     type="text"
+                    value={filters.mg}
+                    onChange={(e) => handleFilterChange(e, "mg")}
+                    className="w-full p-1 border rounded text-black"
+                  />
+                </td>
+                <td className="border p-1">
+                  <input
+                    type="text"
+                    value={filters.strips}
+                    onChange={(e) => handleFilterChange(e, "strips")}
+                    className="w-full p-1 border rounded text-black"
+                  />
+                </td>
+                <td className="border p-1">
+                  <input
+                    type="text"
                     value={filters.quantity}
                     onChange={(e) => handleFilterChange(e, "quantity")}
                     className="w-full p-1 border rounded text-black"
@@ -807,14 +849,7 @@ const ManageStockPage = (props) => {
                     className="w-full p-1 border rounded text-black"
                   />
                 </td>
-                <td className="border p-1">
-                  <input
-                    type="text"
-                    value={filters.purchase}
-                    onChange={(e) => handleFilterChange(e, "price")}
-                    className="w-full p-1 border rounded text-black"
-                  />
-                </td>
+                
                 <td className="border p-1">
                   <input
                     type="text"
@@ -828,6 +863,14 @@ const ManageStockPage = (props) => {
                     type="text"
                     value={filters.createdAt}
                     onChange={(e) => handleFilterChange(e, "createdAt")}
+                    className="w-full p-1 border rounded text-black"
+                  />
+                </td>
+                <td className="border p-1">
+                  <input
+                    type="text"
+                    value={filters.purchase}
+                    onChange={(e) => handleFilterChange(e, "price")}
                     className="w-full p-1 border rounded text-black"
                   />
                 </td>
@@ -852,10 +895,13 @@ const ManageStockPage = (props) => {
                   <td className="border p-2 text-center">{tab.category}</td>
                   <td className="border p-2 text-center">{tab.company}</td>
                   <td className="border p-2 text-center">{tab.salt}</td>
+                  <td className="border p-2 text-center">{tab.mg}</td>
+                  <td className="border p-2 text-center">{tab.strips}</td>
                   <td className="border p-2 text-center">{tab.quantity}</td>
                   <td className="border p-2 text-center">₹{tab.mrp}</td>
-                  <td className="border p-2 text-center">₹{tab.purchase}</td>
                   <td className="border p-2 text-center">₹{tab.price}</td>
+                  <td className="border p-2 text-center">₹{tab.purchase}</td>
+                  
                   <td className="border p-2 text-center">
                     {tab.createdAt?.split("T")[0]}
                   </td>

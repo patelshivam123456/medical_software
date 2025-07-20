@@ -71,19 +71,21 @@ if (req.method === 'PUT') {
         if (!Number.isFinite(revertQty)) continue;
   
         await Tablet.updateOne(
-          { name: oldItem.name, packaging: oldItem.packing },
+          { batch: oldItem.batch },
           { $inc: { quantity: -revertQty } } // ✅ rollback old quantity
         );
       }
   
       // 3. Apply NEW returnquantity to stock (increase stock)
       for (const newItem of req.body.tablets) {
+        const applyStr=Number(newItem.strips)
+        const applyFree= Number(newItem.free)
         const applyQty = Number(newItem.returnquantity);
         if (!Number.isFinite(applyQty)) continue;
   
         await Tablet.updateOne(
-          { name: newItem.name, packaging: newItem.packing },
-          { $inc: { quantity: applyQty } } // ✅ apply new quantity
+          { batch: newItem.batch },
+          { $inc: {strips:(applyStr+applyFree), quantity: applyQty } } // ✅ apply new quantity
         );
       }
   

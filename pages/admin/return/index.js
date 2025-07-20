@@ -172,12 +172,14 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
   }, [searchTerm, billNumbers]);
 
   useEffect(() => {
-    const quantity = parseFloat(formFields.returnquantity) || 0;
+    // const quantity = parseFloat(formFields.returnquantity) || 0;
     const rate = parseFloat(formFields.rate) || 0;
-    const packing= formFields?.packing?.split("*")[1]
-    const total = (rate/Number(packing))*quantity;
-    setFormFields((prev) => ({ ...prev, total: total.toFixed(2) }));
-  }, [formFields.returnquantity, formFields.rate]);
+    const packing= formFields?.packing?.split("*")[1];
+    const strip=formFields?.strips
+    const total = Number(rate)*Number(strip);
+    const quantity =Number(packing)*(Number(strip)+Number(formFields?.free))
+    setFormFields((prev) => ({ ...prev,returnquantity:quantity, total: total.toFixed(2) }));
+  }, [formFields.returnquantity, formFields.strips,formFields.free]);
 
   const handleExpiryChange = (e) => {
     let value = e.target.value.replace(/[^\d]/g, "");
@@ -217,6 +219,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       category,
       free,
       hsm,
+      strips
     } = formFields;
 
     if (
@@ -232,7 +235,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       !gst ||
       !lessquantity ||
       !returnquantity||
-      !category
+      !category||!strips
     ) {
       toast.error("Please fill all fields before adding.");
       return;
@@ -246,6 +249,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
 
     // ✅ Calculate strips
     const strip = calculateStrips(packing, parseInt(lessquantity));
+    const lessquantityCount=Number(packing?.split("*")[1])*(Number(strips)+Number(free))
 
     const newTablet = {
       name: name.trim(),
@@ -262,12 +266,12 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       cgst: Number(gst) / 2,
       total: Number(total),
       gst: Number(gst),
-      lessquantity: Number(lessquantity),
+      lessquantity: Number(lessquantityCount),
       returnquantity:Number(returnquantity),
       category: category.trim(),
       free: Number(free),
       hsm: hsm.trim(),
-      strips:Number(strip),
+      strips:Number(strips),
     };
     const isDuplicate = tablets.some((tablet, index) => {
       if (editingIndex !== null && editingIndex === index) return false;
@@ -316,6 +320,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       category: "",
       free: 0,
       hsm: "",
+      strips:0
     });
 
     setShowSuggestions(false);
@@ -340,6 +345,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       category: tablet.category || "",
       free: tablet.free || 0,
       hsm: tablet.hsm || "",
+      strips:tablet.strips||0
     });
   
     setEditingIndex(index); // 🔁 Remember which row is being edited
@@ -370,6 +376,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       category: "",
       free: 0,
       hsm: "",
+      strips:0
     });
   };
   
@@ -391,10 +398,12 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       const returnQty = Number(tab.returnquantity) || 0;
       const rate = Number(tab.rate) || 0;
       const packing= Number(tab?.packing?.split("*")[1])
+      const strips=Number(tab?.strips)||0
+      const Free=Number(tab?.free)||0
       return {
         ...tab,
-        returnquantity: returnQty,
-        total: returnQty > 0 ? +((rate / packing)*returnQty).toFixed(2) : 0,
+        returnquantity: Number(packing)*(Number(strips)+Number(Free)),
+        total: strips > 0 ? Number(strips)*Number(rate).toFixed(2) : 0,
       };
     });
 
@@ -686,6 +695,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       category: "",
       free: 0,
       hsm: "",
+      strips:0
     });
     toast.success("Reset successfully");
   };
@@ -796,6 +806,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       category: "",
       free: 0,
       hsm: "",
+      strips:0
     });
   };
 
@@ -1177,6 +1188,36 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
                   required
                 />
               </div> */}
+              <div className="w-full md:w-[10%] ">
+                <label>Strips</label>
+                <input
+                  type="number"
+                  value={formFields.strips}
+                  onChange={(e) =>
+                    setFormFields({
+                      ...formFields,
+                      strips: e.target.value,
+                    })
+                  }
+                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  required
+                />
+              </div>
+              <div className="w-full md:w-[10%] ">
+                <label>Free</label>
+                <input
+                  type="number"
+                  value={formFields.free}
+                  onChange={(e) =>
+                    setFormFields({
+                      ...formFields,
+                      free: e.target.value,
+                    })
+                  }
+                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  required
+                />
+              </div>
 
               <div className="w-full md:w-[10%] ">
                 <label>Quantity</label>
@@ -1198,14 +1239,15 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
                 <label>Return Quantity</label>
                 <input
                   type="number"
-                  value={formFields.returnquantity}
+                  value={formFields.strips>0?formFields.returnquantity:0}
                   onChange={(e) =>
                     setFormFields({
                       ...formFields,
                       returnquantity: e.target.value,
                     })
                   }
-                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  disabled
+                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
                   required
                 />
               </div>
@@ -1213,7 +1255,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
               <div className="w-full md:w-[10%] ">
                 <label>Total</label>
                 <input
-                  value={formFields.returnquantity>0?formFields.total:0}
+                  value={formFields.strips>0?formFields.total:0}
                   onChange={(e) =>
                     setFormFields({ ...formFields, total: e.target.value })
                   }
@@ -1269,10 +1311,11 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
           <th className="p-2 min-w-[200px]">Name</th>
           <th className="p-2">Batch</th>
           <th className="p-2">Packing</th>
-         
+          <th className="p-2">Free</th>
+          <th className="p-2">Strips</th>
           <th className="p-2">LessQty</th>
           <th className="p-2">ReturnQty</th>
-          <th className="p-2">Strips</th>
+       
           <th className="p-2">Rate</th>
           <th className="p-2">Total</th>
           <th className="p-2">Actions</th>
@@ -1289,14 +1332,15 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       <td className="p-2 min-w-[200px]">{t.name}</td>
       <td className="p-2">{t.batch}</td>
       <td className="p-2">{t.packing}</td>
-     
+      <td className="p-2">{t.free}</td>
+      <td className="p-2">{t.strips}</td>
       <td className="p-2 text-center">{t.lessquantity}</td>
 
       {/* ✅ show 0 if not present */}
       <td className="p-2 text-center">{returnQty}</td>
-      <td className="p-2 text-center">
+      {/* <td className="p-2 text-center">
     {calculateStrips(t.packing, parseInt(returnQty || 0))}
-  </td>
+  </td> */}
       <td className="p-2 text-center">{t.rate}</td>
 
       {/* ✅ show total based on returnquantity */}
@@ -1722,7 +1766,7 @@ export async function getServerSideProps(context) {
   }
 
   // Only allow admin or sales
-  if (loggedIn && loginType !== "admin" && loginType !== "stockiest") {
+  if (loggedIn && loginType !== "admin" && loginType !== "sales") {
     return {
       props: {},
       redirect: { destination: "/admin" },
