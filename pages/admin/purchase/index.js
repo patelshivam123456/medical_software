@@ -318,7 +318,7 @@ const handleAddTablet = () => {
     cgst: "CGST (%)",
     sgst: "SGST (%)",
     grandtotal: "Grand Total",
-    salesperson: "Sales Person",
+    salesperson: "Purchase Person",
     branch: "Branch Code",
     branchName: "Branch Name",
     address1: "Address Line 1",

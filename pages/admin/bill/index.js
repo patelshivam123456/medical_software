@@ -63,7 +63,8 @@ const Index = (props) => {
     category: "",
     free: 0,
     hsm: "",
-    strips:0
+    strips:0,
+    checkrate:0
   });
 
   // for custom dropdown
@@ -87,6 +88,7 @@ const Index = (props) => {
   const [isLoggedCheck,setIsLoggedCheck] = useState('')
   const [saveBillNo,setSaveBillNo]= useState('')
   const [filterType, setFilterType] = useState("all");
+
 const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
 
   const now = new Date();
@@ -219,19 +221,29 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
     );
   }, [searchTerm, billNumbers]);
 
- 
-
   useEffect(() => {
-    const strip = Number(formFields.strips);
+    const ratecount = Number(formFields.rate);
+    const ratecheck=Number(formFields.checkrate)-Number(formFields.rate)
+    const today = new Date();
+    const formattedDate = `${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getFullYear()).slice(-2)}`;
+    if(formattedDate===formFields.expiry){
+     toast.error("Alert!! Your Product has been Expired||")
+    }
+    else if(formFields.rate>0&&formFields.rate<formFields.checkrate){
+      const timer = setTimeout(()=>{
+      toast.error(`Your Sell price is less then purchase prize,your are lose ${ratecheck}`)
+    },700)
+    return ()=>clearTimeout(timer)
+    }
   
-    if (strip> 0 && editingIndex === null) {
+    else if (ratecount> 0 && editingIndex === null&&formattedDate!==formFields.expiry) {
       const timer = setTimeout(() => {
         addMoreTablet();
       }, 1200);
   
       return () => clearTimeout(timer);
     }
-  }, [formFields.strips]);
+  }, [formFields.rate,formFields.expiry]);
   
 
   const handleExpiryChange = (e) => {
@@ -739,42 +751,6 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
   };
   
 
-  // const handleTitleChange = (value) => {
-  //   setTitle(value);
-  //   setClientName("");
-  //   setSelectedClient(null);
-  //   setInputValue("");
-  //   setMobile("");
-  //   setBranch("");
-  //   setBranchName("");
-  //   setAddress1("");
-  //   setAddress2("");
-  //   setPinCode("");
-  //   setState("");
-  //   const filtered = allClients.filter((c) => c.title === value);
-  //   setFilteredClientNames(filtered);
-  // };
-
-  // const handleClientNameChange = (value) => {
-  //   setClientName(value);
-
-  //   const found = filteredClientNames.find(
-  //     (c) => c.clientName.toLowerCase() === value.toLowerCase()
-  //   );
-
-  //   if (found) {
-  //     setSelectedClient(found);
-  //     setMobile(found.mobile || "");
-  //     setBranch(found.branch || "");
-  //     setBranchName(found.branchName || "");
-  //     setAddress1(found.address1 || "");
-  //     setAddress2(found.address2 || "");
-  //     setPinCode(found.pinCode || "");
-  //     setState(found.state || "");
-  //   } else {
-  //     setSelectedClient(null);
-  //   }
-  // };
   
   const handleTitleChange = (value) => {
     setTitle(value);
@@ -791,7 +767,6 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
     setMobileOptions([]);
   
     const filtered = Object.values(groupedClients).map((clients) => {
-      // Pick first client of each group that matches the title
       const match = clients.find((c) => c.title === value);
       return match;
     }).filter(Boolean);
@@ -816,7 +791,6 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
     const matchingClients = groupedClients[nameKey] || [];
   
     if (matchingClients.length === 1) {
-      // Only one client → auto-fill everything
       const client = matchingClients[0];
       setMobile(client.mobile || "");
       setBranch(client.branch || "");
@@ -828,7 +802,6 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       setMobileOptions([]);
       setClientMobileGroup([]);
     } else if (matchingClients.length > 1) {
-      // Multiple clients → show mobile dropdown
       setMobileOptions(matchingClients.map((c) => c.mobile));
       setClientMobileGroup(matchingClients);
     }
@@ -886,17 +859,6 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       );
   }, [searchTerm, activeBills, filterType, customDateRange]);
 
-  // const calculateStrips=(packing, quantity)=> {
-  //   if (!packing || !quantity) return 0;
-
-  //   const parts = packing.split("*");
-  //   if (parts.length !== 2) return 0;
-  
-  //   const multiplier = parseInt(parts[1], 10);
-  //   if (isNaN(multiplier) || multiplier === 0) return 0;
-  
-  //   return Math.floor(quantity / multiplier);
-  // }
 
   const calculateStrips = (packing, quantity) => {
     if (!packing || !quantity) return "0";
@@ -931,17 +893,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         <form onSubmit={handleSubmit} className="mb-6 w-full max-w-7xl gap-5">
           <div className="lg:flex justify-between lg:items-center">
             <div className="w-full lg:w-1/2 flex items-center gap-3">
-            {/* <div className="w-[60%] md:w-[20%] lg:mb-6">
-              <label>Invoice No:</label>
-              <input
-                type="number"
-                required
-                value={billNo}
-                disabled={isEditingBill === "edit"}
-                onChange={(e) => setBillNo(e.target.value)}
-                className={`block w-full text-black ${isEditingBill === "edit"?"bg-gray-200 cursor-not-allowed":"bg-white"} border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white`}
-              />
-            </div> */}
+           
             <div className="w-full md:w-[50%] lg:mb-6">
               <label>Sales Person:</label>
               <input
@@ -1048,7 +1000,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                             packing: t.packaging || "",
                             quantity: t.quantity,
                             category: t.category,
-                            rate: t.rate || t.price || "",
+                            rate: "",
                             company: t.company,
                             salt: t.salt,
                             discount: 10,
@@ -1060,7 +1012,8 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                             total: (1 * (t.rate || t.price || 0)).toFixed(2),
                             lessquantity:"",
                             free:"",
-                            strips:""
+                            strips:"",
+                            checkrate:t.price
                           });
                           setShowSuggestions(false);
                         }}
@@ -1178,32 +1131,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                 />
               </div>
 
-              <div className="w-full md:w-[12%] ">
-                <label>MRP</label>
-                <input
-                  type="number"
-                  value={formFields.price}
-                  onChange={(e) =>
-                    setFormFields({ ...formFields, price: e.target.value })
-                  }
-                  disabled
-                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
-                  required
-                />
-              </div>
-
-              <div className="w-full md:w-[12%] ">
-                <label>Rate</label>
-                <input
-                  type="number"
-                  value={formFields.rate}
-                  onChange={(e) =>
-                    setFormFields({ ...formFields, rate: e.target.value })
-                  }
-                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
-                  required
-                />
-              </div>
+              
 
               <div className="w-full md:w-[8%] ">
                 <label>Discount %</label>
@@ -1311,6 +1239,32 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                       ...formFields,
                       strips: e.target.value,
                     })
+                  }
+                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  required
+                />
+              </div>
+              <div className="w-full md:w-[12%] ">
+                <label>MRP</label>
+                <input
+                  type="number"
+                  value={formFields.price}
+                  onChange={(e) =>
+                    setFormFields({ ...formFields, price: e.target.value })
+                  }
+                  disabled
+                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
+                  required
+                />
+              </div>
+
+              <div className="w-full md:w-[12%] ">
+                <label>Rate</label>
+                <input
+                  type="number"
+                  value={formFields.rate}
+                  onChange={(e) =>
+                    setFormFields({ ...formFields, rate: e.target.value })
                   }
                   className="border p-2 w-full bg-white text-black outline-none rounded-sm"
                   required
@@ -1789,6 +1743,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         <ConfirmationModal loading={loading} title={"Are you sure want to delete this Invoice?"}
         confirmDeleteId={confirmDeleteId} setConfirmDeleteId={setConfirmDeleteId} confirmDelete={handleDeleteBill}/>
       </div>
+   
      
     </>
   );

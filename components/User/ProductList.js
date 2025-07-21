@@ -2,15 +2,14 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
+import { useCart } from "@/context/CartContext";
 
 const ProductList = () => {
   const [groupedTablets, setGroupedTablets] = useState([]);
   const [stripCounts, setStripCounts] = useState({});
   const [selectedMG, setSelectedMG] = useState({});
-  const [mobile, setMobile] = useState("8707868591");
-  const [cart, setCart] = useState([]);
   const [loadingTablets, setLoadingTablets] = useState(true);
-  const [loadingCart, setLoadingCart] = useState(true);
+  const { cart, setCart, fetchCart, mobile } = useCart();
 
   const router = useRouter();
   const { category } = router.query;
@@ -61,9 +60,28 @@ const ProductList = () => {
         const res = await axios.get("/api/tablets");
         const data = Array.isArray(res.data) ? res.data : res.data.tablets;
 
-        const filtered = category
+        // const filtered = category
+        //   ? data.filter((tab) => tab.category?.toLowerCase() === category.toLowerCase())
+        //   : data;
+        const filtered = (category
           ? data.filter((tab) => tab.category?.toLowerCase() === category.toLowerCase())
-          : data;
+          : data
+        ).filter((tab) => {
+          if (!tab.expiry) return true; // Keep if no expiry info
+        
+          const [expMonth, expYear] = tab.expiry.split("/").map(Number);
+          if (!expMonth || !expYear) return true; // Invalid format, keep as fallback
+        
+          const today = new Date();
+          const currentMonth = today.getMonth() + 1; // JS months are 0-based
+          const currentYear = today.getFullYear() % 100; // Convert to 2-digit year
+        
+          // Exclude if expiry is in the past or current month
+          if (expYear < currentYear) return false;
+          if (expYear === currentYear && expMonth <= currentMonth) return false;
+        
+          return true; // Still valid
+        });
 
         const grouped = {};
         filtered.forEach((tab) => {
@@ -106,22 +124,11 @@ const ProductList = () => {
     fetchTablets();
   }, [category]);
 
-  useEffect(() => {
-    if (!mobile) return;
-    const fetchCart = async () => {
-      setLoadingCart(true);
-      try {
-        const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
-        setCart(res.data || []);
-      } catch (err) {
-        console.error("❌ Error fetching cart:", err);
-      } finally {
-        setLoadingCart(false);
-      }
-    };
 
+  useEffect(() => {
     fetchCart();
-  }, [mobile]);
+  }, [fetchCart]);
+  
 
   const handleStripChange = (productName, value) => {
     setStripCounts((prev) => ({ ...prev, [productName]: value }));
@@ -175,10 +182,12 @@ const ProductList = () => {
     };
 
     try {
+
       await axios.post("/api/order/cart", payload);
-      const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
+await fetchCart();
+toast.success("🛒 Added to cart successfully");
+const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
       setCart(res.data || []);
-      toast.success("🛒 Added to cart successfully");
     } catch (err) {
       console.error("❌ Failed to add to cart:", err);
       toast.error("Failed to add to cart");
@@ -194,10 +203,9 @@ const ProductList = () => {
       await axios.delete("/api/order/cart", {
         data: { productId: tablet._id, mobile }
       });
-      setCart((prev) => prev.filter((item) => !(item._id === tablet._id)));
+
       toast.success("Item removed from cart");
-  
-      // Optional re-fetch to sync
+      await fetchCart();
       const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
       setCart(res.data || []);
     } catch (err) {

@@ -26,6 +26,7 @@
     "react-dom": "^19.0.0",
     "react-modal": "^3.16.3",
     "react-toastify": "^11.0.5",
+    "styled-components": "^6.1.19",
     "swr": "^2.3.4",
     "twilio": "^5.7.3",
     "xlsx": "^0.18.5"

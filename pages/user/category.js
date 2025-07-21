@@ -36,6 +36,8 @@ const Category = () => {
     "CREME": "/category/creme.jpg",
     "DRY SYP": "/category/drysyp.jpg",
     "INJ": "/category/inj.jpg",
+    "OIL":"/category/oil.jpg",
+    "GEL":"/category/gel.jpg",
   };
 
   return (

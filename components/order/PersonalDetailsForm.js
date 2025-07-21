@@ -99,7 +99,7 @@ const PersonalDetailsForm = ({ onSave, initialData, registeredMobile }) => {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow-md space-y-4">
+      <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow-md space-y-4 max-w-3xl mx-auto">
         <h2 className="text-xl font-semibold mb-2">Personal Details</h2>
 
         <label className="flex items-center space-x-2">
