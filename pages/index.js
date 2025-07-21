@@ -1,10 +1,20 @@
+import Banner from '@/components/User/Banner'
+import ContactUs from '@/components/User/ContactUs'
+import FeatureSection from '@/components/User/FeatureSection'
+import Footer from '@/components/User/Footer'
 import Header from '@/components/User/Header'
+import Product from '@/components/User/Product'
 import React from 'react'
 
 const index = (props) => {
   return (
     <div>
       <Header/>
+      <Banner/>
+      <Product/>
+      <FeatureSection/>
+      <ContactUs/>
+      <Footer/>
     </div>
   )
 }

@@ -899,8 +899,8 @@ const ManageStockPage = (props) => {
                   <td className="border p-2 text-center">{tab.strips}</td>
                   <td className="border p-2 text-center">{tab.quantity}</td>
                   <td className="border p-2 text-center">₹{tab.mrp}</td>
-                  <td className="border p-2 text-center">₹{tab.price}</td>
                   <td className="border p-2 text-center">₹{tab.purchase}</td>
+                  <td className="border p-2 text-center">₹{tab.price}</td>
                   
                   <td className="border p-2 text-center">
                     {tab.createdAt?.split("T")[0]}

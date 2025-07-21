@@ -166,8 +166,8 @@ if (req.method === "POST") {
           name: item.name?.trim().toLowerCase(),
           packaging: item.packing?.trim().toLowerCase() || "strip",
           quantity: item.quantity,  // ✅ Fixed this line
-          purchase: item.purchase || item.rate || 0,
-          price: item.price || item.mrp || item.rate || 0,
+          purchase: item.price || 0,
+          price: item.rate  || 0,
           batch: item.batch || '',
           expiry: item.expiry || '',
           mrp: item.mrp || '',
