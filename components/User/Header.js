@@ -133,6 +133,9 @@ const Header=({losdingState,orderRefresh,moveOnStep})=> {
         <a href="/user/product/product-list" className="text-sm/6 font-semibold text-gray-900">
             Product
           </a>
+          <a href="/user/category" className="text-sm/6 font-semibold text-gray-900">
+            Category
+          </a>
         <a href="/user/aboutus" className="text-sm/6 font-semibold text-gray-900">
             About us
           </a>
@@ -143,14 +146,16 @@ const Header=({losdingState,orderRefresh,moveOnStep})=> {
         </PopoverGroup>
         <div className="hidden lg:flex gap-4 lg:flex-1 lg:justify-end items-center">
        
-  <div className="relative cursor-pointer" onClick={() => setShowCartModal(true)}>
+  <a href="/order" className="relative cursor-pointer"
+  // onClick={() => setShowCartModal(true)}
+  >
     <ShoppingCartIcon className='w-6 h-6' />
     {cart.length > 0 && (
       <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5">
         {cart.length}
       </span>
     )}
-  </div>
+  </a>
   <div className=" cursor-pointer" onClick={() => setShowOrdersModal(true)}>
   <ShoppingBagIcon className='w-6 h-6' />
 </div>
@@ -193,6 +198,12 @@ const Header=({losdingState,orderRefresh,moveOnStep})=> {
                   className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
                 >
                   Product
+                </a>
+                <a
+                  href="/user/category"
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                >
+                  Category
                 </a>
               <a
                   href="/user/aboutus"

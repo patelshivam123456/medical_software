@@ -96,7 +96,7 @@ console.log(orderId,"jhjkk");
       lessquantity: item.quantity,
       free: 0,
       packing: item.packaging,
-      strips: 0,
+      strips: item.strips,
       rate: item.price,
       discount: 0,
       hsm: "",
@@ -105,19 +105,53 @@ console.log(orderId,"jhjkk");
   };
   
   // ✅ API POST with ONLY the requested keys
+  // const sendBillData = async () => {
+  //   try {
+  //     const response = await axios.post("/api/bills", {
+  //       salesperson: billdata.salesperson,
+  //       paymenttype: billdata.paymenttype,
+  //       ordertype: billdata.ordertype,
+  //       orderid: billdata.orderid,
+  //       dispatchDate:billdata.dispatchDate,
+  //       tablets: billdata.tablets,
+  //       discount: Number(billdata.discount),
+  //       sgst: Number(billdata.sgst),
+  //       cgst: Number(billdata.cgst),
+  //       gst: Number(billdata.gst),
+  //       clientName: billdata.clientName,
+  //       branchName: billdata.branchName,
+  //       branch: billdata.branch,
+  //       address1: billdata.address1,
+  //       address2: billdata.address2,
+  //       pinCode: billdata.pinCode,
+  //       state: billdata.state,
+  //       title: billdata.title,
+  //       mobile: billdata.mobile,
+  //     });
+  
+  //     console.log("✅ Bill saved successfully:", response.data);
+  //     toast.success("Bill saved successfully!");
+  //     fetchBills()
+  //     handleApprove()
+  //   } catch (err) {
+  //     console.error("❌ Error saving bill:", err);
+  //     toast.error("Failed to save bill");
+  //   }
+  // };
+
   const sendBillData = async () => {
     try {
-      const response = await axios.post("/api/bills", {
+      const payload = {
         salesperson: billdata.salesperson,
         paymenttype: billdata.paymenttype,
         ordertype: billdata.ordertype,
         orderid: billdata.orderid,
-        dispatchDate:billdata.dispatchDate,
+        dispatchDate: billdata.dispatchDate,
         tablets: billdata.tablets,
-        discount: Number(billdata.discount),
-        sgst: Number(billdata.sgst),
-        cgst: Number(billdata.cgst),
-        gst: Number(billdata.gst),
+        discount: Number(billdata.discount || 0),
+        sgst: Number(billdata.sgst || 0),
+        cgst: Number(billdata.cgst || 0),
+        gst: Number(billdata.gst || 0),
         clientName: billdata.clientName,
         branchName: billdata.branchName,
         branch: billdata.branch,
@@ -127,22 +161,37 @@ console.log(orderId,"jhjkk");
         state: billdata.state,
         title: billdata.title,
         mobile: billdata.mobile,
-      });
+      };
   
-      console.log("✅ Bill saved successfully:", response.data);
-      toast.success("Bill saved successfully!");
-      fetchBills()
-      handleApprove()
+      const response = await axios.post("/api/bills", payload);
+  
+      if (response.data.success) {
+        toast.success("✅ Bill saved successfully!");
+        console.log("✅ Server response:", response.data);
+        fetchBills();
+        handleApprove();
+      } else {
+        toast.error(`❌ Failed to save bill: ${response.data.message}`);
+        console.warn("⚠️ Response error:", response.data);
+      }
     } catch (err) {
-      console.error("❌ Error saving bill:", err);
-      toast.error("Failed to save bill");
+      if (err.response) {
+        // API error with response
+        console.error("❌ API Error:", err.response.data);
+        toast.error(`❌ ${err.response.data.message || "Error saving bill"}`);
+      } else if (err.request) {
+        // No response received
+        console.error("❌ No response from server:", err.request);
+        toast.error("❌ No response from server. Please check your connection.");
+      } else {
+        // Other errors
+        console.error("❌ Unexpected error:", err.message);
+        toast.error("❌ Unexpected error occurred");
+      }
     }
   };
   const fetchBills= async () => {
     const res = await axios.get("/api/bills");
-    // setBillNumbers(res.data.bills);
-    // setSaveBillNo(res.data.bills[0])
-    // setModalOpen(true);
     router.push("/admin/bill/"+res.data.bills[0].billNo)
   };
   return (

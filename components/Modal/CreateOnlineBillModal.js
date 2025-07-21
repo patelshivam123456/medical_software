@@ -16,7 +16,7 @@ const CreateOnlineBillModal = ({ data,onClick,date }) => {
     mobile: data.personalDetails?.mobile || "",
     state: data.personalDetails?.state || "",
     pinCode: data.personalDetails?.pincode || "",
-    salesperson: "Admin",
+    salesperson: data.personalDetails?.salesperson||"",
     paymenttype: data.paymentDetails?.type || "N/A",
     gst: 12, // static or make dynamic based on product if needed
     discount: 0, // static unless available in data

@@ -26,7 +26,8 @@ const ProductSchema = new mongoose.Schema({
   mg:String,
   category:String,
   packaging:String,
-  mrp:Number        
+  mrp:Number,
+  strips:Number,        
 }, { _id: false });
 
 const PersonalDetailsSchema = new mongoose.Schema({
