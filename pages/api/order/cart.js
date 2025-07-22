@@ -13,17 +13,18 @@ export default async function handler(req, res) {
       ...item.product,
       quantity: item.quantity,
       price:item.price,
+      strips:item.strips,
       _id: item.productId
     })));
   }
 
   if (req.method === 'POST') {
-    const { _id, quantity,price, ...product } = req.body;
-    if (!_id || !quantity || !price) {
+    const { _id, quantity,strips,price, ...product } = req.body;
+    if (!_id || !quantity||!strips || !price) {
       return res.status(400).json({ message: 'Missing product data' });
     }
   
-    const total = price /quantity;
+    const total = price*strips;
   
     const existing = await Cart.findOne({ mobile, productId: _id });
     if (existing) {
@@ -37,6 +38,7 @@ export default async function handler(req, res) {
         productId: _id,
         quantity,
         price,
+        strips,
         total,
         product
       });
@@ -67,7 +69,28 @@ export default async function handler(req, res) {
     await Cart.deleteMany({ mobile });
     return res.status(200).json({ message: 'Cart cleared' });
   }
-  
+  if (req.method === 'PUT') {
+    const { _id, mobile: bodyMobile, strips, quantity, total, price } = req.body;
+    const mobileToUse = bodyMobile || mobile;
+
+    if (!_id || !strips || !quantity || !price) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const existing = await Cart.findOne({ mobile: mobileToUse, productId: _id });
+
+    if (!existing) {
+      return res.status(404).json({ message: 'Cart item not found' });
+    }
+
+    existing.strips = strips;
+    existing.quantity = quantity;
+    existing.total = total;
+    existing.price = price;
+
+    await existing.save();
+    return res.status(200).json({ message: 'Cart updated successfully' });
+  }
 
   return res.status(405).json({ message: 'Method Not Allowed' });
 }

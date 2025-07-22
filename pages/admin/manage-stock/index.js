@@ -677,7 +677,7 @@ const ManageStockPage = (props) => {
           <div className="w-full md:w-[30%] px-3 mb-6 md:mb-0">
             <div className="pb-1 text-base">Mg</div>
             <input
-              type="number"
+              type="text"
               value={mg}
               onChange={(e) => setMg(e.target.value)}
               placeholder="mg"

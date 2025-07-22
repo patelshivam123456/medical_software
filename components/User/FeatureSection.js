@@ -1,44 +1,46 @@
-import { CloudArrowUpIcon, LockClosedIcon, ServerIcon } from '@heroicons/react/20/solid'
+import { TruckIcon, ShieldCheckIcon, ClockIcon } from '@heroicons/react/20/solid';
 
 const features = [
   {
-    name: 'Push to deploy.',
+    name: 'Fast & Reliable Delivery',
     description:
-      'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis ratione.',
-    icon: CloudArrowUpIcon,
+      'Get your medicines delivered to your doorstep on time, every time. We ensure same-day or next-day delivery in most areas.',
+    icon: TruckIcon,
   },
   {
-    name: 'SSL certificates.',
-    description: 'Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo.',
-    icon: LockClosedIcon,
+    name: '100% Genuine Medicines',
+    description:
+      'We partner directly with licensed pharmacies and distributors to ensure every product is safe and verified.',
+    icon: ShieldCheckIcon,
   },
   {
-    name: 'Database backups.',
-    description: 'Ac tincidunt sapien vehicula erat auctor pellentesque rhoncus. Et magna sit morbi lobortis.',
-    icon: ServerIcon,
+    name: '24/7 Order Support',
+    description:
+      'Whether it’s late night or early morning, our support team is always available to assist you with your orders.',
+    icon: ClockIcon,
   },
-]
+];
 
-const FeatureSection=()=> {
+const FeatureSection = () => {
   return (
     <div className="overflow-hidden bg-gray-900 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
           <div className="lg:pt-4 lg:pr-8">
             <div className="lg:max-w-lg">
-              <h2 className="text-base/7 font-semibold text-indigo-400">Deploy faster</h2>
-              <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">
-                A better workflow
+              <h2 className="text-base/7 font-semibold text-green-400">Our Vision</h2>
+              <p className="mt-2 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+                Making Healthcare Accessible
               </p>
-              <p className="mt-6 text-lg/8 text-gray-300">
-                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque,
-                iste dolor cupiditate blanditiis ratione.
+              <p className="mt-6 text-lg text-gray-300">
+                We aim to revolutionize the way you access healthcare products by combining technology with trust.
+                From life-saving medications to wellness essentials, we bring everything to your fingertips.
               </p>
-              <dl className="mt-10 max-w-xl space-y-8 text-base/7 text-gray-400 lg:max-w-none">
+              <dl className="mt-10 max-w-xl space-y-8 text-base text-gray-400 lg:max-w-none">
                 {features.map((feature) => (
                   <div key={feature.name} className="relative pl-9">
                     <dt className="inline font-semibold text-white">
-                      <feature.icon aria-hidden="true" className="absolute top-1 left-1 size-5 text-indigo-400" />
+                      <feature.icon className="absolute top-1 left-1 size-5 text-green-400" aria-hidden="true" />
                       {feature.name}
                     </dt>{' '}
                     <dd className="inline">{feature.description}</dd>
@@ -48,8 +50,8 @@ const FeatureSection=()=> {
             </div>
           </div>
           <img
-            alt="Product screenshot"
-            src="https://tailwindcss.com/plus-assets/img/component-images/dark-project-app-screenshot.png"
+            alt="Healthcare Vision"
+            src="/vision.jpg"
             width={2432}
             height={1442}
             className="w-3xl max-w-none rounded-xl shadow-xl ring-1 ring-white/10 sm:w-228 md:-ml-4 lg:-ml-0"
@@ -57,6 +59,7 @@ const FeatureSection=()=> {
         </div>
       </div>
     </div>
-  )
-}
-export default FeatureSection
+  );
+};
+
+export default FeatureSection;

@@ -6,6 +6,7 @@ const cartSchema = new mongoose.Schema({
   product: { type: Object, required: true }, // includes name, companyName, batch, expiry, salt etc.
   quantity: { type: Number, required: true },
   price: { type: Number, required: true },
+  strips: { type: Number, required: true }, 
   total: { type: Number, required: true }
 }, { timestamps: true });
 
