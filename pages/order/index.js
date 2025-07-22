@@ -178,9 +178,9 @@ const OrderPage = () => {
       <div className="p-4 md:max-w-5xl mx-auto">
         <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
 
-        <div className="flex flex-col sm:flex-row justify-center items-center mb-1 gap-2 sm:gap-0">
+        <div className="flex flex-row justify-center items-center mb-1 gap-0 sm:gap-0">
           {[1, 2, 3].map((num, index) => (
-            <div key={num} className="flex flex-col sm:flex-row items-center">
+            <div key={num} className="flex flex-row items-center">
               {/* Step circle */}
               <button
                 onClick={() => step >= num && setStep(num)}
@@ -208,8 +208,8 @@ const OrderPage = () => {
                   className={`
             transition-all duration-100 ease-in-out 
             ${step > num ? "bg-green-600" : "bg-gray-300"}
-            mx-0 sm:mx-0 my-2 sm:my-0
-            ${"h-10 sm:h-0.5 sm:w-50 w-0.5"}
+            mx-0 sm:mx-0 my-0 sm:my-0
+            ${"h-0.5 sm:w-50 w-14"}
           `}
                 ></div>
               )}
@@ -415,7 +415,7 @@ const OrderPage = () => {
                           Grand Total
                         </dt>
                         <dd class="text-base font-bold text-gray-900 ">
-                          {(
+                          {Math.ceil(
                             selectedCartItems.reduce((s, i) => s + i.total, 0) *
                             1.12
                           ).toFixed(2)}

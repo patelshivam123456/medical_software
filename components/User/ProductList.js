@@ -3,6 +3,8 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { useCart } from "@/context/CartContext";
+import ProductCard from "./ProductCard";
+import LoaderComp from "./LoaderComp";
 
 const ProductList = () => {
   const [groupedTablets, setGroupedTablets] = useState([]);
@@ -52,6 +54,26 @@ const ProductList = () => {
         : `/user/product/product-list`
     );
   };
+  useEffect(() => {
+    const mgInit = {};
+    const stripInit = {};
+    groupedTablets.forEach((product) => {
+      const cartItem = cart.find(
+        (item) =>
+          item.name === product.name && product.mgOptions.includes(item.mg)
+      );
+      if (cartItem) {
+        mgInit[product.name] = cartItem.mg;
+        stripInit[product.name] = cartItem.strips;
+      } else {
+        mgInit[product.name] = product.mgOptions[0];
+        stripInit[product.name] = 1;
+      }
+    });
+
+    setSelectedMG(mgInit);
+    setStripCounts(stripInit);
+  }, [groupedTablets, cart]);
 
   useEffect(() => {
     const fetchTablets = async () => {
@@ -63,23 +85,26 @@ const ProductList = () => {
         // const filtered = category
         //   ? data.filter((tab) => tab.category?.toLowerCase() === category.toLowerCase())
         //   : data;
-        const filtered = (category
-          ? data.filter((tab) => tab.category?.toLowerCase() === category.toLowerCase())
-          : data
+        const filtered = (
+          category
+            ? data.filter(
+                (tab) => tab.category?.toLowerCase() === category.toLowerCase()
+              )
+            : data
         ).filter((tab) => {
           if (!tab.expiry) return true; // Keep if no expiry info
-        
+
           const [expMonth, expYear] = tab.expiry.split("/").map(Number);
           if (!expMonth || !expYear) return true; // Invalid format, keep as fallback
-        
+
           const today = new Date();
           const currentMonth = today.getMonth() + 1; // JS months are 0-based
           const currentYear = today.getFullYear() % 100; // Convert to 2-digit year
-        
+
           // Exclude if expiry is in the past or current month
           if (expYear < currentYear) return false;
           if (expYear === currentYear && expMonth <= currentMonth) return false;
-        
+
           return true; // Still valid
         });
 
@@ -91,6 +116,7 @@ const ProductList = () => {
               packaging: tab.packaging,
               category: tab.category,
               company: tab.company,
+              price:tab.price,
               mgOptions: [],
               fullTabs: [],
             };
@@ -107,7 +133,14 @@ const ProductList = () => {
         const mgInit = {};
         const stripInit = {};
         Object.values(grouped).forEach((product) => {
-          if (product.mgOptions.length > 0) {
+          const cartItem = cart.find(
+            (item) =>
+              item.name === product.name && product.mgOptions.includes(item.mg)
+          );
+          if (cartItem) {
+            mgInit[product.name] = cartItem.mg;
+            stripInit[product.name] = cartItem.strips;
+          } else {
             mgInit[product.name] = product.mgOptions[0];
             stripInit[product.name] = 3;
           }
@@ -124,27 +157,53 @@ const ProductList = () => {
     fetchTablets();
   }, [category]);
 
-
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
-  
 
   const handleStripChange = (productName, value) => {
-    setStripCounts((prev) => ({ ...prev, [productName]: value }));
+    const newStrips = Number(value);
+    setStripCounts((prev) => ({ ...prev, [productName]: newStrips }));
+
+    const product = groupedTablets.find((p) => p.name === productName);
+    if (product && isInCart(product)) {
+      updateCartStrips(product, newStrips);
+    }
   };
 
+  // const handleMGChange = (productName, mg) => {
+  //   setSelectedMG((prev) => ({ ...prev, [productName]: mg }));
+  // };
   const handleMGChange = (productName, mg) => {
     setSelectedMG((prev) => ({ ...prev, [productName]: mg }));
+
+    const product = groupedTablets.find((p) => p.name === productName);
+    if (!product) return;
+
+    // If product has only one MG, do not change strips logic (preserve behavior)
+    if (product.mgOptions.length <= 1) return;
+
+    const cartItem = cart.find(
+      (item) => item.name === productName && item.mg === mg
+    );
+    const strips = cartItem ? cartItem.strips : 1;
+
+    setStripCounts((prev) => ({
+      ...prev,
+      [productName]: strips,
+    }));
   };
 
   const isInCart = (product) => {
     const selectedMg = selectedMG[product.name];
-    return cart.some((item) => item.name === product.name && item.mg === selectedMg);
+    return cart.some(
+      (item) => item.name === product.name && item.mg === selectedMg
+    );
   };
 
   const handleAddToCart = async (product) => {
-    const selectedMg = selectedMG[product.name];
+    const selectedMg = selectedMG[product.name] || product.mgOptions[0];
+
     const strips = Number(stripCounts[product.name] || 0);
 
     if (!selectedMg || !strips || strips <= 0) {
@@ -182,11 +241,10 @@ const ProductList = () => {
     };
 
     try {
-
       await axios.post("/api/order/cart", payload);
-await fetchCart();
-toast.success("🛒 Added to cart successfully");
-const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
+      await fetchCart();
+      toast.success("🛒 Added to cart successfully");
+      const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
       setCart(res.data || []);
     } catch (err) {
       console.error("❌ Failed to add to cart:", err);
@@ -198,10 +256,10 @@ const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
     const selectedMg = selectedMG[product.name];
     const tablet = product.fullTabs.find((t) => t.mg === selectedMg);
     if (!tablet) return toast.error("Tablet not found");
-  
+
     try {
       await axios.delete("/api/order/cart", {
-        data: { productId: tablet._id, mobile }
+        data: { productId: tablet._id, mobile },
       });
 
       toast.success("Item removed from cart");
@@ -213,12 +271,50 @@ const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
       toast.error("Failed to remove item");
     }
   };
-  
+
+  const updateCartStrips = async (product, newStrips) => {
+    const selectedMg = selectedMG[product.name];
+    const tablet = product.fullTabs.find((t) => t.mg === selectedMg);
+    if (!tablet) return;
+
+    const stripCountInPack = parseInt(product.packaging.split("*")[1] || "1");
+    const quantity = stripCountInPack * newStrips;
+    const total = tablet.price * newStrips;
+    console.log(total);
+
+    const updatedPayload = {
+      _id: tablet._id,
+      strips: newStrips,
+      quantity,
+      total: total,
+      mobile,
+      price: tablet.price,
+    };
+
+    try {
+      await axios.put("/api/order/cart", updatedPayload); // Or POST if PUT not supported
+      await fetchCart();
+      const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
+      setCart(res.data || []);
+    } catch (err) {
+      console.error("❌ Failed to update cart:", err);
+      toast.error("Failed to update cart");
+    }
+  };
+
+  const categoryImages = {
+    TAB: "/category/med.jpg",
+    CREME: "/category/creme.jpg",
+    "DRY SYP": "/category/drysyp.jpg",
+    INJ: "/category/inj.jpg",
+    OIL: "/category/oil.jpg",
+    GEL: "/category/gel.jpg",
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex justify-between">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">
+      <div className="sm:flex justify-between">
+        <h2 className="text-2xl font-bold sm:mb-6 text-gray-800">
           {category ? `Category: ${category}` : "Our Products"}
         </h2>
         <div className="mb-6">
@@ -238,15 +334,16 @@ const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
           </select>
         </div>
       </div>
+      <div>
+        {/* <ProductCard /> */}
+      </div>
 
       {loadingTablets ? (
         <div className="flex justify-center items-center h-[calc(100vh-400px)]">
-          <div className="text-blue-600 font-semibold text-lg animate-pulse">
-            Loading products...
-          </div>
+          <LoaderComp/>
         </div>
       ) : groupedTablets.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {groupedTablets.map((product, index) => {
             const selectedMg = selectedMG[product.name];
             const strips = Number(stripCounts[product.name] || 0);
@@ -255,97 +352,229 @@ const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
             const alreadyInCart = isInCart(product);
 
             const handleClick = () => {
-              if(!mobile){
-toast.error("Your are not Logged In, Please Login First")
-              }else{
-              if (!selectedMg) return toast.error("Please select MG");
-              if (strips <= 0) return toast.error("Please enter a valid strip quantity");
-              if (!tablet) return toast.error("Variant not found");
-              if (availableStock === 0) return toast.error("Out of stock");
-              if (strips > availableStock) return toast.error("Insufficient stock");
+              if (!mobile) {
+                toast.error("Your are not Logged In, Please Login First");
+              } else {
+                if (!selectedMg) return toast.error("Please select MG");
+                if (strips <= 0)
+                  return toast.error("Please enter a valid strip quantity");
+                if (!tablet) return toast.error("Variant not found");
+                if (availableStock === 0) return toast.error("Out of stock");
+                if (strips > availableStock)
+                  return toast.error("Insufficient stock");
 
-              handleAddToCart(product);
+                handleAddToCart(product);
               }
             };
 
             return (
-              <div
-                key={index}
-                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border"
-              >
-                <div className="h-40 bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
-                  <span>Product Image</span>
-                </div>
+              <>
 
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-                  <p className="text-sm text-gray-600">{product.company}</p>
-                  <p className="text-sm text-gray-500 mt-1">Category: {product.category}</p>
-                  <p className="text-sm text-gray-500">Packaging: {product.packaging}</p>
-
-                  <div className="mt-3 flex flex-col sm:flex-row gap-3">
-                    <select
-                      className="border rounded-md px-3 py-2 text-sm text-gray-700 w-full"
-                      value={selectedMG[product.name] || ""}
-                      onChange={(e) => handleMGChange(product.name, e.target.value)}
-                    >
-                      <option value="">Select MG</option>
-                      {product.mgOptions.map((mg, idx) => (
-                        <option key={idx} value={mg}>
-                          {mg} mg
-                        </option>
-                      ))}
-                    </select>
-
-                    <input
-                      type="number"
-                      min={1}
-                      placeholder="Strips"
-                      className="border rounded-md px-3 py-2 text-sm w-full"
-                      value={stripCounts[product.name] || ""}
-                      onChange={(e) => handleStripChange(product.name, e.target.value)}
-                    />
+                {/* <div
+                  key={index}
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border"
+                >
+                  <div className="h-40 bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                    <span>Product Image</span>
                   </div>
 
-                  {availableStock === 0 ? (
-                    <button
-                      className="mt-4 w-full bg-gray-400 text-white rounded-md px-4 py-2 text-sm font-medium cursor-not-allowed"
-                      disabled
-                    >
-                      Out of Stock
-                    </button>
-                  ) : alreadyInCart ? (
-                    <div className="mt-4 flex items-center justify-between gap-2">
-                      <button
-                        className="w-full bg-green-500 text-white rounded-md px-4 py-2 text-sm font-medium cursor-not-allowed"
-                        disabled
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm text-gray-600">{product.company}</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Category: {product.category}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Packaging: {product.packaging}
+                    </p>
+
+                    <div className="mt-3 flex flex-col sm:flex-row gap-3">
+                      <select
+                        className="border rounded-md px-3 py-2 text-sm text-gray-700 w-full"
+                        value={selectedMG[product.name] || product.mgOptions[0]}
+                        onChange={(e) =>
+                          handleMGChange(product.name, e.target.value)
+                        }
                       >
-                        Added
+                        {product.mgOptions.map((mg, idx) => (
+                          <option key={idx} value={mg}>
+                            {mg} mg
+                          </option>
+                        ))}
+                      </select>
+
+                      <input
+                        type="number"
+                        min={1}
+                        placeholder="Strips"
+                        className="border rounded-md px-3 py-2 text-sm w-full"
+                        value={stripCounts[product.name] || ""}
+                        onChange={(e) =>
+                          handleStripChange(product.name, e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="flex items-center border rounded-md overflow-hidden w-full">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newStrips = Math.max(1, strips - 1);
+                          handleStripChange(product.name, newStrips);
+                        }}
+                        className="px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      >
+                        −
                       </button>
+                      <input
+                        type="number"
+                        min={1}
+                        className="text-center w-full py-2 text-sm outline-none"
+                        value={strips}
+                        onChange={(e) =>
+                          handleStripChange(product.name, e.target.value)
+                        }
+                      />
                       <button
-                        className="text-red-600 hover:text-red-800"
-                        onClick={() => handleRemoveFromCart(product)}
-                        title="Remove from cart"
+                        type="button"
+                        onClick={() => {
+                          const newStrips = strips + 1;
+                          handleStripChange(product.name, newStrips);
+                        }}
+                        className="px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200"
                       >
-                        ❌
+                        +
                       </button>
                     </div>
-                  ) : (
-                    <button
-                      className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-sm font-medium"
-                      onClick={handleClick}
+
+                    {availableStock === 0 ? (
+                      <button
+                        className="mt-4 w-full bg-gray-400 text-white rounded-md px-4 py-2 text-sm font-medium cursor-not-allowed"
+                        disabled
+                      >
+                        Out of Stock
+                      </button>
+                    ) : alreadyInCart ? (
+                      <div className="mt-4 flex items-center justify-between gap-2">
+                        <button
+                          className="w-full bg-green-500 text-white rounded-md px-4 py-2 text-sm font-medium cursor-not-allowed"
+                          disabled
+                        >
+                          Added
+                        </button>
+                        <button
+                          className="text-red-600 hover:text-red-800"
+                          onClick={() => handleRemoveFromCart(product)}
+                          title="Remove from cart"
+                        >
+                          ❌
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-sm font-medium"
+                        onClick={handleClick}
+                      >
+                        Add to Cart
+                      </button>
+                    )}
+                  </div>
+                </div> */}
+
+                <div className="border border-gray-400 rounded p-2 ">
+                  <div className="flex ju">
+                    <img
+                      src={
+                        categoryImages[product.category.toUpperCase()] ||
+                        "/productcategory/default.jpg"
+                      }
+                      alt={product.category}
+                      className="w-full h-28"
+                    />
+                  </div>
+                  <div className="text-[14px] font-medium text-gray-600 font-sans pt-2 line-clamp-2 h-13">
+                    {product.name}
+                  </div>
+                  <div className="text-xs font-medium text-gray-600 font-sans pt-0">
+                    {product.company}
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <select
+                      value={selectedMG[product.name] || product.mgOptions[0]}
+                      onChange={(e) =>
+                        handleMGChange(product.name, e.target.value)
+                      }
+                      className="mt-2 text-xs font-medium text-gray-600 font-sans border px-2 py-1 rounded outline-none"
                     >
-                      Add to Cart
-                    </button>
-                  )}
+                      {product.mgOptions.map((mg, idx) => (
+                          <option key={idx} value={mg}>
+                            {mg}
+                          </option>
+                        ))}
+                    </select>
+                    <div className="mt-2 text-xs font-medium text-gray-600 font-sans">
+                    {product.packaging} pack
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center mt-3">
+                    <div className="text-sm font-semibold text-gray-600 font-sans">
+                    ₹{product.price}
+                    </div>
+                    {availableStock === 0 ?
+                    <div className="border bg-gray-300 text-white cursor-not-allowed rounded px-5 py-1.5 text-sm">
+                    Add
+                  </div>
+                    :
+                    alreadyInCart ?  <div className="flex items-center">
+                      <div onClick={() => {
+                          const newStrips = Math.max(0, strips - 1);
+                          console.log(newStrips);
+                          
+                          if(newStrips<1){
+                            handleRemoveFromCart(product)
+                          }else{
+                            handleStripChange(product.name, newStrips);
+                          }  
+                        }}
+                         className="cursor-pointer bg-green-700 text-white h-8 rounded-l-sm flex justify-center items-center w-6 text-sm text-center">
+                        -
+                      </div>
+                      <input className="bg-green-700 text-white h-8  flex justify-center items-center w-5 text-sm text-center"
+                        value={strips}
+                        onChange={(e) =>
+                          handleStripChange(product.name, e.target.value)
+                        }
+                        type="text"
+                        disabled
+                      />
+                      <div onClick={() => {
+                          const newStrips = strips + 1;
+                          handleStripChange(product.name, newStrips);
+                        }}
+                       className="cursor-pointer bg-green-700 text-white h-8 rounded-r-sm flex justify-center items-center w-6 text-sm text-center">
+                        +
+                      </div>
+                    </div>
+                    :<div onClick={handleClick}
+                     className="border border-green-700 text-green-700 cursor-pointer rounded px-4 py-1 text-sm">
+                    Add
+                  </div>}
+                  </div>
+                  <div className="flex justify-between items-center mt-3">
+                   
+                  
+                  </div>
                 </div>
-              </div>
+              </>
             );
           })}
         </div>
       ) : (
         <div className="h-[calc(100vh-426px)]">
-          <div className="bg-green-100 text-green-600 p-6 text-center">Item Not Found</div>
+          <div className="bg-green-100 text-green-600 p-6 text-center">
+            Item Not Found
+          </div>
         </div>
       )}
     </div>

@@ -8,12 +8,13 @@ export default async function handler(req, res) {
   if (!mobile) return res.status(401).json({ message: 'Please login' });
 
   if (req.method === 'GET') {
-    const cart = await Cart.find({ mobile });
+    const cart = await Cart.find({ mobile }).sort({ updatedAt: -1 }); // 👈 Sort by latest updated
     return res.status(200).json(cart.map(item => ({
       ...item.product,
       quantity: item.quantity,
-      price:item.price,
-      strips:item.strips,
+      price: item.price,
+      strips: item.strips,
+      total: item.total,
       _id: item.productId
     })));
   }

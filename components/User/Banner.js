@@ -47,7 +47,7 @@ const Banner = () => {
         </div>
         <div className="mx-auto mt-10 max-w-2xl lg:mx-0 lg:max-w-none">
           <div className="bg-green-700 hover:bg-green-600 transition-all duration-200 w-[180px] text-center py-2 text-base font-semibold text-white rounded-md shadow-md">
-            <a href="/product/product-list">
+            <a href="/user/product/product-list">
               Explore Products <span aria-hidden="true">&rarr;</span>
             </a>
           </div>
