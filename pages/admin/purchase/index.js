@@ -11,6 +11,7 @@ const initialTablet = {
   category: "",
   mg:"",
   batch: "",
+  mg:"",
   expiry: "",
   packing: "",
   strips: 0,

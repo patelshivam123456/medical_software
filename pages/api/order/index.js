@@ -80,13 +80,17 @@ export default async function handler(req, res) {
   // ✅ GET ORDERS BY REGISTERED MOBILE
   if (req.method === "GET") {
     const { mobile } = req.query;
-
+  
     if (!mobile) {
       return res.status(400).json({ message: "mobile (registeredMobile) is required in query params" });
     }
-
+  
     try {
-      const orders = await Order.find({ registeredMobile: mobile }).sort({ createdAt: -1 });
+      const orders = await Order.find({
+        registeredMobile: mobile,
+        submitstatus: { $in: ["Pending", "Approved", "mark_delivery", "Complete","Cancel"] }
+      }).sort({ createdAt: -1 });
+  
       return res.status(200).json(orders);
     } catch (err) {
       console.error("GET error:", err);

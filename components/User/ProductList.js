@@ -255,6 +255,9 @@ const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
             const alreadyInCart = isInCart(product);
 
             const handleClick = () => {
+              if(!mobile){
+toast.error("Your are not Logged In, Please Login First")
+              }else{
               if (!selectedMg) return toast.error("Please select MG");
               if (strips <= 0) return toast.error("Please enter a valid strip quantity");
               if (!tablet) return toast.error("Variant not found");
@@ -262,6 +265,7 @@ const res = await axios.get(`/api/order/cart?mobile=${mobile}`);
               if (strips > availableStock) return toast.error("Insufficient stock");
 
               handleAddToCart(product);
+              }
             };
 
             return (

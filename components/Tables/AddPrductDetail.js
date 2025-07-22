@@ -11,6 +11,7 @@ const AddPrductDetail = (props) => {
           <th className="border px-3 py-2 text-left">Quantity</th>
           <th className="border px-3 py-2 text-left">Packing</th>
           <th className="border px-3 py-2 text-left">Batch</th>
+          <th className="border px-3 py-2 text-left">Mg</th>
           <th className="border px-3 py-2 text-left">Expiry</th>
           <th className="border px-3 py-2 text-left">MRP</th>
           <th className="border px-3 py-2 text-left">Actions</th>
@@ -24,6 +25,7 @@ const AddPrductDetail = (props) => {
             <td className="border px-3 py-2">{t.quantity}</td>
             <td className="border px-3 py-2">{t.packaging}</td>
             <td className="border px-3 py-2">{t.batch}</td>
+            <td className="border px-3 py-2">{t.mg}</td>
             <td className="border px-3 py-2">{t.expiry}</td>
             <td className="border px-3 py-2">₹{t.price}</td>
             <td className="border px-3 py-2 space-x-2">

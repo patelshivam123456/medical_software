@@ -253,6 +253,7 @@ console.log(orderId,"jhjkk");
                           <th className="border px-1">Name</th>
                           <th className="border px-1">Company</th>
                           <th className="border px-1">Batch</th>
+                          <th className="border px-1">Mg</th>
                           <th className="border px-1">Expiry</th>
                           <th className="border px-1">Qty</th>
                           <th className="border px-1">Rate</th>
@@ -264,6 +265,7 @@ console.log(orderId,"jhjkk");
                             <td className="border px-1">{p.name}</td>
                             <td className="border px-1">{p.company}</td>
                             <td className="border px-1">{p.batch}</td>
+                            <td className="border px-1">{p.mg}</td>
                             <td className="border px-1">{p.expiry}</td>
                             <td className="border px-1">{p.quantity}</td>
                             <td className="border px-1">₹{p.price}</td>

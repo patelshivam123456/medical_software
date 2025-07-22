@@ -252,6 +252,7 @@ const BillDetailPage = (props) => {
                     Product
                   </th>
                   <th className="border px-3 py-2 text-left">Batch</th>
+                  <th className="border px-3 py-2 text-left">Mg</th>
                   <th className="border px-3 py-2 text-left">Exp.</th>
                   <th className="border px-3 py-2 text-left">HSN</th>
                   <th className="border px-3 py-2 text-left">MRP</th>
@@ -272,6 +273,7 @@ const BillDetailPage = (props) => {
                     <td className="px-3 pb-1">{t.strips}</td>
                     <td className="px-3 pb-1 min-w-[280px]">{t.name}</td>
                     <td className="px-3 pb-1">{t.batch}</td>
+                    <td className="px-3 pb-1">{t.mg}</td>
                     <td className="px-3 pb-1">{t.expiry}</td>
                     <td className="px-3 pb-1">{t.hsm}</td>
                     <td className="px-3 pb-1 text-right font-mono">

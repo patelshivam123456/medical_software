@@ -19,6 +19,7 @@ const ProductSchema = new mongoose.Schema({
   company: String,
   salt: String,
   batch: String,
+  mg: String,
   expiry: String,
   quantity: Number,
   price: Number,         // 💡 Added: price per unit

@@ -151,7 +151,7 @@ export default function MyOrdersModal({ mobile, onClose, orderRefresh }) {
             {(totals.submitstatus === "Pending"||totals.submitstatus === "Approved")&&<div className="mb-4 text-right">
               <button
                 onClick={()=>{setOpen(true);setOrderId(totals.orderid)}}
-                className="bg-red-600 text-white px-4 py-1 rounded hover:bg-green-700"
+                className="bg-red-600 text-white px-4 py-1 rounded hover:bg-green-700 cursor-pointer"
               >
                 Cancel Order
               </button>
@@ -185,7 +185,7 @@ export default function MyOrdersModal({ mobile, onClose, orderRefresh }) {
         <th className="px-4 py-2 border">Name</th>
         <th className="px-4 py-2 border">Company</th>
         <th className="px-4 py-2 border">Salt</th>
-        <th className="px-4 py-2 border">Batch</th>
+        <th className="px-4 py-2 border">Pack/Mg</th>
         <th className="px-4 py-2 border">Expiry</th>
         <th className="px-4 py-2 border">Qty</th>
         <th className="px-4 py-2 border">Rate</th>
@@ -198,7 +198,7 @@ export default function MyOrdersModal({ mobile, onClose, orderRefresh }) {
           <td className="px-4 py-2 border">{p.name}</td>
           <td className="px-4 py-2 border">{p.company}</td>
           <td className="px-4 py-2 border">{p.salt}</td>
-          <td className="px-4 py-2 border">{p.batch}</td>
+          <td className="px-4 py-2 border">{p.packaging+"/"+p.mg}</td>
           <td className="px-4 py-2 border">{p.expiry}</td>
           <td className="px-4 py-2 border">{p.quantity}</td>
           <td className="px-4 py-2 border">₹{p.price}</td>
@@ -233,7 +233,7 @@ export default function MyOrdersModal({ mobile, onClose, orderRefresh }) {
                   <p>Subtotal: ₹{totals.subtotal?.toFixed(2)}</p>
                   <p>CGST (6%): ₹{totals.cgst?.toFixed(2)}</p>
                   <p>SGST (6%): ₹{totals.sgst?.toFixed(2)}</p>
-                  <p className="font-bold">Grand Total: ₹{Math.ceil(totals.total)}</p>
+                  <p className="font-bold">Grand Total: ₹{Math.ceil(totals.total).toFixed(2)}</p>
                 </div>
               </div>
             </div>

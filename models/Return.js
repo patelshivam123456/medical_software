@@ -25,6 +25,7 @@ const returnBillSchema = new mongoose.Schema({
       hsm: { type: String, required: false, default: "" },
       packing: String,
       batch: String,
+      mg: String,
       expiry: String,
       price: Number,
       rate: Number,

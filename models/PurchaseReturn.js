@@ -22,6 +22,7 @@ const purchaseReturnSchema = new mongoose.Schema({
       hsm: String,
       packing: String,
       batch: String,
+      mg: String,
       expiry: String,
       price: Number,
       rate: Number,

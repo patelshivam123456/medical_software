@@ -148,6 +148,7 @@ const CartModal = ({ cart, removeFromCart }) => {
                   <th className="border p-2">Product</th>
                   <th className="border p-2">Company</th>
                   <th className="border p-2">Batch</th>
+                  <th className="border p-2">Mg</th>
                   <th className="border p-2">Expiry</th>
                   <th className="border p-2">Qty</th>
                   <th className="border p-2">Rate</th>
@@ -168,6 +169,7 @@ const CartModal = ({ cart, removeFromCart }) => {
                     <td className="border p-2">{item.name}</td>
                     <td className="border p-2">{item.company}</td>
                     <td className="border p-2">{item.batch}</td>
+                    <td className="border p-2">{item.mg}</td>
                     <td className="border p-2">{item.expiry}</td>
                     <td className="border p-2 text-center">{item.quantity}</td>
                     <td className="border p-2 text-right">₹{item.price}</td>

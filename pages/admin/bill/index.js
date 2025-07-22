@@ -51,6 +51,7 @@ const Index = (props) => {
     quantity: 0,
     packing: "",
     batch: "",
+    mg:"",
     expiry: "",
     price: "",
     rate: "",
@@ -133,6 +134,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
           tab.salt,
           tab.category,
           tab.batch,
+          tab.mg,
           tab.expiry,
         ]),
       ];
@@ -173,6 +175,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
           tab.salt,
           tab.category,
           tab.batch,
+          tab.mg,
           tab.expiry,
         ]),
       ];
@@ -263,6 +266,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       quantity,
       packing,
       batch,
+      mg,
       expiry,
       price,
       discount,
@@ -286,6 +290,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       !salt ||
       !packing ||
       !batch ||
+      !mg||
       !expiry ||
       !price ||
       !rate ||
@@ -309,6 +314,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       quantity: Number(quantity),
       packing: packing.trim(),
       batch: batch.trim(),
+      mg:mg.trim(),
       expiry: expiry.trim(),
       price: Number(price),
       discount: Number(discount),
@@ -331,6 +337,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         tablet.company === newTablet.company &&
         tablet.salt === newTablet.salt &&
         tablet.batch === newTablet.batch &&
+        tablet.mg===newTablet.mg&&
         tablet.category === newTablet.category &&
         tablet.expiry === newTablet.expiry &&
         tablet.packing === newTablet.packing &&
@@ -360,6 +367,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       quantity: 0,
       packing: "",
       batch: "",
+      mg:"",
       expiry: "",
       price: 0,
       discount: Number(formFields.discount),
@@ -385,6 +393,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       quantity: tablet.quantity,
       packing: tablet.packing,
       batch: tablet.batch,
+      mg:tablet.mg,
       expiry: tablet.expiry,
       price: tablet.price,
       discount: tablet.discount,
@@ -413,6 +422,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       quantity: 0,
       packing: "",
       batch: "",
+      mg:"",
       expiry: "",
       price: "",
       discount: 0,
@@ -715,6 +725,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       quantity: 0,
       packing: "",
       batch: "",
+      mg:"",
       expiry: "",
       price: "",
       discount: 0,
@@ -817,6 +828,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       quantity: 0,
       packing: "",
       batch: "",
+      mg:'',
       expiry: "",
       price: 0,
       discount: 10,
@@ -904,20 +916,22 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                 className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
               />
             </div>
-            <div className="w-full md:w-[50%] lg:mb-6">
-              <label>Payment Type:</label>
-              <select
-                type="text"
-                required
-                value={paymentType}
-                onChange={(e) => setPaymentType(e.target.value)}
-                className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
-              >
-                <option value={""}>--Select Payment Type--</option>
-                <option value={"CASH"}>CASH</option>
-                <option value={"ONLINE"}>ONLINE</option>
-                </select>
-            </div>
+            <div className="w-full md:w-1/2 lg:mb-6">
+  <label htmlFor="paymentType" className="block mb-1 font-medium text-gray-700">
+    Payment Type:
+  </label>
+  <select
+    id="paymentType"
+    required
+    value={paymentType}
+    onChange={(e) => setPaymentType(e.target.value)}
+    className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
+  >
+    <option value="">--Select Payment Type--</option>
+    <option value="CASH">CASH</option>
+    <option value="ONLINE">ONLINE</option>
+  </select>
+</div>
             <div className="w-full md:w-[50%] lg:mb-6">
               <label>Order Type:</label>
               <select
@@ -1007,13 +1021,14 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                             cgst: 6,
                             sgst: 6,
                             batch: t.batch,
+                            mg:t.mg,
                             expiry: t.expiry,
                             price: t.mrp,
                             total: (1 * (t.rate || t.price || 0)).toFixed(2),
                             lessquantity:"",
                             free:"",
                             strips:"",
-                            checkrate:t.price
+                            checkrate:t.purchase
                           });
                           setShowSuggestions(false);
                         }}
@@ -1109,6 +1124,19 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                   value={formFields.batch}
                   onChange={(e) =>
                     setFormFields({ ...formFields, batch: e.target.value })
+                  }
+                  disabled
+                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
+                  required
+                />
+              </div>
+              <div className="w-full md:w-[16%] ">
+                <label>Mg</label>
+                <input
+                  type="text"
+                  value={formFields.mg}
+                  onChange={(e) =>
+                    setFormFields({ ...formFields, mg: e.target.value })
                   }
                   disabled
                   className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
@@ -1306,6 +1334,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
             <th className="p-2">Name</th>
             <th className="p-2">Packing</th>
             <th className="p-2">Batch</th>
+            <th className="p-2">Mg</th>
             <th className="p-2">Expiry</th>
             <th className="p-2">LessQty</th>
             <th className="p-2">Strip</th>
@@ -1323,6 +1352,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
               <td className="p-2 text-center">{t.name}</td>
               <td className="p-2 text-center">{t.packing}</td>
               <td className="p-2 text-center">{t.batch}</td>
+              <td className="p-2 text-center">{t.mg}</td>
               <td className="p-2 text-center">{t.expiry}</td>
               <td className="p-2 text-center">{t.lessquantity}</td>
               <td className="p-2 text-center">

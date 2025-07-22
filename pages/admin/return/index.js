@@ -53,6 +53,7 @@ const Index = (props) => {
     quantity: 0,
     packing: "",
     batch: "",
+    mg:"",
     expiry: "",
     price: "",
     rate: "",
@@ -208,6 +209,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       quantity,
       packing,
       batch,
+      mg,
       expiry,
       price,
       discount,
@@ -228,6 +230,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       !salt ||
       !packing ||
       !batch ||
+      !mg||
       !expiry ||
       !price ||
       !rate ||
@@ -258,6 +261,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       quantity: Number(quantity),
       packing: packing.trim(),
       batch: batch.trim(),
+      mg:mg.trim(),
       expiry: expiry.trim(),
       price: Number(price),
       discount: Number(discount),
@@ -280,6 +284,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
         tablet.company === newTablet.company &&
         tablet.salt === newTablet.salt &&
         tablet.batch === newTablet.batch &&
+        tablet.mg===newTablet.mg&&
         tablet.category === newTablet.category &&
         tablet.expiry === newTablet.expiry &&
         tablet.packing === newTablet.packing &&
@@ -309,6 +314,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       quantity: 0,
       packing: "",
       batch: "",
+      mg:'',
       expiry: "",
       price: 0,
       discount: 0,
@@ -334,6 +340,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       quantity: tablet.quantity || 0,
       packing: tablet.packing || "",
       batch: tablet.batch || "",
+      mg:tablet.mg||"",
       expiry: tablet.expiry || "",
       price: tablet.price || "",
       discount: tablet.discount || 0,
@@ -365,6 +372,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       quantity: 0,
       packing: "",
       batch: "",
+      mg:"",
       expiry: "",
       price: "",
       discount: 0,
@@ -684,6 +692,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       quantity: 0,
       packing: "",
       batch: "",
+      mg:"",
       expiry: "",
       price: "",
       discount: 0,
@@ -795,6 +804,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       quantity: 0,
       packing: "",
       batch: "",
+      mg:"",
       expiry: "",
       price: 0,
       discount: 10,
@@ -1062,6 +1072,19 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
                   required
                 />
               </div>
+              <div className="w-full md:w-[16%] ">
+                <label>Mg</label>
+                <input
+                  type="text"
+                  value={formFields.mg}
+                  onChange={(e) =>
+                    setFormFields({ ...formFields, mg: e.target.value })
+                  }
+                  disabled
+                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
+                  required
+                />
+              </div>
 
               <div className="w-full md:w-[10%] ">
                 <label>Expiry</label>
@@ -1310,6 +1333,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
           <th className="p-2">#</th>
           <th className="p-2 min-w-[200px]">Name</th>
           <th className="p-2">Batch</th>
+          <th className="p-2">Mg</th>
           <th className="p-2">Packing</th>
           <th className="p-2">Free</th>
           <th className="p-2">Strips</th>
@@ -1331,6 +1355,7 @@ const [showBatchSuggestions, setShowBatchSuggestions] = useState(false);
       <td className="p-2 text-center">{index + 1}</td>
       <td className="p-2 min-w-[200px]">{t.name}</td>
       <td className="p-2">{t.batch}</td>
+      <td className="p-2">{t.mg}</td>
       <td className="p-2">{t.packing}</td>
       <td className="p-2">{t.free}</td>
       <td className="p-2">{t.strips}</td>

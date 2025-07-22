@@ -169,6 +169,7 @@ if (req.method === "POST") {
           purchase: item.price || 0,
           price: item.rate  || 0,
           batch: item.batch || '',
+          mg: item.mg||'',
           expiry: item.expiry || '',
           mrp: item.mrp || '',
           company: item.company || "",
