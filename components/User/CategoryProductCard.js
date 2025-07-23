@@ -6,7 +6,7 @@ import { useCart } from "@/context/CartContext";
 import ProductCard from "./ProductCard";
 import LoaderComp from "./LoaderComp";
 
-const ProductList = () => {
+const CategoryProductCard = ({category}) => {
   const [groupedTablets, setGroupedTablets] = useState([]);
   const [stripCounts, setStripCounts] = useState({});
   const [selectedMG, setSelectedMG] = useState({});
@@ -14,12 +14,12 @@ const ProductList = () => {
   const { cart, setCart, fetchCart, mobile } = useCart();
 
   const router = useRouter();
-  const { category } = router.query;
+//   const { category } = router.query;
 
-  const [selectedCategory, setSelectedCategory] = useState(category || "");
+  const [selectedCategory, setSelectedCategory] = useState();
 
   useEffect(() => {
-    setSelectedCategory(category || "");
+    setSelectedCategory(category);
   }, [category]);
 
   const CategoryList = [
@@ -82,9 +82,6 @@ const ProductList = () => {
         const res = await axios.get("/api/tablets");
         const data = Array.isArray(res.data) ? res.data : res.data.tablets;
 
-        // const filtered = category
-        //   ? data.filter((tab) => tab.category?.toLowerCase() === category.toLowerCase())
-        //   : data;
         const filtered = (
           category
             ? data.filter(
@@ -92,20 +89,18 @@ const ProductList = () => {
               )
             : data
         ).filter((tab) => {
-          if (!tab.expiry) return true; // Keep if no expiry info
-
+          if (!tab.expiry) return true;
           const [expMonth, expYear] = tab.expiry.split("/").map(Number);
-          if (!expMonth || !expYear) return true; // Invalid format, keep as fallback
-
+          if (!expMonth || !expYear) return true; 
           const today = new Date();
-          const currentMonth = today.getMonth() + 1; // JS months are 0-based
-          const currentYear = today.getFullYear() % 100; // Convert to 2-digit year
+          const currentMonth = today.getMonth() + 1;
+          const currentYear = today.getFullYear() % 100;
 
-          // Exclude if expiry is in the past or current month
+         
           if (expYear < currentYear) return false;
           if (expYear === currentYear && expMonth <= currentMonth) return false;
 
-          return true; // Still valid
+          return true; 
         });
 
         const grouped = {};
@@ -127,9 +122,9 @@ const ProductList = () => {
           grouped[tab.name].fullTabs.push(tab);
         });
 
-        setGroupedTablets(Object.values(grouped));
+        setGroupedTablets(Object.values(grouped)?.slice(0,5));
 
-        // ✅ Prefill MG and strip counts
+     
         const mgInit = {};
         const stripInit = {};
         Object.values(grouped).forEach((product) => {
@@ -312,8 +307,11 @@ const ProductList = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="sm:flex justify-between">
+    <div className="max-w-6xl mx-auto px-4 pt-2 pb-4">
+        <h2 className="text-lg font-bold sm:mb-2 text-gray-800">
+          {category ? `${category} Releted Product` : "Our Products"}
+        </h2>
+      {/* <div className="sm:flex justify-between">
         <h2 className="text-2xl font-bold sm:mb-6 text-gray-800">
           {category ? `Category: ${category}` : "Our Products"}
         </h2>
@@ -335,8 +333,7 @@ const ProductList = () => {
         </div>
       </div>
       <div>
-        {/* <ProductCard /> */}
-      </div>
+      </div> */}
 
       {loadingTablets ? (
         <div className="flex justify-center items-center h-[calc(100vh-400px)]">
@@ -468,4 +465,4 @@ const ProductList = () => {
   );
 };
 
-export default ProductList;
+export default CategoryProductCard;
