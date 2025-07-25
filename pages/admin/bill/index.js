@@ -232,7 +232,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
     if(formattedDate===formFields.expiry){
      toast.error("Alert!! Your Product has been Expired||")
     }
-    else if(formFields.rate>0&&formFields.rate<formFields.checkrate){
+    else if(formFields.rate>0&&formFields.rate>formFields.checkrate){
       const timer = setTimeout(()=>{
       toast.error(`Your Sell price is less then purchase prize,your are lose ${ratecheck}`)
     },700)
