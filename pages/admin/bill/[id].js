@@ -247,7 +247,7 @@ const BillDetailPage = (props) => {
                   {/* <th className="border px-3 py-2 text-left">Qty.</th> */}
                   {/* <th className="border px-3 py-2 text-left">Free</th> */}
                   <th className="border px-3 py-2 text-left">Pack</th>
-                  <th className="border px-3 py-2 text-left">Strips</th>
+                  <th className="border px-3 py-2 text-left">Qty</th>
                   <th className="border px-3 py-2 text-left min-w-[280px]">
                     Product
                   </th>

@@ -201,7 +201,7 @@ const Index = (props) => {
             </select>
           </div> */}
           <div className="w-full md:w-[25%] ">
-            <label>Pharam Name</label>
+            <label>New Ledger(Supplier)</label>
             <input
               type="text"
               required
