@@ -147,7 +147,7 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete 
                       <td className="border p-2">{bill.clientName}</td>
                       <td className="border p-2">{bill.mobile}</td>
                       <td className="border p-2">₹{bill.grandtotal}</td>
-                      <td className="border p-2">₹{bill.amountPaid}</td>
+                     {bill.ordertype === "CASH"? <td className="border p-2">₹{bill.grandtotal}</td>:<td className="border p-2">₹{bill.amountPaid}</td>}
                      {bill.ordertype === "pending"? <td className="border p-2">₹{bill?.grandtotal-bill?.amountPaid}</td>:
                      <td className="border p-2">Clear</td>}
                       <td className="border p-2 capitalize">{bill.ordertype}</td>
@@ -170,6 +170,7 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete 
                             <div className="flex items-center gap-4 px-3">
                           <div className="text-green-600 text-sm italic">Payment Done</div>
                           {/* <button onClick={()=>{handleEdit(bill._id);onClose()}} className="cursor-pointer"><PencilSquareIcon className="w-4 h-4"/></button> */}
+                          <button onClick={()=>{handleDelete(bill._id);onClose()}} className="cursor-pointer"><TrashIcon className="w-4 h-4"/></button>
                           <a href={`/admin/purchase/${bill._id}`}><EyeIcon className="w-5 h-5"/></a>
                           </div>
                         )}
