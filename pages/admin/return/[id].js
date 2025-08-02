@@ -150,12 +150,12 @@ const totalInWords = toWords(roundedGrandTotal);
         <div className="flex  gap-2 border mt-2 px-3">
           <div className="w-[35%] flex justify-between">
             <div>
-          {billdata.returnperson&&<div className="text-sm">Return Person: {billdata.returnperson}</div>}
+          {/* {billdata.returnperson&&<div className="text-sm">Return Person: {billdata.returnperson}</div>} */}
           {billdata.paymenttype&&<div className="text-sm">Payment Method: {billdata.paymenttype}</div>}
           </div>
           <div>
-          {billdata.ordertype&&<div className="text-sm">Order Type: {billdata.ordertype}</div>}
-          {billdata.orderid&&<div className="text-sm">Order Id: {billdata.orderid}</div>}
+          {/* {billdata.ordertype&&<div className="text-sm">Order Type: {billdata.ordertype}</div>} */}
+          {/* {billdata.orderid&&<div className="text-sm">Order Id: {billdata.orderid}</div>} */}
           </div>
           </div>
           <div className="w-[65%] flex gap-4 ">
@@ -221,7 +221,7 @@ const totalInWords = toWords(roundedGrandTotal);
                 {/* <th className="border px-3 py-2 text-left">Qty.</th>
                 <th className="border px-3 py-2 text-left">Return</th> */}
                 <th className="border px-3 py-2 text-left">Pack</th>
-                <th className="border px-3 py-2 text-left">Return Strips</th>
+                <th className="border px-3 py-2 text-left">Qty.</th>
                 <th className="border px-3 py-2 text-left min-w-[280px]">Product</th>
                 <th className="border px-3 py-2 text-left">Batch</th>
                 <th className="border px-3 py-2 text-left">Mg</th>
@@ -229,9 +229,9 @@ const totalInWords = toWords(roundedGrandTotal);
                 <th className="border px-3 py-2 text-left">HSN</th>
                 <th className="border px-3 py-2 text-left">MRP</th>
                 <th className="border px-3 py-2 text-left">Rate</th>
-                <th className="border px-3 py-2 text-left">Dis.</th>
+                {/* <th className="border px-3 py-2 text-left">Dis.</th>
                 <th className="border px-3 py-2 text-left">SGST</th>
-                <th className="border px-3 py-2 text-left">CGST</th>
+                <th className="border px-3 py-2 text-left">CGST</th> */}
                 <th className="border px-3 py-2 text-left">Amount</th>
               </tr>
             </thead>
@@ -250,9 +250,9 @@ const totalInWords = toWords(roundedGrandTotal);
       <td className="px-3 pb-1">{t.hsm}</td>
       <td className="px-3 pb-1 text-right font-mono">{Number(t.price).toFixed(2)}</td>
       <td className="px-3 pb-1 text-right font-mono">{Number(t.rate).toFixed(2)}</td>
-      <td className="px-3 pb-1 text-right font-mono">{Number(t.discount).toFixed(2)}</td>
+      {/* <td className="px-3 pb-1 text-right font-mono">{Number(t.discount).toFixed(2)}</td>
       <td className="px-3 pb-1">{t.sgst}</td>
-      <td className="px-3 pb-1">{t.cgst}</td>
+      <td className="px-3 pb-1">{t.cgst}</td> */}
       <td className="px-3 pb-1 text-right font-mono">{Number(t.total).toFixed(2)}</td>
     </tr>
   ))}

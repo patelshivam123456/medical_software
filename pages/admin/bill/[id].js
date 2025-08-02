@@ -184,9 +184,9 @@ const BillDetailPage = (props) => {
                   <div className="text-sm">
                     Invoice No.: SJ000{billdata.billNo}
                   </div>
-                  <div className="text-sm">
+                  {/* <div className="text-sm">
                     Sales man: {billdata.salesperson}
-                  </div>
+                  </div> */}
                 </div>
                 <div>
                   <div className="text-sm">
@@ -257,9 +257,9 @@ const BillDetailPage = (props) => {
                   <th className="border px-3 py-2 text-left">HSN</th>
                   <th className="border px-3 py-2 text-left">MRP</th>
                   <th className="border px-3 py-2 text-left">Rate</th>
-                  <th className="border px-3 py-2 text-left">Dis.</th>
+                  {/* <th className="border px-3 py-2 text-left">Dis.</th>
                   <th className="border px-3 py-2 text-left">SGST</th>
-                  <th className="border px-3 py-2 text-left">CGST</th>
+                  <th className="border px-3 py-2 text-left">CGST</th> */}
                   <th className="border px-3 py-2 text-left">Amount</th>
                 </tr>
               </thead>
@@ -282,11 +282,11 @@ const BillDetailPage = (props) => {
                     <td className="px-3 pb-1 text-right font-mono">
                       {Number(t.rate).toFixed(2)}
                     </td>
-                    <td className="px-3 pb-1 text-right font-mono">
+                    {/* <td className="px-3 pb-1 text-right font-mono">
                       {Number(t.discount).toFixed(2)}
                     </td>
                     <td className="px-3 pb-1">{t.sgst||"6"}</td>
-                    <td className="px-3 pb-1">{t.cgst||"6"}</td>
+                    <td className="px-3 pb-1">{t.cgst||"6"}</td> */}
                     <td className="px-3 pb-1 text-right font-mono">
                       {Number(t.total).toFixed(2)}
                     </td>

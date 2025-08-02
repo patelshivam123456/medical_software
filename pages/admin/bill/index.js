@@ -929,7 +929,8 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
   >
     <option value="">--Select Payment Type--</option>
     <option value="CASH">CASH</option>
-    <option value="ONLINE">ONLINE</option>
+    <option value="CREDIT">CREDIT</option>
+    <option value="DEBIT">DEBIT</option>
   </select>
 </div>
             <div className="w-full md:w-[50%] lg:mb-6">
