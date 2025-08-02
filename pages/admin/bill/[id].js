@@ -137,7 +137,7 @@ const BillDetailPage = (props) => {
                 </div>
                 <div>
                   <div className="text-lg" style={{ fontWeight: "bold" }}>
-                    SHRI JI ENTERPRISE
+                    SHRI JI ENTERPRISES
                   </div>
                   <div className="text-xs font-semibold italic -mt-1">
                     GST Not Applicable
@@ -764,7 +764,7 @@ const BillDetailPage = (props) => {
 
                 <td className="w-[30%] border p-2 align-top">
                   <div className="text-sm font-semibold italic underline mb-2">
-                    For SHRI JI ENTERPRISE
+                    For SHRI JI ENTERPRISES
                   </div>
                   <div>
                     <img

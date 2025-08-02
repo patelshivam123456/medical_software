@@ -103,7 +103,7 @@ const CreateOnlineBillModal = ({ data,onClick,date }) => {
                 <div className="flex items-center gap-2 mb-1">
                   <img src="/sriji.png" alt="logo" className="h-12 w-12" />
                   <div>
-                    <div className="text-lg font-bold">SHRI JI ENTERPRISE</div>
+                    <div className="text-lg font-bold">SHRI JI ENTERPRISES</div>
                     <div className="text-xs font-semibold italic -mt-1">
                       GST Not Applicable
                     </div>
@@ -315,7 +315,7 @@ const CreateOnlineBillModal = ({ data,onClick,date }) => {
                   </td>
                   <td className="w-[30%] border p-2 align-top">
                     <div className="text-sm font-semibold italic underline mb-2">
-                      For SHRI JI ENTERPRISE
+                      For SHRI JI ENTERPRISES
                     </div>
                     <img src="/shivamsign.jpeg" alt="sign" className="w-42 h-16" />
                   </td>

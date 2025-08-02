@@ -75,9 +75,9 @@ const Header=({isLoggedStatus})=> {
             />
           </a>
           <div className='mt-19'>
-          <div className='text-[10px] font-semibold text-black -ml-18 tracking-wider'>ENTERPRISE</div>
+          <div className='text-[10px] font-semibold text-black -ml-18 tracking-wider'>ENTERPRISES</div>
             {/* <div className='text-yellow-600 font-semibold text-[18px]'>SHRI JI</div> */}
-            {/* <div className='text-[10px]  text-black -mt-1 border-t-[0.5px] border-gray-400'>ENTERPRISE</div> */}
+            {/* <div className='text-[10px]  text-black -mt-1 border-t-[0.5px] border-gray-400'>ENTERPRISES</div> */}
           </div>
         </div>
         <div className="flex lg:hidden">

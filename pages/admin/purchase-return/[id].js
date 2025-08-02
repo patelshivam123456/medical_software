@@ -126,7 +126,7 @@ const totalInWords = toWords(roundedGrandTotal);
           <div className="gap-1" style={{display:"flex",alignItems:"center"}}>
             <div style={{marginTop:"13px"}}><img src="/sriji.png" alt="logo" className="h-12 w-12"/></div>
             <div>
-            <div className="text-lg" style={{fontWeight:"bold"}}>SHRI JI ENTERPRISE</div>
+            <div className="text-lg" style={{fontWeight:"bold"}}>SHRI JI ENTERPRISES</div>
             <div className="text-xs font-semibold italic -mt-1">
             GST Not Applicable
             </div>
@@ -698,7 +698,7 @@ const totalInWords = toWords(roundedGrandTotal);
       </td>
 
       <td className="w-[30%] border p-2 align-top">
-        <div className="text-sm font-semibold italic underline mb-2">For SHRI JI ENTERPRISE</div>
+        <div className="text-sm font-semibold italic underline mb-2">For SHRI JI ENTERPRISES</div>
         <div><img src="/shivamsign.jpeg" alt="sign" className="w-42 h-16"/></div>
       </td>
     </tr>

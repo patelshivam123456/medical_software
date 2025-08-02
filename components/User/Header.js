@@ -53,7 +53,7 @@ const Header = ({ losdingState, orderRefresh, moveOnStep }) => {
             <img alt="company logo" src="/sriji.png" className="w-20" />
           </a>
           <div className="mt-19">
-            <div className='text-[10px] font-semibold text-black -ml-18 tracking-wider'>ENTERPRISE</div>
+            <div className='text-[10px] font-semibold text-black -ml-18 tracking-wider'>ENTERPRISES</div>
           </div>
         </div>
 
