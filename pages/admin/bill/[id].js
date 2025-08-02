@@ -271,7 +271,7 @@ const BillDetailPage = (props) => {
                     {/* <td className="px-3 pb-1 text-right">{t.free}</td> */}
                     <td className="px-3 pb-1">{t.packing}</td>
                     <td className="px-3 pb-1">{t.strips}</td>
-                    <td className="px-3 pb-1 min-w-[280px]">{t.name}</td>
+                    <td className="px-3 pb-1 min-w-[280px]">{t?.name?.toUpperCase()}</td>
                     <td className="px-3 pb-1">{t.batch}</td>
                     <td className="px-3 pb-1">{t.mg}</td>
                     <td className="px-3 pb-1">{t.expiry}</td>
