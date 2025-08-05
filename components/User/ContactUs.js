@@ -24,7 +24,7 @@ const ContactUs=()=> {
 
                 <h2 class="mt-4 text-lg font-medium text-gray-800 ">Email</h2>
                 <p class="mt-2 text-gray-500 dark:text-gray-600">Our friendly team is here to help.</p>
-                <p class="mt-2 text-blue-500 dark:text-blue-400"><a href="mailto:shivamv1003@gmail.com">shivamv1003@gmail.com</a></p>
+                <p class="mt-2 text-blue-500 dark:text-blue-400"><a href="mailto:shrijienterprises352@gmail.com">shrijienterprises352@gmail.com</a></p>
             </div>
 
             <div>
@@ -38,8 +38,8 @@ const ContactUs=()=> {
                 </span>
 
                 <h2 class="mt-4 text-lg font-medium text-gray-800 ">Address</h2>
-                <p class="mt-2 text-gray-500 dark:text-gray-600">Come say hello at our office HQ.</p>
-                <p class="mt-2 text-blue-500 dark:text-blue-400">100 Smith Street Collingwood VIC 3066 AU</p>
+                <p class="mt-2 text-gray-500 dark:text-gray-600">Keshav Nagar, Fazullaganj</p>
+                <p class="mt-2 text-gray-500 dark:text-gray-600">Lucknow, Uttar Pradesh- 226020</p>
             </div>
 
             <div>
@@ -52,8 +52,11 @@ const ContactUs=()=> {
                 </span>
 
                 <h2 class="mt-4 text-lg font-medium text-gray-800 ">Phone</h2>
-                <p class="mt-2 text-gray-500 dark:text-gray-600">Mon-Sun from 10am to 10pm.</p>
+                <p class="mt-2 text-gray-500 dark:text-gray-600">Mon-Sun from 10am to 8pm.</p>
+                <div className='flex gap-12'>
                 <p class="mt-2 text-blue-500 dark:text-blue-400">+91-<a href='tel:8707868591'>8707868591</a></p>
+                <p class="mt-2 text-gray-500 dark:text-gray-600">+91-9211037182</p>
+                </div>
             </div>
         </div>
     </div>

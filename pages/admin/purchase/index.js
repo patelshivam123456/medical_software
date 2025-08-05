@@ -45,13 +45,19 @@ const initialForm = {
   address2: "",
   pinCode: "",
   state: "",
-  
+  email:"",
+  accountDetails:"",
+  accountNumber:"",
+  accountIfscCode:"",
+  gstIn:"",
   gst: 0,
   cgst: 0,
   sgst: 0,
   discount: 0,
   
   grandtotal: 0,
+  
+  amountPaid:0,
 };
 
 const NewPurchasePage=(props)=> {
@@ -98,6 +104,11 @@ const NewPurchasePage=(props)=> {
         address2: selectedClient.address2 || "",
         pinCode: selectedClient.pinCode || "",
         state: selectedClient.state || "",
+        email:selectedClient.email||"",
+        accountDetails:selectedClient.accountDetails||"",
+        accountNumber:selectedClient.accountNumber||"",
+        accountIfscCode:selectedClient.accountIfscCode||"",
+        gstIn:selectedClient.gstIn||""
       }));
     }
   };
@@ -106,7 +117,7 @@ const NewPurchasePage=(props)=> {
     const { name, value } = e.target;
     let newValue = value;
 
-    if (name === "strips" || name === "price") {
+    if (name === "strips" ) {
       newValue = Number(value);
     }
 
@@ -327,6 +338,12 @@ const handleAddTablet = () => {
     pinCode: "PIN Code",
     state: "State",
     invoiceDate: "Invoice Date",
+    email:"Email",
+    accountDetails:"Account Details",
+    accountNumber:"Account Number",
+    accountIfscCode:"Ifsc Code",
+    gstIn:"GSTIN",
+    amountPaid:"Paid Amount"
   };
   const handleEditTablet = (index) => {
     setTabletForm(tablets[index]);
@@ -484,22 +501,7 @@ const handleAddTablet = () => {
       {/* Add Tablet */}
       <h2 className="text-lg font-semibold mb-2">Add Tablet</h2>
       <div className="grid grid-cols-4 gap-3 mb-4">
-        {/* {Object.keys(initialTablet).map((field) => (
-          <div key={field} className="flex flex-col">
-            <label className="text-sm capitalize mb-1">{field}</label>
-            <input
-              key={field}
-              name={field}
-              type={
-                typeof initialTablet[field] === "number" ? "number" : "text"
-              }
-              value={tabletForm[field]}
-              onChange={handleTabletChange}
-              placeholder={field}
-              className="border p-2"
-            />
-          </div>
-        ))} */}
+       
        {Object.keys(initialTablet).map((field) => {
           const isError = errors[field];
 

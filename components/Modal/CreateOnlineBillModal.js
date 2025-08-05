@@ -105,12 +105,12 @@ const CreateOnlineBillModal = ({ data,onClick,date }) => {
                   <div>
                     <div className="text-lg font-bold">SHRI JI ENTERPRISES</div>
                     <div className="text-xs font-semibold italic -mt-1">
-                      GST Not Applicable
+                      "Your Health, Our Priority"
                     </div>
                   </div>
                 </div>
-                <div>Pratap market, Kamla Market, Aminabad Rd</div>
-                <div>Aminabad, Lucknow, Uttar Pradesh - 122001</div>
+                <div>Keshav Nagar, Fazullaganj</div>
+                <div>Lucknow, Uttar Pradesh - 226020</div>
                 <div className="text-base">Mobile: +91-8707868591</div>
               </div>
 

@@ -148,7 +148,7 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete 
                       <td className="border p-2">{bill.mobile}</td>
                       <td className="border p-2">₹{bill.grandtotal}</td>
                      {bill.ordertype === "CASH"? <td className="border p-2">₹{bill.grandtotal}</td>:<td className="border p-2">₹{bill.amountPaid}</td>}
-                     {bill.ordertype === "pending"? <td className="border p-2">₹{bill?.grandtotal-bill?.amountPaid}</td>:
+                     {bill.ordertype === "pending"? <td className="border p-2">₹{(bill?.grandtotal-bill?.amountPaid).toFixed(2)}</td>:
                      <td className="border p-2">Clear</td>}
                       <td className="border p-2 capitalize">{bill.ordertype}</td>
                       <td className="border p-2 capitalize">{!bill?.paymentDate&&bill.ordertype === "CASH"?

@@ -32,18 +32,7 @@ export default async function handler(req, res) {
         }
         const failedTablets = [];
           
-              // for (const item of updated.tablets) {
-              //         const updated = await Tablet.updateOne(
-              //           { batch: item.batch },
-              //           { $inc: { strips: +(item.strips+item.free),
-              //             quantity:item.quantity,
-              //            } }
-              //         );
-              
-              //         if (updated.modifiedCount === 0) {
-              //           console.warn(`⚠️ Stock update skipped for: ${item.name} (${item.packing})`);
-              //         }
-              //       }
+             
               for (const item of updated.tablets) {
                 const tablet = await Tablet.findOne({ batch: item.batch });
               

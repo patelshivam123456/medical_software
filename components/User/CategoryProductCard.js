@@ -304,6 +304,7 @@ const CategoryProductCard = ({category}) => {
     INJ: "/category/inj.jpg",
     OIL: "/category/oil.jpg",
     GEL: "/category/gel.jpg",
+    "SURGICALS":"/category/surgical.webp"
   };
 
   return (

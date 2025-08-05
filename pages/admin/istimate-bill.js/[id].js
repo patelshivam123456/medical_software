@@ -141,7 +141,7 @@ const IstimateBill = (props) => {
                     NEW KISHORE AND COMPANY
                   </div>
                   {/* <div className="text-xs font-semibold italic -mt-1">
-                    GST Not Applicable
+                    "Your Health, Our Priority"
                   </div> */}
                 </div>
               </div>

@@ -154,14 +154,14 @@ const BillDetailPage = (props) => {
                     SHRI JI ENTERPRISES
                   </div>
                   <div className="text-xs font-semibold italic -mt-1">
-                    GST Not Applicable
+                    "Your Health, Our Priority"
                   </div>
                 </div>
               </div>
               <div style={{ marginTop: "-5px" }}>
-                Pratap market,Kamla Market,Aminabad Rd
+                Keshav Nagar, Fazullaganj
               </div>
-              <div>Aminabad,Lucknow,Uttar Pradesh-122001</div>
+              <div>Lucknow,Uttar Pradesh-226020</div>
               <div className="text-base">Mobile Number: +91-8707868591</div>
             </div>
             <div className="w-1/2">
@@ -174,7 +174,18 @@ const BillDetailPage = (props) => {
               <div className="text-base">
                 Mobile Number: +91-{billdata.mobile}
               </div>
-              <div>GST:</div>
+              <div style={{display:"flex",justifyContent:"space-between"}}>
+              <div>GST: <span style={{fontWeight:"bold"}}>{billdata.gstIn}</span></div>
+              {billdata.email&&<div>Email: {billdata.email}</div>}
+              </div>
+              {billdata.accountDetails&&<div>Account Details: {billdata.accountDetails}</div>}
+              {billdata.accountDetails&&
+              <div style={{display:"flex",justifyContent:"space-between"}}>
+              <div>Account Number: {billdata.accountNumber}</div>
+              <div>Ifsc Code: {billdata.accountIfscCode}</div>
+              </div>
+              }
+              
             </div>
           </div>
           <div className="flex  gap-2 border mt-2 px-3">
@@ -259,12 +270,14 @@ const BillDetailPage = (props) => {
                 <tr>
                   <th className="border px-3 py-2 text-left">Sn.</th>
                   {/* <th className="border px-3 py-2 text-left">Qty.</th> */}
-                  <th className="border px-3 py-2 text-left">Free</th>
+                  {/* <th className="border px-3 py-2 text-left">Free</th> */}
                   <th className="border px-3 py-2 text-left">Pack</th>
+                 
                   <th className="border px-3 py-2 text-left">Qty.</th>
                   <th className="border px-3 py-2 text-left min-w-[280px]">
                     Product
                   </th>
+                  <th className="border px-3 py-2 text-left">Company</th>
                   <th className="border px-3 py-2 text-left">Batch</th>
                   <th className="border px-3 py-2 text-left">Mg</th>
                   <th className="border px-3 py-2 text-left">Exp.</th>
@@ -282,12 +295,13 @@ const BillDetailPage = (props) => {
                   <tr key={t._id || i}>
                     <td className="px-3 pb-1">{i + 1}</td>
                     {/* <td className="px-3 pb-1 text-right">{t.lessquantity}</td> */}
-                    <td className="px-3 pb-1 text-right">{t.free}</td>
+                    {/* <td className="px-3 pb-1 text-right">{t.free}</td> */}
                     <td className="px-3 pb-1">{t.packing}</td>
                     <td className="px-3 pb-1">{t.strips}</td>
                     <td className="px-3 pb-1 min-w-[280px]">{t.name}</td>
+                    <td className="px-3 pb-1  min-w-[10px]">{t.company}</td>
                     <td className="px-3 pb-1">{t.batch}</td>
-                    <td className="px-3 pb-1">{t.mg}</td>
+                    <td className="px-3 pb-1">{t.mg==="NA"?"-":t.mg}</td>
                     <td className="px-3 pb-1">{t.expiry}</td>
                     <td className="px-3 pb-1">{t.hsm}</td>
                     <td className="px-3 pb-1 text-right font-mono">

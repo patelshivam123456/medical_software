@@ -22,6 +22,11 @@ const Index = (props) => {
     address2: "",
     pinCode: "",
     state: "",
+    email:"",
+    accountDetails:"",
+    accountIfscCode:"",
+    accountNumber:"",
+    gstIn:""
   });
   const [clients, setClients] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -95,6 +100,11 @@ const Index = (props) => {
         address2: "",
         pinCode: "",
         state: "",
+        gstIn:"",
+        accountNumber:"",
+        accountIfscCode:"",
+        accountDetails:"",
+        email:""
       });
       setEditId(null);
       fetchClients();
@@ -143,6 +153,11 @@ const Index = (props) => {
       address2: client.address2 || "",
       pinCode: client.pinCode || "",
       state: client.state || "",
+      email:client.email||"",
+      accountDetails:client.accountDetails||"",
+      accountNumber:client.accountNumber||"",
+      accountIfscCode:client.accountIfscCode||"",
+      gstIn:client.gstIn||""
     });
   };
 
@@ -304,6 +319,61 @@ const Index = (props) => {
               value={formData.state}
               onChange={(e) =>
                 setFormData({ ...formData, state: e.target.value })
+              }
+              className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+            />
+          </div>
+          <div className="w-full md:w-[20%] ">
+            <label>Email</label>
+            <input
+              // required
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+            />
+          </div>
+          <div className="w-full md:w-[20%] ">
+            <label>Account Details</label>
+            <input
+              // required
+              value={formData.accountDetails}
+              onChange={(e) =>
+                setFormData({ ...formData, accountDetails: e.target.value })
+              }
+              className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+            />
+          </div>
+          <div className="w-full md:w-[20%] ">
+            <label>Account Number</label>
+            <input
+              // required
+              value={formData.accountNumber}
+              onChange={(e) =>
+                setFormData({ ...formData, accountNumber: e.target.value })
+              }
+              className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+            />
+          </div>
+          <div className="w-full md:w-[20%] ">
+            <label>Ifsc Code</label>
+            <input
+              required
+              value={formData.accountIfscCode}
+              onChange={(e) =>
+                setFormData({ ...formData, accountIfscCode: e.target.value })
+              }
+              className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+            />
+          </div>
+          <div className="w-full md:w-[20%] ">
+            <label>GSTIN</label>
+            <input
+              // required
+              value={formData.gstIn}
+              onChange={(e) =>
+                setFormData({ ...formData, gstIn: e.target.value })
               }
               className="border p-2 w-full bg-white text-black outline-none rounded-sm"
             />

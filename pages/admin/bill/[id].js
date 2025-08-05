@@ -140,14 +140,14 @@ const BillDetailPage = (props) => {
                     SHRI JI ENTERPRISES
                   </div>
                   <div className="text-xs font-semibold italic -mt-1">
-                    GST Not Applicable
+                    "Your Health, Our Priority"
                   </div>
                 </div>
               </div>
               <div style={{ marginTop: "-5px" }}>
-                Pratap market,Kamla Market,Aminabad Rd
+                Keshav Nagar, Fazullaganj
               </div>
-              <div>Aminabad,Lucknow,Uttar Pradesh-122001</div>
+              <div>Lucknow,Uttar Pradesh-226020</div>
               <div className="text-base">Mobile Number: +91-8707868591</div>
             </div>
             <div className="w-1/2">

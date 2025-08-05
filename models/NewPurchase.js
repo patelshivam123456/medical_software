@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const newPurchaseSchema = new mongoose.Schema({
   billNo: { type: Number, required: true, unique: true },
-  oldbillNo: { type: Number, required: false, default: null },
+  oldbillNo: { type: String, required: false, default: null },
   salesperson: { type: String },
   paymenttype: { type: String },
   ordertype: { type: String, default: "pending" }, // Default to "pending"
@@ -49,11 +49,15 @@ const newPurchaseSchema = new mongoose.Schema({
   address2: { type: String },
   pinCode: { type: String },
   state: { type: String },
-
+  email:{type:String},
+  accountDetails:{type:String},
+  accountNumber:{type:String},
+  accountIfscCode:{type:String},
+  gstIn:{type:String},
   grandtotal: { type: Number, required: true },
 
   // ✅ Payment tracking
-  amountPaid: { type: Number, default: 0 },
+  amountPaid: { type: Number, default: null },
   paymentDate: { type: Date, default: null },
 }, {
   timestamps: true
