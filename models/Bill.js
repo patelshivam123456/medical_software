@@ -47,6 +47,16 @@ const billSchema = new mongoose.Schema({
   address2: { type: String },
   pinCode: { type: String },
   state: { type: String },
+  email:{type:String},
+  accountDetails:{type:String},
+  accountNumber:{type:String},
+  accountIfscCode:{type:String},
+  gstIn:{type:String},
+  grandtotal: { type: Number, required: true },
+
+  // ✅ Payment tracking
+  amountPaid: { type: Number, default: null },
+  paymentDate: { type: Date, default: null },
 }, { timestamps: true });
 
 export default mongoose.models.Bill || mongoose.model('Bill', billSchema);

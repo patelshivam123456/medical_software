@@ -166,7 +166,7 @@ const BillDetailPage = (props) => {
           <div className="flex  gap-2 border mt-2 px-3">
             <div className="w-[35%]">
               <div className="text-sm">
-                Payment Method: {billdata.paymenttype==="cod"?"Cash on Delivery":billdata.paymenttype}
+                Payment: {billdata.paymenttype==="cod"?"Cash on Delivery":billdata.paymenttype}
               </div>
               {billdata.orderid&&<div className="text-sm">
                 Order_Id: {billdata.orderid}
@@ -273,7 +273,7 @@ const BillDetailPage = (props) => {
                     <td className="px-3 pb-1">{t.strips}</td>
                     <td className="px-3 pb-1 min-w-[280px]">{t?.name?.toUpperCase()}</td>
                     <td className="px-3 pb-1">{t.batch}</td>
-                    <td className="px-3 pb-1">{t.mg}</td>
+                    <td className="px-3 pb-1">{t.mg==="NA"?"-":t.mg}</td>
                     <td className="px-3 pb-1">{t.expiry}</td>
                     <td className="px-3 pb-1">{t.hsm}</td>
                     <td className="px-3 pb-1 text-right font-mono">

@@ -16,14 +16,18 @@ import LoadingBtn from "@/components/Buttons/LoadingBtn";
 import Searchable from "@/components/Input/Searchable";
 import ConfirmationModal from "@/components/Modal/ConfirmationModal";
 import Header from "@/components/Header";
+import PaymentClientModal from "@/components/Modal/PaymentClientModal";
 
 const Index = (props) => {
   const router = useRouter();
   const [billNo, setBillNo] = useState("");
+  const [billNoDelete, setBillNoDelete] = useState("");
   const [salesPerson, setSalesPerson] = useState("");
   const [paymentType, setPaymentType] = useState("");
   const [orderType, setOrderType] = useState("Mannual");
   const [orderId, setOrderId] = useState("");
+  const [grandTotal, setGrandTotal] = useState(0);
+  const [amountPaid, setAmountPaid] = useState("");
   const [discount, setDiscount] = useState(0);
   const [gst, setGst] = useState(0);
   const [cgst, setCgst] = useState(0);
@@ -31,6 +35,11 @@ const Index = (props) => {
   const [clientName, setClientName] = useState("");
   const [title, setTitle] = useState("");
   const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
+  const [accountDetails, setAccountDetails] = useState("");
+  const [accountIfscCode, setAccountIfscCode] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [gstIn, setGstIn] = useState("");
   const [branchName, setBranchName] = useState("");
   const [branch, setBranch] = useState("");
   const [address1, setAddress1] = useState("");
@@ -40,6 +49,7 @@ const Index = (props) => {
   const [availableTablets, setAvailableTablets] = useState([]);
   const [tablets, setTablets] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalPaymentOpen, setModalPaymentOpen] = useState(false);
   const [billNumbers, setBillNumbers] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -436,7 +446,11 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       strips:0
     });
   };
-
+  const calculateGrandTotal = () => {
+    console.log(tablets,"jjjjjjj");
+    
+    return tablets.reduce((sum, tab) => sum + Number(tab.total || 0), 0);
+  };
   const handleSubmit = async (e) => {
     setIsLoading(true);
     e.preventDefault();
@@ -472,6 +486,15 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         state,
         title,
         mobile,
+        gstIn,
+        email,
+        accountDetails,
+        accountIfscCode,accountNumber,
+        grandtotal: calculateGrandTotal(),
+        amountPaid:Number(amountPaid),
+        paymentDate:orderType === "Cash"
+      ? new Date().toISOString().slice(0, 10) // "YYYY-MM-DD"
+      : "",
       });
 
       if (response.status === 201) {
@@ -566,6 +589,12 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       setAddress1(bill.address1 || "");
       setAddress2(bill.address2 || "");
       setPinCode(bill.pinCode || "");
+      setEmail(bill.email || "");
+      setAccountDetails(bill.accountDetails || "");
+      setAccountNumber(bill.accountNumber || "");
+      setAccountIfscCode(bill.accountIfscCode || "");
+      setGstIn(bill.gstIn || "");
+      setAmountPaid(bill.amountPaid)
       setState(bill.state || "");
       setTablets(bill.tablets || []);
       setModalOpen(false);
@@ -598,6 +627,12 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       setAddress2(bill.address2 || "");
       setPinCode(bill.pinCode || "");
       setState(bill.state || "");
+      setEmail(bill.email || "");
+      setAccountDetails(bill.accountDetails || "");
+      setAccountNumber(bill.accountNumber || "");
+      setAccountIfscCode(bill.accountIfscCode || "");
+      setGstIn(bill.gstIn || "");
+      setAmountPaid(bill.amountPaid||0)
       setTablets(bill.tablets || []);
       setModalOpen(false);
       setIsEditingBill("edit");
@@ -635,6 +670,15 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         state,
         title,
         mobile,
+        gstIn,
+        email,
+        accountDetails,
+        accountIfscCode,accountNumber,
+        grandtotal: calculateGrandTotal(),
+        amountPaid:Number(amountPaid),
+        paymentDate:orderType === "Cash"
+      ? new Date().toISOString().slice(0, 10) // "YYYY-MM-DD"
+      : "",
       });
 
       if (res.status === 200) {
@@ -670,10 +714,10 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
     }
   };
 
-  const handleDeleteBill = async () => {
+  const handleDeleteBill = async (invoiceId) => {
     setLoading(true)
     try {
-      const res = await axios.delete(`/api/bills/${invoiceId}`);
+      const res = await axios.delete(`/api/bills/${billNoDelete}`);
       if (res.status === 200) {
         toast.success("Bill deleted successfully");
         setBillNumbers((prev) => prev.filter((b) => b !== invoiceId));
@@ -810,6 +854,11 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       setAddress2(client.address2 || "");
       setPinCode(client.pinCode || "");
       setState(client.state || "");
+      setEmail(client.email || "");
+      setAccountDetails(client.accountDetails || "");
+      setAccountNumber(client.accountNumber || "");
+      setAccountIfscCode(client.accountIfscCode || "");
+      setGstIn(client.gstIn || "");
       setMobileOptions([]);
       setClientMobileGroup([]);
     } else if (matchingClients.length > 1) {
@@ -867,7 +916,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
     return activeBills
       .filter((bill) => filterDate(bill.createdAt))
       .filter((b) =>
-        `SG000${b.billNo}`.toLowerCase().includes(searchTerm.toLowerCase())
+        `SG000${b.billNo}`.toLowerCase().includes(searchTerm.toLowerCase()),
       );
   }, [searchTerm, activeBills, filterType, customDateRange]);
 
@@ -886,6 +935,8 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
   
     return remaining === 0 ? `${fullStrips}` : `${fullStrips}*${remaining}`;
   };
+
+  
   
   
   return (
@@ -894,12 +945,18 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       <div className="p-6 max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-2xl font-bold lg:mb-4">Create Bill</h2>
-          <button
+          {/* <button
             onClick={openModal}
             className=" bg-gray-700 text-white px-4 py-2 hidden lg:block rounded cursor-pointer"
           >
             Show All Invoice
-          </button>
+          </button> */}
+          <button
+        onClick={() => setModalPaymentOpen(true)}
+        className="bg-yellow-600 text-white px-4 py-2 rounded cursor-pointer"
+      >
+        View Ledger
+      </button>
           <div onClick={openModal} className="block lg:hidden"><PaperClipIcon className="w-6 h-6"/></div>
         </div>
         <form onSubmit={handleSubmit} className="mb-6 w-full max-w-7xl gap-5">
@@ -938,14 +995,15 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
               <select
                 type="text"
                 required
-                disabled
+                // disabled
                 value={orderType}
                 onChange={(e) => setOrderType(e.target.value)}
                 className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
               >
                 <option value={""} disabled>--Select Order Type--</option>
                 <option value={"Mannual"}>Mannual</option>
-                <option value={"Online"}>Online</option>
+                <option value={"Pending"}>Pending</option>
+                <option value={"Cash"}>Cash</option>
                 </select>
             </div>
             </div>
@@ -1484,12 +1542,19 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
 
       const matchedClient = clientMobileGroup.find(c => c.mobile === selectedMobile);
       if (matchedClient) {
+        console.log(matchedClient,"hdajhkj");
+        
         setBranch(matchedClient.branch || "");
         setBranchName(matchedClient.branchName || "");
         setAddress1(matchedClient.address1 || "");
         setAddress2(matchedClient.address2 || "");
         setPinCode(matchedClient.pinCode || "");
         setState(matchedClient.state || "");
+        setEmail(matchedClient.email || "");
+        setAccountDetails(matchedClient.accountDetails || "");
+        setAccountNumber(matchedClient.accountNumber || "");
+        setAccountIfscCode(matchedClient.accountIfscCode || "");
+        setGstIn(matchedClient.gstIn || "");
       }
     }}
     required
@@ -1516,6 +1581,15 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
 )}
 
 </div>
+<div className="w-full md:w-[20%]">
+                  <label>Email</label>
+                  <input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    // required
+                  />
+                </div>
 
                 <div className="w-full md:w-[20%]">
                   <label>Branch</label>
@@ -1587,10 +1661,64 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                     required
                   />
                 </div>
+                <div className="w-full md:w-[20%]">
+                  <label>account Details</label>
+                  <input
+                    value={accountDetails}
+                    onChange={(e) => setAccountDetails(e.target.value)}
+                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    // required
+                  />
+                </div>
+                <div className="w-full md:w-[20%]">
+                  <label>Account Details</label>
+                  <input
+                    value={accountDetails}
+                    onChange={(e) => setAccountDetails(e.target.value)}
+                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    // required
+                  />
+                </div>
+                <div className="w-full md:w-[20%]">
+                  <label>Account Number</label>
+                  <input
+                    value={accountNumber}
+                    onChange={(e) => setAccountNumber(e.target.value)}
+                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    // required
+                  />
+                </div>
+                <div className="w-full md:w-[20%]">
+                  <label>Ifsc Code</label>
+                  <input
+                    value={accountIfscCode}
+                    onChange={(e) => setAccountIfscCode(e.target.value)}
+                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    // required
+                  />
+                </div>
+                <div className="w-full md:w-[20%]">
+                  <label>GSTIN</label>
+                  <input
+                    value={gstIn}
+                    onChange={(e) => setGstIn(e.target.value)}
+                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    // required
+                  />
+                </div>
               </div>
             </div>
           </div>
-          <div className="flex justify-end items-center mt-2">
+          <div className="flex justify-end items-center gap-4 mt-2">
+          <div className="w-full md:w-[20%]">
+                  <label>Amount Paid</label>
+                  <input
+                    value={amountPaid}
+                    onChange={(e) => setAmountPaid(e.target.value)}
+                    className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                    // required
+                  />
+                </div>
             {isLoading ? (
               <LoadingBtn />
             ) : tablets.length > 0 ? (
@@ -1612,7 +1740,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
             )}
           </div>
         </form>
-        <Modal
+        {/* <Modal
           isOpen={modalOpen}
           onRequestClose={() => setModalOpen(false)}
           className="bg-white  p-6 border max-w-4xl mx-auto mt-2 lg:mt-12 shadow-2xl z-50"
@@ -1768,7 +1896,16 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
 </div>
 
           </div>
-        </Modal>
+        </Modal> */}
+
+         <PaymentClientModal
+                isOpen={modalPaymentOpen}
+                onClose={() => setModalPaymentOpen(false)}
+                handleEdit={handleEditBill}
+                handleDelete={()=>setConfirmDeleteId(true)}
+                billNoDelete={billNoDelete}
+                setBillNoDelete={setBillNoDelete}
+              />
       </div>
       <div>
         <ConfirmationModal loading={loading} title={"Are you sure want to delete this Invoice?"}

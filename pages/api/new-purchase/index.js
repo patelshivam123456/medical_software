@@ -107,7 +107,7 @@ if (req.method === "POST") {
         oldbillNo, salesperson, paymenttype, ordertype, orderid, invoiceDate,
         tablets, discount = 0, gst = 0, cgst = 0, sgst = 0,
         title, clientName, mobile, branch, branchName,
-        address1, address2, pinCode, state, grandtotal
+        address1, address2, pinCode, state, grandtotal,email,accountDetails,accountNumber,accountIfscCode,gstIn,amountPaid,paymentDate
       } = req.body;
   
       // ✅ 1. Validate tablets array
@@ -148,7 +148,8 @@ if (req.method === "POST") {
         address2,
         pinCode,
         state,
-        grandtotal
+        grandtotal,
+        email,accountDetails,accountNumber,accountIfscCode,gstIn,amountPaid,paymentDate
       });
   
       try {

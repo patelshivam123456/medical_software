@@ -5,8 +5,8 @@ import PaymentConfirmationModal from "./PaymentConfirmationModal";
 import { toast } from "react-toastify";
 import { EyeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 
-export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,setBillNoDelete }) {
-  const [activeTab, setActiveTab] = useState("pending");
+const PaymentClientModal=({ isOpen, onClose,handleEdit,handleDelete,setBillNoDelete })=> {
+  const [activeTab, setActiveTab] = useState("Pending");
   const [allBills, setAllBills] = useState([]);
   const [filteredBills, setFilteredBills] = useState([]);
   const [search, setSearch] = useState("");
@@ -21,20 +21,22 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
 
   const fetchBills = async () => {
     try {
-      const res = await axios.get("/api/get-purchse");
-      setAllBills(res.data.purchases);
-      filterBills(res.data.purchases, search, activeTab);
+      const res = await axios.get("/api/bills");
+      setAllBills(res.data.bills);
+      filterBills(res.data.bills, search, activeTab);
     } catch (e) {
       console.error("Error fetching bills", e);
     }
   };
 
   const filterBills = (data, term, status) => {
+    console.log(data,"kkkkkkkkkkkkkkkkk");
+    
     const filtered = data.filter(
       (bill) =>
         bill.ordertype === status &&
         (bill.clientName?.toLowerCase().includes(term.toLowerCase()) ||
-         bill.oldbillNo?.toString().includes(term))
+         bill.billNo?.toString().includes(term))
     );
     setFilteredBills(filtered);
   };
@@ -57,7 +59,7 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
 
   const confirmPayment = async () => {
     const amountPaid =
-      paymentType === "full" ? selectedBill.grandtotal : Number(customAmount);
+      paymentType === "full" ? (selectedBill?.grandtotal-selectedBill?.amountPaid) : Number(customAmount);
 
     if (paymentType === "partial" && (!amountPaid || amountPaid <= 0)) {
       toast.error("Enter valid partial amount");
@@ -65,7 +67,7 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
     }
 
     try {
-      const res = await axios.post("/api/update-payment-status", {
+      const res = await axios.post("/api/update-payment-client", {
         billId: selectedBill._id,
         amountPaid,
       });
@@ -92,14 +94,14 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
 
             <div className="flex mb-4 space-x-4">
               <button
-                className={`px-4 py-2 rounded ${activeTab === "pending" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-                onClick={() => setActiveTab("pending")}
+                className={`px-4 py-2 rounded ${activeTab === "Pending" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+                onClick={() => setActiveTab("Pending")}
               >
                 Pending
               </button>
               <button
-                className={`px-4 py-2 rounded ${activeTab === "CASH" ? "bg-green-600 text-white" : "bg-gray-200"}`}
-                onClick={() => setActiveTab("CASH")}
+                className={`px-4 py-2 rounded ${activeTab === "Cash" ? "bg-green-600 text-white" : "bg-gray-200"}`}
+                onClick={() => setActiveTab("Cash")}
               >
                 Done
               </button>
@@ -112,7 +114,7 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
             </div>
 
             <div className="mb-2 text-right font-bold text-lg">
-  {activeTab === "pending" ? (
+  {activeTab === "Pending" ? (
     <>
       Total Due Payment: ₹
       {(Number(grandTotal || 0) - Number(amountpaid|| 0)).toFixed(2)}
@@ -143,18 +145,18 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
                 <tbody>
                   {filteredBills.map((bill) => (
                     <tr key={bill._id}>
-                      <td className="border p-2">{bill.oldbillNo}</td>
+                      <td className="border p-2">{bill.billNo}</td>
                       <td className="border p-2">{bill.clientName}</td>
                       <td className="border p-2">{bill.mobile}</td>
                       <td className="border p-2">₹{bill.grandtotal}</td>
-                     {bill.ordertype === "CASH"? <td className="border p-2">₹{bill.grandtotal}</td>:<td className="border p-2">₹{bill.amountPaid}</td>}
-                     {bill.ordertype === "pending"? <td className="border p-2">₹{(bill?.grandtotal-bill?.amountPaid).toFixed(2)}</td>:
+                     {bill.ordertype === "Cash"? <td className="border p-2">₹{bill.grandtotal}</td>:<td className="border p-2">₹{bill.amountPaid}</td>}
+                     {bill.ordertype === "Pending"? <td className="border p-2">₹{(bill?.grandtotal-bill?.amountPaid).toFixed(2)}</td>:
                      <td className="border p-2">Clear</td>}
                       <td className="border p-2 capitalize">{bill.ordertype}</td>
-                      <td className="border p-2 capitalize">{!bill?.paymentDate&&bill.ordertype === "CASH"?
+                      <td className="border p-2 capitalize">{!bill?.paymentDate&&bill.ordertype === "Cash"?
                       new Date().toISOString().slice(0, 10):bill.paymentDate?bill?.paymentDate?.split("T")[0]:"-"}</td>
                       <td>
-                        {bill.ordertype === "pending" ? (
+                        {bill.ordertype === "Pending" ? (
                             <div className="flex items-center gap-4 p-2">
                           <button
                             className="bg-blue-600 text-white px-4 py-2 rounded text-sm cursor-pointer"
@@ -162,16 +164,16 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
                           >
                             Clear
                           </button>
-                          <button onClick={()=>{handleEdit(bill._id);onClose()}} className="cursor-pointer"><PencilSquareIcon className="w-4 h-4"/></button>
-                          <button onClick={()=>{handleDelete();onClose();setBillNoDelete(bill._id)}} className="cursor-pointer"><TrashIcon className="w-4 h-4"/></button>
-                          <a href={`/admin/purchase/${bill._id}`}><EyeIcon className="w-5 h-5"/></a>
+                          <button onClick={()=>{handleEdit(bill.billNo);onClose()}} className="cursor-pointer"><PencilSquareIcon className="w-4 h-4"/></button>
+                          <button onClick={()=>{handleDelete();onClose();setBillNoDelete(bill.billNo)}} className="cursor-pointer"><TrashIcon className="w-4 h-4"/></button>
+                          <a href={`/admin/bill/${bill.billNo}`}><EyeIcon className="w-5 h-5"/></a>
                           </div>
                         ) : (
                             <div className="flex items-center gap-4 px-3">
                           <div className="text-green-600 text-sm italic">Payment Done</div>
-                          {/* <button onClick={()=>{handleEdit(bill._id);onClose()}} className="cursor-pointer"><PencilSquareIcon className="w-4 h-4"/></button> */}
-                          {/* <button onClick={()=>{handleDelete();onClose();setBillNoDelete(bill._id)}} className="cursor-pointer"><TrashIcon className="w-4 h-4"/></button> */}
-                          <a href={`/admin/purchase/${bill._id}`}><EyeIcon className="w-5 h-5"/></a>
+                          {/* <button onClick={()=>{handleEdit(bill.billNo);onClose()}} className="cursor-pointer"><PencilSquareIcon className="w-4 h-4"/></button> */}
+                          {/* <button onClick={()=>{handleDelete();onClose();setBillNoDelete(bill.billNo)}} className="cursor-pointer"><TrashIcon className="w-4 h-4"/></button> */}
+                          <a href={`/admin/bill/${bill.billNo}`}><EyeIcon className="w-5 h-5"/></a>
                           </div>
                         )}
                       </td>
@@ -203,3 +205,5 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
     </>
   );
 }
+
+export default PaymentClientModal

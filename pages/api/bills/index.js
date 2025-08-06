@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
     try {
-      const { salesperson,paymenttype,ordertype,orderid, dispatchDate,tablets, discount = 0,gst=0 ,cgst = 0, sgst = 0,title,clientName,mobile,branch,branchName,address1,address2,pinCode,state,strips } = req.body;
+      const { salesperson,paymenttype,ordertype,orderid, dispatchDate,tablets, discount = 0,gst=0 ,cgst = 0, sgst = 0,title,clientName,mobile,branch,branchName,address1,address2,pinCode,state,strips,email,accountDetails,accountNumber,accountIfscCode,gstIn,grandtotal,amountPaid,paymentDate } = req.body;
 
       // ✅ 1. Validate Request Body
       // if (!billNo || typeof billNo !== "string") {
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
        const nextBillNo = latest ? latest.billNo + 1 : 1;
 
       // ✅ 2. Check if Bill Already Exists
-      const existingBill = await Bill.findOne({ nextBillNo });
+      const existingBill = await Bill.findOne({ billNo: nextBillNo });
       if (existingBill) {
         return res.status(409).json({ success: false, message: `Bill with number ${nextBillNo} already exists` });
       }
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
       }
 
       // ✅ 4. Create Bill
-      const bill = new Bill({ billNo:nextBillNo,salesperson,paymenttype,ordertype,orderid,dispatchDate,tablets, discount,gst, cgst, sgst,title,clientName,mobile,branch,branchName,address1,address2,pinCode,state,strips });
+      const bill = new Bill({ billNo:nextBillNo,salesperson,paymenttype,ordertype,orderid,dispatchDate,tablets, discount,gst, cgst, sgst,title,clientName,mobile,branch,branchName,address1,address2,pinCode,state,strips,email,accountDetails,accountNumber,accountIfscCode,gstIn,grandtotal,amountPaid,paymentDate });
 
       try {
         await bill.save();

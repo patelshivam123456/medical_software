@@ -11,6 +11,11 @@ const clientSchema = new mongoose.Schema({
   address2: String,
   pinCode: String,
   state: String,
+  email:String,
+  accountDetails:String,
+  accountNumber:String,
+  accountIfscCode:String,
+  gstIn:String,
 });
 
 // Prevent duplicate clientName + mobile

@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import PaymentsModal from "@/components/Modal/PaymentModal";
 import Header from "@/components/Header";
+import ConfirmationModal from "@/components/Modal/ConfirmationModal";
 
 const initialTablet = {
   name: "",
@@ -71,8 +72,9 @@ const NewPurchasePage=(props)=> {
   const [isLoggedCheck,setIsLoggedCheck] = useState('')
   const [errors, setErrors] = useState({});
   const [editTabletIndex, setEditTabletIndex] = useState(null);
-
-
+  const [confirmDeleteId,setConfirmDeleteId] = useState(false)
+  const [billNoDelete, setBillNoDelete] = useState("");
+  const [loading, setLoading] = useState(false);
   useEffect(()=>{
     if(props.isLoggedStatus){
         setIsLoggedCheck(props.isLoggedStatus)
@@ -306,15 +308,19 @@ const handleAddTablet = () => {
   };
 
   const deletePurchase = async (id) => {
+    setLoading(true)
     try {
-      const res = await axios.delete(`/api/new-purchase?id=${id}`);
+      const res = await axios.delete(`/api/new-purchase?id=${billNoDelete}`);
       if (res.data.success) {
-        toast.success(res.data.message); // "Purchase deleted successfully"
+        toast.success(res.data.message);
+        setLoading(false) // "Purchase deleted successfully"
       } else {
         toast.error(res.data.message);
+        setLoading(false)
       }
     } catch (err) {
       console.error(err);
+      setLoading(false)
       toast.error("Error deleting purchase.");
     }
   };
@@ -674,8 +680,15 @@ const handleAddTablet = () => {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         handleEdit={handleEditBill}
-        handleDelete={deletePurchase}
+        handleDelete={()=>setConfirmDeleteId(true)}
+        billNoDelete={billNoDelete}
+        setBillNoDelete={setBillNoDelete}
       />
+
+<div>
+        <ConfirmationModal loading={loading} title={"Are you sure want to delete this Invoice?"}
+        confirmDeleteId={confirmDeleteId} setConfirmDeleteId={setConfirmDeleteId} confirmDelete={deletePurchase}/>
+      </div>
     </div>
     </>
   );

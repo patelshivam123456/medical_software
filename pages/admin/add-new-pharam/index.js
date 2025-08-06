@@ -171,6 +171,11 @@ const Index = (props) => {
       address2: "",
       pinCode: "",
       state: "",
+      gstIn:"",
+      accountNumber:"",
+      accountIfscCode:"",
+      accountDetails:"",
+      email:""
     });
     setEditId(null);
   };
