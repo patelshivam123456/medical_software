@@ -131,7 +131,7 @@ const Header=({isLoggedStatus})=> {
           } */}
           {(router.pathname.toLowerCase().includes("admin")&&isLoggedStatus)&&<>
           
-          <PopoverGroup className="hidden lg:flex lg:gap-x-12">
+          <PopoverGroup className="hidden lg:flex lg:gap-x-5">
           {checkLoginType==="admin"&&
           <><Popover className="relative">
             <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 outline-none">
@@ -223,6 +223,9 @@ const Header=({isLoggedStatus})=> {
           </a>}
           {checkLoginType==="admin"&&<a href="/admin/accesstype/adduser" className="text-sm/6 font-semibold text-gray-900">
             Login Access
+          </a>}
+          {checkLoginType==="admin"&&<a href="/admin/profit" className="text-sm/6 font-semibold text-gray-900">
+            Check Profit
           </a>}
           {(checkLoginType==="admin"||checkLoginType==="delivery")&&<a href="/admin/complete-delivery" className="text-sm/6 font-semibold text-gray-900">
             Delivery person
@@ -422,6 +425,14 @@ const Header=({isLoggedStatus})=> {
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
                 Login Access
+              </a>
+            </div>}
+            {(checkLoginType==="admin")&&<div className="space-y-2 py-6">
+              <a
+                href="/admin/profit"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Check Profit
               </a>
             </div>}
             {(checkLoginType==="admin"||checkLoginType==="delivery")&&<div className="space-y-2 py-6">

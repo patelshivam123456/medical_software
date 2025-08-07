@@ -146,10 +146,10 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
                       <td className="border p-2">{bill.oldbillNo}</td>
                       <td className="border p-2">{bill.clientName}</td>
                       <td className="border p-2">{bill.mobile}</td>
-                      <td className="border p-2">₹{bill.grandtotal}</td>
-                     {bill.ordertype === "CASH"? <td className="border p-2">₹{bill.grandtotal}</td>:<td className="border p-2">₹{bill.amountPaid}</td>}
+                      <td className="border p-2">₹{(bill.grandtotal).toFixed(2)}</td>
+                     {bill.ordertype === "CASH"? <td className="border p-2">₹{(bill.grandtotal).toFixed(2)}</td>:<td className="border p-2">₹{(bill.amountPaid).toFixed(2)}</td>}
                      {bill.ordertype === "pending"? <td className="border p-2">₹{(bill?.grandtotal-bill?.amountPaid).toFixed(2)}</td>:
-                     <td className="border p-2">Clear</td>}
+                     <td className="border p-2 text-green-600 italic font-semibold">No Dues</td>}
                       <td className="border p-2 capitalize">{bill.ordertype}</td>
                       <td className="border p-2 capitalize">{!bill?.paymentDate&&bill.ordertype === "CASH"?
                       new Date().toISOString().slice(0, 10):bill.paymentDate?bill?.paymentDate?.split("T")[0]:"-"}</td>

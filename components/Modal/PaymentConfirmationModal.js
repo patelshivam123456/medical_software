@@ -16,7 +16,7 @@ const PaymentConfirmationModal = ({selectedBill,confirmPayment,paymentModalOpen,
             checked={paymentType === "full"}
             onChange={() => setPaymentType("full")}
           />
-          <span>Pay Full Amount (₹{selectedBill?.grandtotal-selectedBill?.amountPaid})</span>
+          <span>Pay Full Amount (₹{Math.ceil(selectedBill?.grandtotal-selectedBill?.amountPaid)})</span>
         </label>
 
         <label className="flex items-center space-x-2">

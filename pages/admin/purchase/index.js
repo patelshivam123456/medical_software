@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import PaymentsModal from "@/components/Modal/PaymentModal";
 import Header from "@/components/Header";
 import ConfirmationModal from "@/components/Modal/ConfirmationModal";
+import InputModal from "@/components/Modal/InputModal";
 
 const initialTablet = {
   name: "",
@@ -75,6 +76,50 @@ const NewPurchasePage=(props)=> {
   const [confirmDeleteId,setConfirmDeleteId] = useState(false)
   const [billNoDelete, setBillNoDelete] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [companyList, setCompanyList] = useState([]);
+  const [filteredCompanies, setFilteredCompanies] = useState([]);
+  const [showCompanyDropdown, setShowCompanyDropdown] = useState(false);
+
+  const [showCompanyModal, setShowCompanyModal] = useState(false);
+  const [newCompanyName, setNewCompanyName] = useState("");
+  const [companyError, setCompanyError] = useState("");
+
+  const [saltList, setSaltList] = useState([]);
+  const [filteredSalts, setFilteredSalts] = useState([]);
+  const [showSaltDropdown, setShowSaltDropdown] = useState(false);
+
+  const [showSaltModal, setShowSaltModal] = useState(false);
+  const [newSaltName, setNewSaltName] = useState("");
+  const [saltError, setSaltError] = useState("");
+  
+
+
+  useEffect(() => {
+    fetchCompanies();
+    fetchSalt()
+  }, []);
+
+  const fetchCompanies = async () => {
+    try {
+      const res = await axios.get("/api/company/list");
+      setCompanyList(res.data?.success ? res.data.company || [] : []);
+    } catch (err) {
+      console.error("Company fetch error:", err);
+      setCompanyList([]);
+    }
+  };
+
+  const fetchSalt = async () => {
+    try {
+      const res = await axios.get("/api/salt/saltlist");
+      setSaltList(res.data?.success ? res.data.salt || [] : []);
+    } catch (err) {
+      console.error("Salt fetch error:", err);
+      setSaltList([]);
+    }
+  };
+
   useEffect(()=>{
     if(props.isLoggedStatus){
         setIsLoggedCheck(props.isLoggedStatus)
@@ -261,6 +306,7 @@ const handleAddTablet = () => {
       ? new Date().toISOString().slice(0, 10) // "YYYY-MM-DD"
       : "",
     };
+    setIsLoading(true);
     try {
       if (isEditMode && editBillId) {
         const res = await axios.put(`/api/new-purchase/${editBillId}`, payload);
@@ -284,6 +330,8 @@ const handleAddTablet = () => {
     } catch (err) {
       console.error(err);
       toast.error("Failed to submit purchase.");
+    } finally {
+      setIsLoading(false); // 🔴 Stop loading
     }
   };
 
@@ -380,6 +428,102 @@ const handleAddTablet = () => {
     { id: 20, value: "TAB", option: "TAB" },
   ];
 
+  const handleSelectCompany = (name) => {
+    setTabletForm((prev) => ({ ...prev, company: name }));
+    setShowCompanyDropdown(false);
+  };
+
+  const handleCompanyInputChange = (e) => {
+    const value = e.target.value;
+    setTabletForm((prev) => ({ ...prev, company: value }));
+  
+    if (value.trim() === "") {
+      setFilteredCompanies([]);
+      setShowCompanyDropdown(false);
+      return;
+    }
+  
+    const filtered = companyList.filter((comp) =>
+      comp.option.toLowerCase().includes(value.toLowerCase())
+    );
+  
+    setFilteredCompanies(filtered);
+    setShowCompanyDropdown(true);
+  };
+
+  const handleSelectSalt = (name) => {
+    setTabletForm((prev) => ({ ...prev, salt: name }));
+    setShowSaltDropdown(false);
+  };
+
+  const handleSaltInputChange = (e) => {
+    const value = e.target.value;
+    setTabletForm((prev) => ({ ...prev, salt: value }));
+  
+    if (value.trim() === "") {
+      setFilteredSalts([]);
+      setShowSaltDropdown(false);
+      return;
+    }
+  
+    const filtered = saltList.filter((comp) =>
+      comp.option.toLowerCase().includes(value.toLowerCase())
+    );
+  
+    setFilteredSalts(filtered);
+    setShowSaltDropdown(true);
+  };
+  
+  const submitCompany = async () => {
+    setIsLoading(true);
+    const trimmedName = newCompanyName.trim();
+
+    if (!trimmedName) {
+      setCompanyError("Company name is required.");
+      return;
+    }
+
+    try {
+      await axios.post("/api/company/create", { name: trimmedName });
+      setNewCompanyName("");
+      setShowCompanyModal(false);
+      setCompanyError("");
+      fetchCompanies();
+      toast.success("Company added successfully");
+      setIsLoading(false);
+    } catch (err) {
+      const msg = err.response?.data?.message || "Failed to add company";
+      setCompanyError(msg);
+      toast.error(msg);
+      setIsLoading(false);
+    }
+  };
+
+  const submitSalt = async () => {
+    setIsLoading(true);
+    const trimmedName = newSaltName.trim();
+
+    if (!trimmedName) {
+      setSaltError("Salt name is required.");
+      return;
+    }
+
+    try {
+      await axios.post("/api/salt/create", { name: trimmedName });
+      setNewSaltName("");
+      setShowSaltModal(false);
+      setSaltError("");
+      fetchCompanies();
+      fetchSalt();
+      toast.success("Salt added successfully");
+      setIsLoading(false);
+    } catch (err) {
+      const msg = err.response?.data?.message || "Failed to add Salt";
+      setSaltError(msg);
+      toast.error(msg);
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -563,6 +707,97 @@ const handleAddTablet = () => {
             );
           }
 
+          if (field === "company") {
+            return (
+              <div key={field} className="flex flex-col relative">
+                <div className="flex justify-between">
+                <label className="text-sm mb-1 capitalize">Company</label>
+                <div
+                className="text-red-400 text-sm cursor-pointer"
+                onClick={() => setShowCompanyModal(true)}
+              >
+                +Add Company
+              </div>
+                </div>
+                <input
+                  type="text"
+                  name="company"
+                  value={tabletForm.company}
+                  onChange={handleCompanyInputChange}
+                  onFocus={() => {
+                    setFilteredCompanies(companyList); // ✅ always show full list on focus
+                    setShowCompanyDropdown(true);
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setShowCompanyDropdown(false), 200);
+                  }}
+                  placeholder="Search Company"
+                  className={`border p-2 ${errors[field] ? "border-red-500" : ""}`}
+                  autoComplete="off"
+                />
+                {showCompanyDropdown && filteredCompanies.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 max-h-40 overflow-y-auto bg-white border border-gray-300 z-10 rounded shadow">
+                    {filteredCompanies.map((comp, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => handleSelectCompany(comp.value)}
+                        className="p-2 cursor-pointer hover:bg-gray-100"
+                      >
+                        {comp.option}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          if (field === "salt") {
+            return (
+              <div key={field} className="flex flex-col relative">
+                <div className="flex justify-between">
+                <label className="text-sm mb-1 capitalize">Salt</label>
+                <div
+                className="text-red-400 text-sm cursor-pointer"
+                onClick={() => setShowSaltModal(true)}
+              >
+                +Add Salt
+              </div>
+                </div>
+                <input
+                  type="text"
+                  name="salt"
+                  value={tabletForm.salt}
+                  onChange={handleSaltInputChange}
+                  onFocus={() => {
+                    setFilteredSalts(saltList); // ✅ always show full list on focus
+                    setShowSaltDropdown(true);
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setShowSaltDropdown(false), 200);
+                  }}
+                  placeholder="Search Salt"
+                  className={`border p-2 ${errors[field] ? "border-red-500" : ""}`}
+                  autoComplete="off"
+                />
+                {showSaltDropdown && filteredSalts.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 max-h-40 overflow-y-auto bg-white border border-gray-300 z-10 rounded shadow">
+                    {filteredSalts.map((comp, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => handleSelectSalt(comp.value)}
+                        className="p-2 cursor-pointer hover:bg-gray-100"
+                      >
+                        {comp.option}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          }
+          
+
           if (field === "category") {
             return (
               <div key={field} className="flex flex-col">
@@ -668,11 +903,38 @@ const handleAddTablet = () => {
           Grand Total: ₹{calculateGrandTotal()}
         </div>
         <button
-          onClick={submitPurchase}
-          className="bg-green-600 text-white px-6 py-2 rounded"
-        >
-          Submit Purchase
-        </button>
+  onClick={submitPurchase}
+  className="bg-green-600 text-white px-6 py-2 rounded flex items-center justify-center"
+  disabled={isLoading}
+>
+  {isLoading ? (
+    <span className="flex items-center gap-2">
+      <svg
+        className="animate-spin h-5 w-5 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        ></path>
+      </svg>
+      Submitting...
+    </span>
+  ) : (
+    "Submit Purchase"
+  )}
+</button>
       </div>
      
 
@@ -690,6 +952,44 @@ const handleAddTablet = () => {
         confirmDeleteId={confirmDeleteId} setConfirmDeleteId={setConfirmDeleteId} confirmDelete={deletePurchase}/>
       </div>
     </div>
+    {showCompanyModal && (
+        <>
+          <InputModal
+            value={newCompanyName}
+            onChange={(e) => {
+              setNewCompanyName(e.target.value);
+              setCompanyError(false);
+            }}
+            onClose={() => {
+              setShowCompanyModal(false);
+              setCompanyError(false);
+            }}
+            onSubmit={submitCompany}
+            label={"Add New Company"}
+            Error={companyError}
+            isLoading={isLoading}
+          />
+        </>
+      )}
+      {showSaltModal && (
+        <>
+          <InputModal
+            value={newSaltName}
+            onChange={(e) => {
+              setNewSaltName(e.target.value);
+              setSaltError(false);
+            }}
+            onClose={() => {
+              setShowSaltModal(false);
+              setSaltError(false);
+            }}
+            onSubmit={submitSalt}
+            label={"Add New Salt"}
+            Error={saltError}
+            isLoading={isLoading}
+          />
+        </>
+      )}
     </>
   );
 }
