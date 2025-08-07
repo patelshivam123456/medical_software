@@ -234,7 +234,31 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
     );
   }, [searchTerm, billNumbers]);
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   const ratecount = Number(formFields.rate);
+  //   const ratecheck=Number(formFields.checkrate)-Number(formFields.rate)
+  //   const today = new Date();
+  //   const formattedDate = `${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getFullYear()).slice(-2)}`;
+  //   if(formattedDate===formFields.expiry){
+  //    toast.error("Alert!! Your Product has been Expired||")
+  //   }
+  //   else if(formFields.rate>0&&Number(formFields.rate)<Number(formFields.checkrate)){
+  //     const timer = setTimeout(()=>{
+  //     toast.error(`Your Sell price is less then purchase prize,your are lose ${ratecheck}`)
+  //   },700)
+  //   return ()=>clearTimeout(timer)
+  //   }
+  
+  //   else if (ratecount> 0 && editingIndex === null&&formattedDate!==formFields.expiry) {
+  //     const timer = setTimeout(() => {
+  //       addMoreTablet();
+  //     }, 1200);
+  
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [formFields.rate,formFields.expiry]);
+  
+  const addNewTablet=()=>{
     const ratecount = Number(formFields.rate);
     const ratecheck=Number(formFields.checkrate)-Number(formFields.rate)
     const today = new Date();
@@ -243,21 +267,13 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
      toast.error("Alert!! Your Product has been Expired||")
     }
     else if(formFields.rate>0&&Number(formFields.rate)<Number(formFields.checkrate)){
-      const timer = setTimeout(()=>{
       toast.error(`Your Sell price is less then purchase prize,your are lose ${ratecheck}`)
-    },700)
-    return ()=>clearTimeout(timer)
     }
   
     else if (ratecount> 0 && editingIndex === null&&formattedDate!==formFields.expiry) {
-      const timer = setTimeout(() => {
-        addMoreTablet();
-      }, 1200);
-  
-      return () => clearTimeout(timer);
+        addMoreTablet(); 
     }
-  }, [formFields.rate,formFields.expiry]);
-  
+  }
 
   const handleExpiryChange = (e) => {
     let value = e.target.value.replace(/[^\d]/g, "");
@@ -1370,7 +1386,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                 />
               </div> */}
             </div>
-            {editingIndex !== null&&<div className="flex items-center gap-2 justify-end pt-2 lg:pt-0 lg:mr-4">
+            {editingIndex !== null?<div className="flex items-center gap-2 justify-end pt-2 lg:pt-0 lg:mr-4">
               <button
                 type="button"
                 onClick={addMoreTablet}
@@ -1379,7 +1395,17 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                 Update
               </button>
               <div className="text-sm text-red-600 cursor-pointer" onClick={resetForm}>Reset</div>
-            </div>}
+            </div>:
+            <div className="flex items-center gap-2 justify-end pt-2 lg:pt-0 lg:mr-4">
+            <button
+              type="button"
+              onClick={addNewTablet}
+              className="bg-green-600 text-xs text-white p-2 rounded  cursor-pointer"
+            >
+              Add
+            </button>
+            <div className="text-sm text-red-600 cursor-pointer" onClick={resetForm}>Reset</div>
+          </div>}
             <div className="border-[1px] mt-5 mb-2"></div>
             {tablets.length > 0 && (
   <div className="">
