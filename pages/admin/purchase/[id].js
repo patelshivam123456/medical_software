@@ -67,26 +67,92 @@ const BillDetailPage = (props) => {
   const roundedgrandtotal = Math.ceil(grandtotalWithTax);
   const totalInWords = toWords(roundedgrandtotal);
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     setDownloading(true);
-    const input = document.getElementById("bill-content");
-
-    html2canvas(input, {
-      backgroundColor: "#00000",
-      scale: 2,
-      ignoreElements: (el) => el.classList?.contains("no-print"),
-    }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF();
+  
+    const content = document.getElementById("bill-content");
+    const table = content.querySelector("table"); // adjust selector if needed
+    const rows = table?.querySelectorAll("tbody tr") || [];
+  
+    const isTwoPage = rows.length > 10;
+  
+    const cloneContentForFirstPage = () => {
+      const clone = content.cloneNode(true);
+      clone.id = "clone-page-1";
+  
+      // Remove rows > 10
+      const tableClone = clone.querySelector("table");
+      const bodyRows = tableClone.querySelectorAll("tbody tr");
+      bodyRows.forEach((row, i) => {
+        if (i >= 10) row.remove();
+      });
+  
+      // Remove bottom content for first page
+      clone.querySelectorAll(".bottom-content").forEach(el => el.remove());
+  
+      document.body.appendChild(clone);
+      return clone;
+    };
+  
+    const cloneContentForSecondPage = () => {
+      const clone = content.cloneNode(true);
+      clone.id = "clone-page-2";
+  
+      // Keep only rows > 10
+      const tableClone = clone.querySelector("table");
+      const bodyRows = tableClone.querySelectorAll("tbody tr");
+      bodyRows.forEach((row, i) => {
+        if (i < 10) row.remove();
+      });
+  
+      // Keep bottom content
+      document.body.appendChild(clone);
+      return clone;
+    };
+  
+    const generateImageFromElement = async (element) => {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        ignoreElements: (el) => el.classList?.contains("no-print"),
+      });
+      return canvas.toDataURL("image/png");
+    };
+  
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+  
+    if (isTwoPage) {
+      const page1 = cloneContentForFirstPage();
+      const page2 = cloneContentForSecondPage();
+  
+      const imgData1 = await generateImageFromElement(page1);
+      const imgProps1 = pdf.getImageProperties(imgData1);
+      const pdfHeight1 = (imgProps1.height * pageWidth) / imgProps1.width;
+      pdf.addImage(imgData1, "PNG", 0, 0, pageWidth, pdfHeight1);
+  
+      pdf.addPage();
+      const imgData2 = await generateImageFromElement(page2);
+      const imgProps2 = pdf.getImageProperties(imgData2);
+      const pdfHeight2 = (imgProps2.height * pageWidth) / imgProps2.width;
+      pdf.addImage(imgData2, "PNG", 0, 0, pageWidth, pdfHeight2);
+  
+      // Clean up
+      page1.remove();
+      page2.remove();
+    } else {
+      const imgData = await generateImageFromElement(content);
       const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Invoice-${billdata.billNo}.pdf`);
-      setDownloading(false);
-    });
+      const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pdfHeight);
+    }
+  
+    pdf.save(`Invoice-${billdata.billNo}.pdf`);
+    setDownloading(false);
   };
+  
+
+
 
 //   const calculateStrips = (packing, quantity) => {
 //     if (!packing || !quantity) return "0";
@@ -106,18 +172,19 @@ const BillDetailPage = (props) => {
   return (
     // <></>
     <>
-      <Header isLoggedStatus={isLoggedCheck} />
+      {/* <Header isLoggedStatus={isLoggedCheck} /> */}
       <div
         id="bill-content"
-        className="relative p-6 max-w-7xl mx-auto bg-white "
-        style={{
-          width: "2000px",
-          minHeight: "700px",
-          padding: "40px",
-          boxSizing: "border-box",
-          position: "relative",
-          color: "black",
-        }}
+        className="relative  max-w-6xl mx-auto bg-white "
+        // style={{
+        //   width: "2000px",
+        //   minHeight: "700px",
+        //   padding: "40px",
+        //   boxSizing: "border-box",
+        //   position: "relative",
+        //   color: "black",
+        // }}
+        style={{width: "1800px", minHeight: "297mm",padding:"10px" , background: "#fff" }}
       >
         {/* ✅ Watermark logo */}
         <img
@@ -126,7 +193,7 @@ const BillDetailPage = (props) => {
           className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none select-none w-[300px]"
           style={{ zIndex: 10 }}
         />
-        <div className="mb-6 -mt-6 no-print relative z-10 flex justify-end">
+        {/* <div className="mb-6 -mt-6 no-print relative z-10 flex justify-end">
           {downloading ? (
             <LoadingBtn />
           ) : (
@@ -137,7 +204,7 @@ const BillDetailPage = (props) => {
               📥 Download PDF
             </button>
           )}
-        </div>
+        </div> */}
         {/* ✅ Bill content */}
         <div className="relative z-10 border px-2 py-2">
           <div className="flex">
@@ -200,7 +267,7 @@ const BillDetailPage = (props) => {
             <div className="w-[65%] flex gap-4 ">
               <div
                 className="w-[35%] text-xl font-semibold text-center pb-4 pt-2 px-2"
-                style={{ backgroundColor: "#f5b13d" }}
+                style={{ border:"1px solid" }}
               >
                 GST INVOICE
               </div>
@@ -256,13 +323,15 @@ const BillDetailPage = (props) => {
           <div
             className="relative border"
             style={{
-              minHeight: "220px", // adjust as needed
+              minHeight: "180px", // adjust as needed
               display: "flex",
               flexDirection: "column",
               justifyContent: "flex-start",
+              paddingBottom:"20px"
             }}
+            id="bill-table"
           >
-            <table className=" min-w-full pb-60 text-sm">
+            <table className=" min-w-full pb-60 text-sm" id="bill-bottom">
               <thead
                 className=""
                 style={{ backgroundColor: "#60b16b", color: "black" }}
@@ -293,21 +362,21 @@ const BillDetailPage = (props) => {
               <tbody>
                 {billdata.tablets.map((t, i) => (
                   <tr key={t._id || i}>
-                    <td className="px-3 pb-1">{i + 1}</td>
+                    <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{i + 1}</td>
                     {/* <td className="px-3 pb-1 text-right">{t.lessquantity}</td> */}
                     {/* <td className="px-3 pb-1 text-right">{t.free}</td> */}
-                    <td className="px-3 pb-1">{t.packing}</td>
-                    <td className="px-3 pb-1">{t.strips}</td>
-                    <td className="px-3 pb-1 min-w-[280px]">{t.name}</td>
-                    <td className="px-3 pb-1  min-w-[10px]">{t.company}</td>
-                    <td className="px-3 pb-1">{t.batch}</td>
-                    <td className="px-3 pb-1">{t.mg==="NA"?"-":t.mg}</td>
-                    <td className="px-3 pb-1">{t.expiry}</td>
-                    <td className="px-3 pb-1">{t.hsm}</td>
-                    <td className="px-3 pb-1 text-right font-mono">
+                    <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.packing}</td>
+                    <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.strips}</td>
+                    <td className="px-3 pb-1 min-w-[280px]" style={{paddingBottom:"4px"}}>{t.name}</td>
+                    <td className="px-3 pb-1  min-w-[10px]" style={{paddingBottom:"4px"}}>{t.company}</td>
+                    <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.batch}</td>
+                    <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.mg==="NA"?"-":t.mg}</td>
+                    <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.expiry}</td>
+                    <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.hsm}</td>
+                    <td className="px-3 pb-1 text-right font-mono" style={{paddingBottom:"4px"}}>
                       {t.mrp}
                     </td>
-                    <td className="px-3 pb-1 text-right font-mono">
+                    <td className="px-3 pb-1 text-right font-mono" style={{paddingBottom:"4px"}}>
                       {Number(t.price)}
                     </td>
                     {/* <td className="px-3 pb-1 text-right font-mono">
@@ -323,15 +392,11 @@ const BillDetailPage = (props) => {
               </tbody>
             </table>
           </div>
-          <div className="flex items-center mb-2">
+          <div id=".bottom-content">
+          <div className="flex items-center mb-2" >
             <div
               className="w-[60%]"
-              // style={{
-              //   minHeight: "220px", // adjust as needed
-              //   display: "flex",
-              //   flexDirection: "column",
-              //   justifyContent: "flex-start",
-              // }}
+             
             >
               <table className=" min-w-full border pb-60 text-sm mt-3">
                 <thead className="" style={{ backgroundColor: "yellowgreen" }}>
@@ -733,20 +798,20 @@ const BillDetailPage = (props) => {
               </div>
               {/* <div className="border-t-2"></div> */}
               <div
-                className="w-[98%] ml-2 flex justify-between items-center font-bold border text-white bg-black px-4 py-3 "
+                className="w-[98%] ml-2 flex justify-between items-center font-bold border text-white bg-black px-4 py-1 "
                 style={{
-                  borderWidth: "2px",
+                  border: "1px solid black",
                   fontSize: "16px",
                   backgroundColor: "skyblue",
-                  color: "#00000",
+                  // color: "#00000",
                 }}
               >
-                <div style={{ marginTop: "-14px", color: "black" }}>
+                <div style={{ marginTop: "0px", color: "black" }}>
                   GRAND TOTAL
                 </div>
                 <div
                   style={{
-                    marginTop: "-14px",
+                    marginTop: "0px",
                     paddingRight: "8px",
                     color: "black",
                   }}
@@ -756,12 +821,12 @@ const BillDetailPage = (props) => {
               </div>
             </div>
           </div>
-          <div className="font-medium italic text-xs  pb-2">
+          <div className="font-medium italic text-xs  pb-2" >
             Rs&nbsp;
             {totalInWords.charAt(0).toUpperCase() + totalInWords.slice(1)}{" "}
             Rupees Only
           </div>
-          <table className="w-full">
+          <table className="w-full" >
             <tbody>
               <tr>
                 <td className="w-[40%] border p-2 align-top">
@@ -797,6 +862,7 @@ const BillDetailPage = (props) => {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         {/* ✅ Hidden from PDF */}

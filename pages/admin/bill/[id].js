@@ -92,14 +92,14 @@ const BillDetailPage = (props) => {
 
   return (
     <>
-      <Header isLoggedStatus={isLoggedCheck} />
+      {/* <Header isLoggedStatus={isLoggedCheck} /> */}
       <div
         id="bill-content"
-        className="relative p-6 max-w-7xl mx-auto bg-white "
+        className="relative  max-w-5xl mx-auto bg-white "
         style={{
-          width: "2000px",
+          width: "1500px",
           minHeight: "700px",
-          padding: "40px",
+          padding: "10px",
           boxSizing: "border-box",
           position: "relative",
           color: "black",
@@ -112,7 +112,7 @@ const BillDetailPage = (props) => {
           className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none select-none w-[300px]"
           style={{ zIndex: 10 }}
         />
-        <div className="mb-6 -mt-6 no-print relative z-10 flex justify-end">
+        {/* <div className="mb-6 -mt-6 no-print relative z-10 flex justify-end">
           {downloading ? (
             <LoadingBtn />
           ) : (
@@ -123,7 +123,7 @@ const BillDetailPage = (props) => {
               📥 Download PDF
             </button>
           )}
-        </div>
+        </div> */}
         {/* ✅ Bill content */}
         <div className="relative z-10 border px-2 py-2">
           <div className="flex">
@@ -175,7 +175,7 @@ const BillDetailPage = (props) => {
             <div className="w-[65%] flex gap-4 ">
               <div
                 className="w-[35%] text-xl font-semibold text-center pb-4 pt-2 px-2"
-                style={{ backgroundColor: "#f5b13d" }}
+                style={{ backgroundColor: "#f5b13d",border:"1px solid #f5b13d" }}
               >
                 GST INVOICE
               </div>
@@ -231,10 +231,11 @@ const BillDetailPage = (props) => {
           <div
             className="relative border"
             style={{
-              minHeight: "220px", // adjust as needed
+              minHeight: "150px", // adjust as needed
               display: "flex",
               flexDirection: "column",
               justifyContent: "flex-start",
+              paddingBottom:"20px"
             }}
           >
             <table className=" min-w-full pb-60 text-sm">
@@ -713,20 +714,15 @@ const BillDetailPage = (props) => {
               </div>
               {/* <div className="border-t-2"></div> */}
               <div
-                className="w-[98%] ml-2 flex justify-between items-center font-bold border text-white bg-black px-4 py-3 "
-                style={{
-                  borderWidth: "2px",
-                  fontSize: "16px",
-                  backgroundColor: "skyblue",
-                  color: "#00000",
-                }}
+                className="w-[98%] ml-2 flex justify-between items-center font-bold text-white bg-black px-4 py-1 "
+                style={{ backgroundColor: "#f5b13d",border:"1px solid black" }}
               >
-                <div style={{ marginTop: "-14px", color: "black" }}>
+                <div style={{ marginTop: "0px", color: "black" }}>
                   GRAND TOTAL
                 </div>
                 <div
                   style={{
-                    marginTop: "-14px",
+                    marginTop: "0px",
                     paddingRight: "8px",
                     color: "black",
                   }}
