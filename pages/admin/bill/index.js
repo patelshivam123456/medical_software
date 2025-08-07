@@ -75,7 +75,8 @@ const Index = (props) => {
     free: 0,
     hsm: "",
     strips:0,
-    checkrate:0
+    checkrate:0,
+    totalStrip:0
   });
 
   // for custom dropdown
@@ -432,7 +433,8 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       category: tablet.category,
       free: tablet.free,
       hsm: tablet.hsm,
-      strips:tablet.strips
+      strips:tablet.strips,
+      totalStrip:tablet.strips
     });
     setEditingIndex(index);
   };
@@ -977,7 +979,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         </div>
         <form onSubmit={handleSubmit} className="mb-6 w-full max-w-7xl gap-5">
           <div className="lg:flex justify-between lg:items-center">
-            <div className="w-full lg:w-1/2 flex items-center gap-3">
+            <div className="w-full lg:w-[70%] flex items-center gap-3">
            
             <div className="w-full md:w-[50%] lg:mb-6">
               <label>Sales Person:</label>
@@ -1021,6 +1023,10 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                 <option value={"Pending"}>Pending</option>
                 <option value={"Cash"}>Cash</option>
                 </select>
+            </div>
+            <div className=" lg:mb-6 w-full md:w-[50%] -mt-2">
+              <label className="font-bold">Grand Total</label>
+              <div className="border border-gray-300 p-2 rounded">{(calculateGrandTotal()).toFixed(2)}</div>
             </div>
             </div>
             {!billNo && isEditingBill === "copy" ? (
@@ -1103,7 +1109,8 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                             lessquantity:"",
                             free:"",
                             strips:"",
-                            checkrate:t.purchase
+                            checkrate:t.purchase,
+                            totalStrip:t.strips
                           });
                           setShowSuggestions(false);
                         }}
@@ -1299,6 +1306,19 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                   required
                 />
               </div>
+              <div className="w-full md:w-[10%] ">
+                <label>Total Strips</label>
+                <input
+                  type="number"
+                  value={formFields.totalStrip}
+                  onChange={(e) =>
+                    setFormFields({ ...formFields, totalStrip: e.target.value })
+                  }
+                  disabled
+                  className="border p-2 w-full bg-gray-300 cursor-not-allowed text-black outline-none rounded-sm"
+                  required
+                />
+              </div>
 
               <div className="w-full md:w-[10%] ">
                 <label>Free</label>
@@ -1386,7 +1406,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                 />
               </div> */}
             </div>
-            {editingIndex !== null?<div className="flex items-center gap-2 justify-end pt-2 lg:pt-0 lg:mr-4">
+            {editingIndex !== null?<div className="flex items-center gap-2 justify-end pt-2 lg:pt-2 lg:mr-4">
               <button
                 type="button"
                 onClick={addMoreTablet}
@@ -1396,7 +1416,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
               </button>
               <div className="text-sm text-red-600 cursor-pointer" onClick={resetForm}>Reset</div>
             </div>:
-            <div className="flex items-center gap-2 justify-end pt-2 lg:pt-0 lg:mr-4">
+            <div className="flex items-center gap-2 justify-end pt-2 lg:pt-2 lg:mr-4">
             <button
               type="button"
               onClick={addNewTablet}

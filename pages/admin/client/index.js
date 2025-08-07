@@ -258,7 +258,7 @@ const Index = (props) => {
           <div className="w-full md:w-[20%]">
             <label>Email</label>
             <input
-              required
+              // required
               value={formData.email}
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
@@ -359,7 +359,7 @@ const Index = (props) => {
           <div className="w-full md:w-[20%] ">
             <label>Account Details</label>
             <input
-              required
+              // required
               value={formData.accountDetails}
               onChange={(e) =>
                 setFormData({ ...formData, accountDetails: e.target.value })
@@ -381,7 +381,7 @@ const Index = (props) => {
           <div className="w-full md:w-[20%]">
             <label>Ifsc Code</label>
             <input
-              required
+              // required
               value={formData.accountIfscCode}
               onChange={(e) =>
                 setFormData({ ...formData, accountIfscCode: e.target.value })

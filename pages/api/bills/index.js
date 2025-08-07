@@ -38,21 +38,36 @@ export default async function handler(req, res) {
           return res.status(400).json({ success: false, message: "Tablet data is incomplete" });
         }
 
-        const tablet = await Tablet.findOne({ name: item.name, packaging: item.packing });
+        // const tablet = await Tablet.findOne({ name: item.name, packaging: item.packing });
          
-        if (!tablet) {
-          return res.status(404).json({
-            success: false,
-            message: `Tablet not found: ${item.name} (${item.packing})`,
-          });
-        }
+        // if (!tablet) {
+        //   return res.status(404).json({
+        //     success: false,
+        //     message: `Tablet not found: ${item.name} (${item.packing})`,
+        //   });
+        // }
 
-        if (tablet.quantity < (item.lessquantity+item.free)) {
-          return res.status(400).json({
-            success: false,
-            message: `Insufficient stock for ${item.name} (${item.packing}). Available: ${tablet.quantity}, Required: ${item.lessquantity}`,
-          });
-        }
+        // if (tablet.quantity < (item.lessquantity+item.free)) {
+        //   return res.status(400).json({
+        //     success: false,
+        //     message: `Insufficient stock for ${item.name} (${item.packing}). Available: ${tablet.quantity}, Required: ${item.lessquantity}`,
+        //   });
+        // }
+        const tablet = await Tablet.findOne({ batch: item.batch });
+
+if (!tablet) {
+  return res.status(404).json({
+    success: false,
+    message: `Tablet not found with batch: ${item.batch}`,
+  });
+}
+
+if (tablet.quantity < (item.lessquantity + item.free)) {
+  return res.status(400).json({
+    success: false,
+    message: `Insufficient stock for ${tablet.name} (Batch: ${item.batch}). Available: ${tablet.quantity}, Required: ${item.lessquantity + item.free}`,
+  });
+}
       }
 
       // ✅ 4. Create Bill
