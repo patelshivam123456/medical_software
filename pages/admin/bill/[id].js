@@ -54,27 +54,83 @@ const BillDetailPage = (props) => {
   const roundedGrandTotal = Math.ceil(grandTotalWithTax);
   const totalInWords = toWords(roundedGrandTotal);
 
-  const handleDownloadPDF = () => {
+  // const handleDownloadPDF = () => {
+  //   setDownloading(true);
+  //   const input = document.getElementById("bill-content");
+
+  //   html2canvas(input, {
+  //     backgroundColor: "#00000",
+  //     scale: 2,
+  //     ignoreElements: (el) => el.classList?.contains("no-print"),
+  //   }).then((canvas) => {
+  //     const imgData = canvas.toDataURL("image/png");
+  //     const pdf = new jsPDF();
+  //     const imgProps = pdf.getImageProperties(imgData);
+  //     const pdfWidth = pdf.internal.pageSize.getWidth();
+  //     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+  //     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+  //     pdf.save(`Invoice-${data.bill.billNo}.pdf`);
+  //     setDownloading(false);
+  //   });
+  // };
+  const handleDownloadPDF = async () => {
     setDownloading(true);
-    const input = document.getElementById("bill-content");
-
-    html2canvas(input, {
-      backgroundColor: "#00000",
-      scale: 2,
-      ignoreElements: (el) => el.classList?.contains("no-print"),
-    }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF();
+  
+    const content = document.getElementById("bill-content");
+    const table = content.querySelector("table");
+    const rows = table?.querySelectorAll("tbody tr") || [];
+    const totalRows = rows.length;
+    const rowsPerPage = 14;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
+  
+    const generatePageClone = (pageIndex) => {
+      const clone = content.cloneNode(true);
+      clone.id = `clone-page-${pageIndex + 1}`;
+  
+      const tableClone = clone.querySelector("table");
+      const bodyRows = tableClone.querySelectorAll("tbody tr");
+  
+      bodyRows.forEach((row, i) => {
+        const startIndex = pageIndex * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+        if (i < startIndex || i >= endIndex) row.remove();
+      });
+  
+      // Remove bottom content except on last page
+      if (pageIndex !== totalPages - 1) {
+        clone.querySelectorAll(".bottom-content").forEach(el => el.remove());
+      }
+  
+      document.body.appendChild(clone);
+      return clone;
+    };
+  
+    const generateImageFromElement = async (element) => {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        ignoreElements: (el) => el.classList?.contains("no-print"),
+      });
+      return canvas.toDataURL("image/png");
+    };
+  
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+  
+    for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+      const pageClone = generatePageClone(pageIndex);
+      const imgData = await generateImageFromElement(pageClone);
       const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Invoice-${data.bill.billNo}.pdf`);
-      setDownloading(false);
-    });
+      const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
+      if (pageIndex > 0) pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pdfHeight);
+      pageClone.remove();
+    }
+  
+    pdf.save(`Invoice-${billdata.billNo}.pdf`);
+    setDownloading(false);
   };
-
   const calculateStrips = (packing, quantity) => {
     if (!packing || !quantity) return "0";
   
@@ -144,11 +200,12 @@ const BillDetailPage = (props) => {
                   </div>
                 </div>
               </div>
-              <div style={{ marginTop: "-5px" }}>
+              <div style={{ marginTop: "-5px",fontSize:"14px" }}>
                 Keshav Nagar, Fazullaganj
               </div>
-              <div>Lucknow,Uttar Pradesh-226020</div>
-              <div className="text-base">Mobile Number: +91-8707868591</div>
+              <div className="text-sm">Lucknow,Uttar Pradesh-226020</div>
+              <div className="text-sm">Mobile Number: +91-8707868591</div>
+              <div className="text-sm">Email: <span style={{color:"blue"}}>shrijienterprise352@gmail.com</span></div>
             </div>
             <div className="w-1/2">
               <div className="text-lg" style={{ fontWeight: "bold" }}>
@@ -191,16 +248,27 @@ const BillDetailPage = (props) => {
                 <div>
                   <div className="text-sm">
                     Date:{" "}
-                    {billdata?.createdAt
-                      ? new Date(billdata.createdAt).toLocaleString("en-IN", {
+                    {billdata?.invoiceDate
+                      ? <>{new Date(billdata.invoiceDate).toLocaleString("en-IN", {
                           timeZone: "Asia/Kolkata",
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
+                          // hour: "2-digit",
+                          // minute: "2-digit",
+                          // hour12: true,
+                        })+" "+
+                        new Date(billdata.createdAt).toLocaleString("en-IN", {
+                          // timeZone: "Asia/Kolkata",
+                          // day: "2-digit",
+                          // month: "2-digit",
+                          // year: "numeric",
                           hour: "2-digit",
                           minute: "2-digit",
                           hour12: true,
                         })
+                        }
+                        </>
                       : ""}
                   </div>
                   {billdata.dispatchDate?
@@ -237,6 +305,7 @@ const BillDetailPage = (props) => {
               justifyContent: "flex-start",
               paddingBottom:"20px"
             }}
+            id="bill-table"
           >
             <table className=" min-w-full pb-60 text-sm">
               <thead
@@ -296,8 +365,10 @@ const BillDetailPage = (props) => {
               </tbody>
             </table>
           </div>
+          <div className="bottom-content">
           <div className="flex items-center mb-2">
-            <div
+            <div className="w-[60%]"></div>
+            {/* <div
               className="w-[60%]"
               // style={{
               //   minHeight: "220px", // adjust as needed
@@ -618,8 +689,8 @@ const BillDetailPage = (props) => {
                   </tr>
                 </tbody>
               </table>
-            </div>
-            <div className="w-[40%] space-y-3 pt-5">
+            </div> */}
+            <div className="w-[40%] space-y-3 pt-2">
               <div className="flex justify-between px-7 text-sm">
                 <div className="font-medium">SUB TOTAL</div>
                 <div>
@@ -758,21 +829,22 @@ const BillDetailPage = (props) => {
                   </div>
                 </td>
 
-                <td className="w-[30%] border p-2 align-top">
+                <td className="w-[30%] border p-2 align-top text-center">
                   <div className="text-sm font-semibold italic underline mb-2">
                     For SHRI JI ENTERPRISES
                   </div>
                   <div>
-                    <img
+                    {/* <img
                       src="/shivamsign.jpeg"
                       alt="sign"
                       className="w-42 h-16"
-                    />
+                    /> */}
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         {/* ✅ Hidden from PDF */}

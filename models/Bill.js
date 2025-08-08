@@ -10,6 +10,7 @@ const billSchema = new mongoose.Schema({
     type: Date,
     default: null  
   },
+  invoiceDate: { type: Date, default: null },
   tablets: [
     {
       name: String,

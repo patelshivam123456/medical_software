@@ -172,7 +172,7 @@ const PaymentClientModal=({ isOpen, onClose,handleEdit,handleDelete,setBillNoDel
                             <div className="flex items-center gap-4 px-3">
                           <div className="text-green-600 text-sm italic">Payment Done</div>
                           <button onClick={()=>{handleEdit(bill.billNo);onClose()}} className="cursor-pointer"><PencilSquareIcon className="w-4 h-4"/></button>
-                          {/* <button onClick={()=>{handleDelete();onClose();setBillNoDelete(bill.billNo)}} className="cursor-pointer"><TrashIcon className="w-4 h-4"/></button> */}
+                          <button onClick={()=>{handleDelete();onClose();setBillNoDelete(bill.billNo)}} className="cursor-pointer"><TrashIcon className="w-4 h-4"/></button>
                           <a href={`/admin/bill/${bill.billNo}`} target="_blank"><EyeIcon className="w-5 h-5"/></a>
                           </div>
                         )}

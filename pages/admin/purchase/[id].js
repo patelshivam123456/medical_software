@@ -71,41 +71,30 @@ const BillDetailPage = (props) => {
     setDownloading(true);
   
     const content = document.getElementById("bill-content");
-    const table = content.querySelector("table"); // adjust selector if needed
+    const table = content.querySelector("table");
     const rows = table?.querySelectorAll("tbody tr") || [];
+    const totalRows = rows.length;
+    const rowsPerPage = 14;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
   
-    const isTwoPage = rows.length > 10;
-  
-    const cloneContentForFirstPage = () => {
+    const generatePageClone = (pageIndex) => {
       const clone = content.cloneNode(true);
-      clone.id = "clone-page-1";
+      clone.id = `clone-page-${pageIndex + 1}`;
   
-      // Remove rows > 10
       const tableClone = clone.querySelector("table");
       const bodyRows = tableClone.querySelectorAll("tbody tr");
+  
       bodyRows.forEach((row, i) => {
-        if (i >= 10) row.remove();
+        const startIndex = pageIndex * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+        if (i < startIndex || i >= endIndex) row.remove();
       });
   
-      // Remove bottom content for first page
-      clone.querySelectorAll(".bottom-content").forEach(el => el.remove());
+      // Remove bottom content except on last page
+      if (pageIndex !== totalPages - 1) {
+        clone.querySelectorAll(".bottom-content").forEach(el => el.remove());
+      }
   
-      document.body.appendChild(clone);
-      return clone;
-    };
-  
-    const cloneContentForSecondPage = () => {
-      const clone = content.cloneNode(true);
-      clone.id = "clone-page-2";
-  
-      // Keep only rows > 10
-      const tableClone = clone.querySelector("table");
-      const bodyRows = tableClone.querySelectorAll("tbody tr");
-      bodyRows.forEach((row, i) => {
-        if (i < 10) row.remove();
-      });
-  
-      // Keep bottom content
       document.body.appendChild(clone);
       return clone;
     };
@@ -122,34 +111,20 @@ const BillDetailPage = (props) => {
     const pdf = new jsPDF("p", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
   
-    if (isTwoPage) {
-      const page1 = cloneContentForFirstPage();
-      const page2 = cloneContentForSecondPage();
-  
-      const imgData1 = await generateImageFromElement(page1);
-      const imgProps1 = pdf.getImageProperties(imgData1);
-      const pdfHeight1 = (imgProps1.height * pageWidth) / imgProps1.width;
-      pdf.addImage(imgData1, "PNG", 0, 0, pageWidth, pdfHeight1);
-  
-      pdf.addPage();
-      const imgData2 = await generateImageFromElement(page2);
-      const imgProps2 = pdf.getImageProperties(imgData2);
-      const pdfHeight2 = (imgProps2.height * pageWidth) / imgProps2.width;
-      pdf.addImage(imgData2, "PNG", 0, 0, pageWidth, pdfHeight2);
-  
-      // Clean up
-      page1.remove();
-      page2.remove();
-    } else {
-      const imgData = await generateImageFromElement(content);
+    for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+      const pageClone = generatePageClone(pageIndex);
+      const imgData = await generateImageFromElement(pageClone);
       const imgProps = pdf.getImageProperties(imgData);
       const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
+      if (pageIndex > 0) pdf.addPage();
       pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pdfHeight);
+      pageClone.remove();
     }
   
     pdf.save(`Invoice-${billdata.billNo}.pdf`);
     setDownloading(false);
   };
+  
   
 
 
@@ -392,7 +367,7 @@ const BillDetailPage = (props) => {
               </tbody>
             </table>
           </div>
-          <div id=".bottom-content">
+          <div className="bottom-content">
           <div className="flex items-center mb-2" >
             <div
               className="w-[60%]"
@@ -847,16 +822,16 @@ const BillDetailPage = (props) => {
                   </div>
                 </td>
 
-                <td className="w-[30%] border p-2 align-top">
+                <td className="w-[30%] border p-2 align-top text-center">
                   <div className="text-sm font-semibold italic underline mb-2">
                     For SHRI JI ENTERPRISES
                   </div>
                   <div>
-                    <img
+                    {/* <img
                       src="/shivamsign.jpeg"
                       alt="sign"
                       className="w-42 h-16"
-                    />
+                    /> */}
                   </div>
                 </td>
               </tr>

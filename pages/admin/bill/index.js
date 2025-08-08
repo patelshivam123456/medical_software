@@ -36,6 +36,7 @@ const Index = (props) => {
   const [title, setTitle] = useState("");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
+  const [invoiceDate,setInvoiceDate] = useState("")
   const [accountDetails, setAccountDetails] = useState("");
   const [accountIfscCode, setAccountIfscCode] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
@@ -132,6 +133,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         bill.branch,
         bill.branchName,
         bill.salesperson,
+        bill.invoiceDate,
         bill.paymenttype,
         bill.ordertype,
         bill.orderid,
@@ -173,6 +175,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         bill.branch,
         bill.branchName,
         bill.salesperson,
+        bill.invoiceDate,
         bill.paymenttype,
         bill.ordertype,
         bill.orderid,
@@ -487,6 +490,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       const response = await axios.post("/api/bills", {
         // billNo,
         salesperson:salesPerson,
+        invoiceDate:invoiceDate,
         paymenttype:paymentType,
         ordertype:orderType,
         orderid:orderId,
@@ -518,6 +522,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       if (response.status === 201) {
         setBillNo("");
         setSalesPerson("")
+        setInvoiceDate("")
         setPaymentType("")
         setOrderType("")
         setOrderId("")
@@ -591,6 +596,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       const res = await axios.get(`/api/bills/${billNo}`);
       const bill = res.data.bill;
       setSalesPerson(bill.salesperson||"")
+      setInvoiceDate(bill.invoiceDate||"")
       setPaymentType(bill.paymenttype||"")
       setOrderType(bill.ordertype||"")
       setOrderId(bill.orderid||"")
@@ -628,6 +634,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       const bill = res.data.bill;
       setBillNo(bill.billNo);
       setSalesPerson(bill.salesperson)
+      setInvoiceDate(bill.invoiceDate)
       setPaymentType(bill.paymenttype)
       setOrderType(bill.ordertype)
       setOrderId(bill.orderid)
@@ -671,6 +678,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       const res = await axios.put(`/api/bills/${billNo}`, {
         billNo,
         salesperson:salesPerson,
+        invoiceDate:invoiceDate,
         paymenttype:paymentType,
         ordertype:orderType,
         orderid:orderId,
@@ -703,6 +711,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         toast.success("Bill updated successfully");
         setBillNo("");
         setSalesPerson("")
+        setInvoiceDate("")
         setPaymentType("")
         setOrderType("")
         setOrderId("")
@@ -761,6 +770,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
   const handleResetForm = () => {
     setBillNo("");
     setSalesPerson("")
+    setInvoiceDate("")
     setPaymentType("")
     setOrderType("")
     setOrderId("")
@@ -980,6 +990,16 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         <form onSubmit={handleSubmit} className="mb-6 w-full max-w-7xl gap-5">
           <div className="lg:flex justify-between lg:items-center">
             <div className="w-full lg:w-[70%] flex items-center gap-3">
+            <div className="w-full md:w-[50%] lg:mb-6">
+              <label>Invoice Date:</label>
+              <input
+                type="date"
+                
+                value={invoiceDate}
+                onChange={(e) => setInvoiceDate(e.target.value)}
+                className="block w-full text-black bg-gray-200 border border-red-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white"
+              />
+            </div>
            
             <div className="w-full md:w-[50%] lg:mb-6">
               <label>Sales Person:</label>
