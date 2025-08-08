@@ -165,7 +165,7 @@ const BillDetailPage = (props) => {
         <img
           src="/sriji.png"
           alt="Watermark"
-          className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none select-none w-[300px]"
+          className="absolute top-[60%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none select-none w-[300px]"
           style={{ zIndex: 10 }}
         />
         <div className="mb-6 mt-6 no-print relative z-10 flex justify-end">
@@ -785,15 +785,15 @@ const BillDetailPage = (props) => {
               </div>
               {/* <div className="border-t-2"></div> */}
               <div
-                className="w-[98%] ml-2 flex justify-between items-center font-bold text-white bg-black px-4 py-2 "
+                className="w-[98%] ml-2 flex justify-between items-center font-bold text-white bg-black px-4 py-3 "
                 style={{ backgroundColor: "#f5b13d",border:"1px solid black" }}
               >
-                <div style={{ marginTop: "-10px", color: "black" }}>
+                <div style={{ marginTop: "-14px", color: "black" }}>
                   GRAND TOTAL
                 </div>
                 <div
                   style={{
-                    marginTop: "-10px",
+                    marginTop: "-14px",
                     paddingRight: "8px",
                     color: "black",
                   }}

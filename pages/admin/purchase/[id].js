@@ -165,10 +165,10 @@ const BillDetailPage = (props) => {
         <img
           src="/sriji.png"
           alt="Watermark"
-          className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none select-none w-[300px]"
+          className="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none select-none w-[300px]"
           style={{ zIndex: 10 }}
         />
-        <div className="mb-6 -mt-6 no-print relative z-10 flex justify-end">
+        <div className="mb-6 mt-5 no-print relative z-10 flex justify-end">
           {downloading ? (
             <LoadingBtn />
           ) : (
@@ -200,31 +200,32 @@ const BillDetailPage = (props) => {
                   </div>
                 </div>
               </div>
-              <div style={{ marginTop: "-5px" }}>
+              <div style={{ marginTop: "-5px",fontSize:"14px" }}>
                 Keshav Nagar, Fazullaganj
               </div>
-              <div>Lucknow,Uttar Pradesh-226020</div>
-              <div className="text-base">Mobile Number: +91-8707868591</div>
+              <div className="text-sm">Lucknow,Uttar Pradesh-226020</div>
+              <div className="text-sm">Mobile Number: +91-8707868591</div>
+              <div className="text-sm">Email: <span style={{color:"blue"}}>shrijienterprise352@gmail.com</span></div>
             </div>
             <div className="w-1/2">
               <div className="text-lg" style={{ fontWeight: "bold" }}>
                 {billdata.clientName}
               </div>
-              <div className="">{billdata.address1}</div>
-              <div>{billdata.address2 || ""}</div>
-              <div>{billdata.state + "," + billdata.pinCode}</div>
-              <div className="text-base">
+              <div className="text-sm">{billdata.address1}</div>
+              <div className="text-sm">{billdata.address2 || ""}</div>
+              <div className="text-sm">{billdata.state + "," + billdata.pinCode}</div>
+              <div className="text-sm">
                 Mobile Number: +91-{billdata.mobile}
               </div>
               <div style={{display:"flex",justifyContent:"space-between"}}>
-              <div>GST: <span style={{fontWeight:"bold"}}>{billdata.gstIn}</span></div>
-              {billdata.email&&<div>Email: {billdata.email}</div>}
+              <div className="text-sm">GST: <span style={{fontWeight:"bold"}}>{billdata.gstIn}</span></div>
+              {billdata.email&&<div className="text-sm">Email: <span style={{color:"blue"}}>{billdata.email}</span></div>}
               </div>
-              {billdata.accountDetails&&<div>Account Details: {billdata.accountDetails}</div>}
+              {billdata.accountDetails&&<div className="text-sm">Account Details: {billdata.accountDetails}</div>}
               {billdata.accountDetails&&
               <div style={{display:"flex",justifyContent:"space-between"}}>
-              <div>Account Number: {billdata.accountNumber}</div>
-              <div>Ifsc Code: {billdata.accountIfscCode}</div>
+              <div className="text-sm">Account Number: {billdata.accountNumber}</div>
+              <div className="text-sm">Ifsc Code: {billdata.accountIfscCode}</div>
               </div>
               }
               
@@ -773,7 +774,7 @@ const BillDetailPage = (props) => {
               </div>
               {/* <div className="border-t-2"></div> */}
               <div
-                className="w-[98%] ml-2 flex justify-between items-center font-bold border text-white bg-black px-4 py-1 "
+                className="w-[98%] ml-2 flex justify-between items-center font-bold border text-white bg-black px-4 py-4 "
                 style={{
                   border: "1px solid black",
                   fontSize: "16px",
@@ -781,12 +782,12 @@ const BillDetailPage = (props) => {
                   // color: "#00000",
                 }}
               >
-                <div style={{ marginTop: "0px", color: "black" }}>
+                <div style={{ marginTop: "-20px", color: "black" }}>
                   GRAND TOTAL
                 </div>
                 <div
                   style={{
-                    marginTop: "0px",
+                    marginTop: "-20px",
                     paddingRight: "8px",
                     color: "black",
                   }}
