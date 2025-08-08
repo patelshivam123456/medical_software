@@ -172,7 +172,7 @@ const BillDetailPage = (props) => {
   return (
     // <></>
     <>
-      {/* <Header isLoggedStatus={isLoggedCheck} /> */}
+      <Header isLoggedStatus={isLoggedCheck} />
       <div
         id="bill-content"
         className="relative  max-w-6xl mx-auto bg-white "
@@ -193,7 +193,7 @@ const BillDetailPage = (props) => {
           className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 pointer-events-none select-none w-[300px]"
           style={{ zIndex: 10 }}
         />
-        {/* <div className="mb-6 -mt-6 no-print relative z-10 flex justify-end">
+        <div className="mb-6 -mt-6 no-print relative z-10 flex justify-end">
           {downloading ? (
             <LoadingBtn />
           ) : (
@@ -204,7 +204,7 @@ const BillDetailPage = (props) => {
               📥 Download PDF
             </button>
           )}
-        </div> */}
+        </div>
         {/* ✅ Bill content */}
         <div className="relative z-10 border px-2 py-2">
           <div className="flex">
