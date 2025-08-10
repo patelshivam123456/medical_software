@@ -74,6 +74,64 @@ const BillDetailPage = (props) => {
   //     setDownloading(false);
   //   });
   // };
+  // const handleDownloadPDF = async () => {
+  //   setDownloading(true);
+  
+  //   const content = document.getElementById("bill-content");
+  //   const table = content.querySelector("table");
+  //   const rows = table?.querySelectorAll("tbody tr") || [];
+  //   const totalRows = rows.length;
+  //   const rowsPerPage = 14;
+  //   const totalPages = Math.ceil(totalRows / rowsPerPage);
+  
+  //   const generatePageClone = (pageIndex) => {
+  //     const clone = content.cloneNode(true);
+  //     clone.id = `clone-page-${pageIndex + 1}`;
+  
+  //     const tableClone = clone.querySelector("table");
+  //     const bodyRows = tableClone.querySelectorAll("tbody tr");
+  
+  //     bodyRows.forEach((row, i) => {
+  //       const startIndex = pageIndex * rowsPerPage;
+  //       const endIndex = startIndex + rowsPerPage;
+  //       if (i < startIndex || i >= endIndex) row.remove();
+  //     });
+  
+  //     // Remove bottom content except on last page
+  //     if (pageIndex !== totalPages - 1) {
+  //       clone.querySelectorAll(".bottom-content").forEach(el => el.remove());
+  //     }
+  
+  //     document.body.appendChild(clone);
+  //     return clone;
+  //   };
+  
+  //   const generateImageFromElement = async (element) => {
+  //     const canvas = await html2canvas(element, {
+  //       scale: 2,
+  //       backgroundColor: "#ffffff",
+  //       ignoreElements: (el) => el.classList?.contains("no-print"),
+  //     });
+  //     return canvas.toDataURL("image/png");
+  //   };
+  
+  //   const pdf = new jsPDF("p", "mm", "a4");
+  //   const pageWidth = pdf.internal.pageSize.getWidth();
+  
+  //   for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+  //     const pageClone = generatePageClone(pageIndex);
+  //     const imgData = await generateImageFromElement(pageClone);
+  //     const imgProps = pdf.getImageProperties(imgData);
+  //     const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
+  //     if (pageIndex > 0) pdf.addPage();
+  //     pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pdfHeight);
+  //     pageClone.remove();
+  //   }
+  
+  //   pdf.save(`Invoice-${billdata.billNo}.pdf`);
+  //   setDownloading(false);
+  // };
+
   const handleDownloadPDF = async () => {
     setDownloading(true);
   
@@ -81,12 +139,26 @@ const BillDetailPage = (props) => {
     const table = content.querySelector("table");
     const rows = table?.querySelectorAll("tbody tr") || [];
     const totalRows = rows.length;
-    const rowsPerPage = 14;
+    const rowsPerPage = 14; // adjust if needed
     const totalPages = Math.ceil(totalRows / rowsPerPage);
   
     const generatePageClone = (pageIndex) => {
       const clone = content.cloneNode(true);
       clone.id = `clone-page-${pageIndex + 1}`;
+
+      const invoiceEl = clone.querySelector(".invoice-number");
+
+  // ✅ Add page number under invoice number only if more than 1 page and not first page
+  if (invoiceEl && totalPages > 1 && pageIndex > 0) {
+    const pageEl = document.createElement("div");
+    pageEl.style.fontSize = "20px";
+    pageEl.style.marginTop = "2px";
+    pageEl.style.fontWeight = "bold";
+    pageEl.textContent = `Page No...${pageIndex + 1}`;
+
+    // Insert right after invoice number
+    invoiceEl.insertAdjacentElement("afterend", pageEl);
+  }
   
       const tableClone = clone.querySelector("table");
       const bodyRows = tableClone.querySelectorAll("tbody tr");
@@ -97,8 +169,17 @@ const BillDetailPage = (props) => {
         if (i < startIndex || i >= endIndex) row.remove();
       });
   
-      // Remove bottom content except on last page
+      // Add "Continued..." if not last page
       if (pageIndex !== totalPages - 1) {
+        const continuedDiv = document.createElement("div");
+        continuedDiv.style.textAlign = "right";
+        continuedDiv.style.marginTop = "10px";
+        continuedDiv.style.fontSize = "20px";
+        continuedDiv.style.fontWeight = "bold";
+        continuedDiv.innerText = `Continued...${pageIndex + 2}`;
+        clone.appendChild(continuedDiv);
+  
+        // Remove footer content on intermediate pages
         clone.querySelectorAll(".bottom-content").forEach(el => el.remove());
       }
   
@@ -128,9 +209,10 @@ const BillDetailPage = (props) => {
       pageClone.remove();
     }
   
-    pdf.save(`Invoice-${billdata.billNo}.pdf`);
+    pdf.save(`Invoice-SJ000${billdata.billNo}.pdf`);
     setDownloading(false);
   };
+  
   const calculateStrips = (packing, quantity) => {
     if (!packing || !quantity) return "0";
   
@@ -238,7 +320,7 @@ const BillDetailPage = (props) => {
               </div>
               <div className="w-[65%] flex  justify-between pb-4 ">
                 <div>
-                  <div className="text-sm">
+                  <div className="text-sm invoice-number">
                     Invoice No.: SJ000{billdata.billNo}
                   </div>
                   {/* <div className="text-sm">
@@ -258,7 +340,7 @@ const BillDetailPage = (props) => {
                           // minute: "2-digit",
                           // hour12: true,
                         })+" "+
-                        new Date(billdata.createdAt).toLocaleString("en-IN", {
+                        new Date(billdata.updatedAt).toLocaleString("en-IN", {
                           // timeZone: "Asia/Kolkata",
                           // day: "2-digit",
                           // month: "2-digit",
@@ -281,7 +363,7 @@ const BillDetailPage = (props) => {
                   <div className="text-sm">
                     Due Date:{" "}
                     {billdata?.createdAt
-                      ? new Date(billdata.createdAt).toLocaleString("en-IN", {
+                      ? new Date(billdata.invoiceDate).toLocaleString("en-IN", {
                           timeZone: "Asia/Kolkata",
                           day: "2-digit",
                           month: "2-digit",

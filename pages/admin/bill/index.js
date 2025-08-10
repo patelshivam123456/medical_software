@@ -634,7 +634,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       const bill = res.data.bill;
       setBillNo(bill.billNo);
       setSalesPerson(bill.salesperson)
-      setInvoiceDate(bill.invoiceDate)
+      setInvoiceDate(
+        bill.invoiceDate ? bill.invoiceDate.slice(0, 10) : ""
+      );
       setPaymentType(bill.paymenttype)
       setOrderType(bill.ordertype)
       setOrderId(bill.orderid)
