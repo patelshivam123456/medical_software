@@ -364,7 +364,7 @@ const Index = (props) => {
           <div className="w-full md:w-[20%] ">
             <label>Ifsc Code</label>
             <input
-              required
+              // required
               value={formData.accountIfscCode}
               onChange={(e) =>
                 setFormData({ ...formData, accountIfscCode: e.target.value })
