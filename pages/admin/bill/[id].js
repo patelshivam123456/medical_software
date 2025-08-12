@@ -17,6 +17,7 @@ const BillDetailPage = (props) => {
   const [grandTotal, setGrandTotal] = useState(0);
   const [downloading, setDownloading] = useState(false);
   const [isLoggedCheck, setIsLoggedCheck] = useState("");
+  const [showStamp, setShowStamp] = useState(false);
 
   const { data, error } = useSWR(
     () => (id ? `/api/bills/${id}` : null),
@@ -54,84 +55,6 @@ const BillDetailPage = (props) => {
   const roundedGrandTotal = Math.ceil(grandTotalWithTax);
   const totalInWords = toWords(roundedGrandTotal);
 
-  // const handleDownloadPDF = () => {
-  //   setDownloading(true);
-  //   const input = document.getElementById("bill-content");
-
-  //   html2canvas(input, {
-  //     backgroundColor: "#00000",
-  //     scale: 2,
-  //     ignoreElements: (el) => el.classList?.contains("no-print"),
-  //   }).then((canvas) => {
-  //     const imgData = canvas.toDataURL("image/png");
-  //     const pdf = new jsPDF();
-  //     const imgProps = pdf.getImageProperties(imgData);
-  //     const pdfWidth = pdf.internal.pageSize.getWidth();
-  //     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-  //     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-  //     pdf.save(`Invoice-${data.bill.billNo}.pdf`);
-  //     setDownloading(false);
-  //   });
-  // };
-  // const handleDownloadPDF = async () => {
-  //   setDownloading(true);
-  
-  //   const content = document.getElementById("bill-content");
-  //   const table = content.querySelector("table");
-  //   const rows = table?.querySelectorAll("tbody tr") || [];
-  //   const totalRows = rows.length;
-  //   const rowsPerPage = 14;
-  //   const totalPages = Math.ceil(totalRows / rowsPerPage);
-  
-  //   const generatePageClone = (pageIndex) => {
-  //     const clone = content.cloneNode(true);
-  //     clone.id = `clone-page-${pageIndex + 1}`;
-  
-  //     const tableClone = clone.querySelector("table");
-  //     const bodyRows = tableClone.querySelectorAll("tbody tr");
-  
-  //     bodyRows.forEach((row, i) => {
-  //       const startIndex = pageIndex * rowsPerPage;
-  //       const endIndex = startIndex + rowsPerPage;
-  //       if (i < startIndex || i >= endIndex) row.remove();
-  //     });
-  
-  //     // Remove bottom content except on last page
-  //     if (pageIndex !== totalPages - 1) {
-  //       clone.querySelectorAll(".bottom-content").forEach(el => el.remove());
-  //     }
-  
-  //     document.body.appendChild(clone);
-  //     return clone;
-  //   };
-  
-  //   const generateImageFromElement = async (element) => {
-  //     const canvas = await html2canvas(element, {
-  //       scale: 2,
-  //       backgroundColor: "#ffffff",
-  //       ignoreElements: (el) => el.classList?.contains("no-print"),
-  //     });
-  //     return canvas.toDataURL("image/png");
-  //   };
-  
-  //   const pdf = new jsPDF("p", "mm", "a4");
-  //   const pageWidth = pdf.internal.pageSize.getWidth();
-  
-  //   for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
-  //     const pageClone = generatePageClone(pageIndex);
-  //     const imgData = await generateImageFromElement(pageClone);
-  //     const imgProps = pdf.getImageProperties(imgData);
-  //     const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
-  //     if (pageIndex > 0) pdf.addPage();
-  //     pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pdfHeight);
-  //     pageClone.remove();
-  //   }
-  
-  //   pdf.save(`Invoice-${billdata.billNo}.pdf`);
-  //   setDownloading(false);
-  // };
-
   const handleDownloadPDF = async () => {
     setDownloading(true);
   
@@ -147,16 +70,12 @@ const BillDetailPage = (props) => {
       clone.id = `clone-page-${pageIndex + 1}`;
 
       const invoiceEl = clone.querySelector(".invoice-number");
-
-  // ✅ Add page number under invoice number only if more than 1 page and not first page
   if (invoiceEl && totalPages > 1 && pageIndex > 0) {
     const pageEl = document.createElement("div");
     pageEl.style.fontSize = "20px";
     pageEl.style.marginTop = "2px";
     pageEl.style.fontWeight = "bold";
     pageEl.textContent = `Page No...${pageIndex + 1}`;
-
-    // Insert right after invoice number
     invoiceEl.insertAdjacentElement("afterend", pageEl);
   }
   
@@ -168,8 +87,7 @@ const BillDetailPage = (props) => {
         const endIndex = startIndex + rowsPerPage;
         if (i < startIndex || i >= endIndex) row.remove();
       });
-  
-      // Add "Continued..." if not last page
+
       if (pageIndex !== totalPages - 1) {
         const continuedDiv = document.createElement("div");
         continuedDiv.style.textAlign = "right";
@@ -178,8 +96,6 @@ const BillDetailPage = (props) => {
         continuedDiv.style.fontWeight = "bold";
         continuedDiv.innerText = `Continued...${pageIndex + 2}`;
         clone.appendChild(continuedDiv);
-  
-        // Remove footer content on intermediate pages
         clone.querySelectorAll(".bottom-content").forEach(el => el.remove());
       }
   
@@ -233,17 +149,16 @@ const BillDetailPage = (props) => {
       <Header isLoggedStatus={isLoggedCheck} />
       <div
         id="bill-content"
-        className="relative  max-w-5xl mx-auto bg-white "
+        className="relative  max-w-7xl mx-auto bg-white "
         style={{
           width: "1500px",
           minHeight: "700px",
-          padding: "10px",
+          padding: "35px",
           boxSizing: "border-box",
           position: "relative",
           color: "black",
         }}
       >
-        {/* ✅ Watermark logo */}
         <img
           src="/sriji.png"
           alt="Watermark"
@@ -262,7 +177,6 @@ const BillDetailPage = (props) => {
             </button>
           )}
         </div>
-        {/* ✅ Bill content */}
         <div className="relative z-10 border px-2 py-2">
           <div className="flex">
             <div className="w-1/2">
@@ -336,15 +250,8 @@ const BillDetailPage = (props) => {
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
-                          // hour: "2-digit",
-                          // minute: "2-digit",
-                          // hour12: true,
                         })+" "+
                         new Date(billdata.updatedAt).toLocaleString("en-IN", {
-                          // timeZone: "Asia/Kolkata",
-                          // day: "2-digit",
-                          // month: "2-digit",
-                          // year: "numeric",
                           hour: "2-digit",
                           minute: "2-digit",
                           hour12: true,
@@ -368,9 +275,6 @@ const BillDetailPage = (props) => {
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
-                          // hour: "2-digit",
-                          // minute: "2-digit",
-                          // hour12: true,
                         })
                       : ""}
                   </div>}
@@ -381,7 +285,7 @@ const BillDetailPage = (props) => {
           <div
             className="relative border"
             style={{
-              minHeight: "150px", // adjust as needed
+              minHeight: "150px", 
               display: "flex",
               flexDirection: "column",
               justifyContent: "flex-start",
@@ -396,11 +300,9 @@ const BillDetailPage = (props) => {
               >
                 <tr>
                   <th className="border px-3 py-2 text-left">Sn.</th>
-                  {/* <th className="border px-3 py-2 text-left">Qty.</th> */}
-                  {/* <th className="border px-3 py-2 text-left">Free</th> */}
                   <th className="border px-3 py-2 text-left">Pack</th>
                   <th className="border px-3 py-2 text-left">Qty</th>
-                  <th className="border px-3 py-2 text-left min-w-[280px]">
+                  <th className="border px-3 py-2 text-left min-w-[250px]">
                     Product
                   </th>
                   <th className="border px-3 py-2 text-left">Batch</th>
@@ -419,13 +321,11 @@ const BillDetailPage = (props) => {
                 {billdata.tablets.map((t, i) => (
                   <tr key={t._id || i}>
                     <td className="px-3 pb-1">{i + 1}</td>
-                    {/* <td className="px-3 pb-1 text-right">{t.lessquantity}</td> */}
-                    {/* <td className="px-3 pb-1 text-right">{t.free}</td> */}
                     <td className="px-3 pb-1">{t.packing}</td>
                     <td className="px-3 pb-1">{t.strips}</td>
-                    <td className="px-3 pb-1 min-w-[280px]">{t.category==="INJ"?t?.name?.toUpperCase()+"-"+t.category:t?.name?.toUpperCase()}</td>
+                    <td className="px-3 pb-1 min-w-[250px]">{t.category==="INJ"?t.category+" "+t?.name?.toUpperCase():t?.name?.toUpperCase()}</td>
                     <td className="px-3 pb-1">{t.batch}</td>
-                    <td className="px-3 pb-1">{t.mg==="NA"?"-":t.mg}</td>
+                    <td className="px-3 pb-1">{t?.mg==="NA"?"-":t?.mg?.split(" ")[0]+t?.mg?.split(" ")[1]}</td>
                     <td className="px-3 pb-1">{t.expiry}</td>
                     <td className="px-3 pb-1">{t.hsm}</td>
                     <td className="px-3 pb-1 text-right font-mono">
@@ -865,7 +765,6 @@ const BillDetailPage = (props) => {
                     : "00"}
                 </div>
               </div>
-              {/* <div className="border-t-2"></div> */}
               <div
                 className="w-[98%] ml-2 flex justify-between items-center font-bold text-white bg-black px-4 py-3 "
                 style={{ backgroundColor: "#f5b13d",border:"1px solid black" }}
@@ -911,22 +810,31 @@ const BillDetailPage = (props) => {
                   </div>
                 </td>
 
-                <td className="w-[30%] border p-2 align-top text-center">
-                  <div className="text-sm font-semibold italic underline mb-2">
+                <td className="w-[30%] border p-2 align-top text-center relative">
+                  <div className={`text-sm font-semibold italic underline mb-2`}
+                  style={showStamp?{color:"lightgray"}:{color:"black"}}>
                     For SHRI JI ENTERPRISES
                   </div>
-                  <div>
-                    {/* <img
-                      src="/shivamsign.jpeg"
+                  {showStamp&&<div className="w-[170px] h-[10px] absolute top-[10px] left-[60px]">
+                    <img
+                      src="/stamp1.png"
                       alt="sign"
-                      className="w-42 h-16"
-                    /> */}
-                  </div>
+                      
+                    />
+                  </div>}
                 </td>
               </tr>
             </tbody>
           </table>
           </div>
+        </div>
+        <div className="flex justify-end mt-4 gap-3 no-print">
+          <input
+          type="checkbox"
+          checked={showStamp}
+          onChange={(e) => setShowStamp(e.target.checked)}
+        />
+          <span>Show Stamp Image</span>
         </div>
 
         {/* ✅ Hidden from PDF */}

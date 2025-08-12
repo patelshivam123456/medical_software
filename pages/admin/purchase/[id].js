@@ -150,7 +150,7 @@ const BillDetailPage = (props) => {
       <Header isLoggedStatus={isLoggedCheck} />
       <div
         id="bill-content"
-        className="relative  max-w-6xl mx-auto bg-white "
+        className="relative  max-w-7xl mx-auto bg-white "
         // style={{
         //   width: "2000px",
         //   minHeight: "700px",
@@ -319,7 +319,7 @@ const BillDetailPage = (props) => {
                   <th className="border px-3 py-2 text-left">Pack</th>
                  
                   <th className="border px-3 py-2 text-left">Qty.</th>
-                  <th className="border px-3 py-2 text-left min-w-[280px]">
+                  <th className="border px-3 py-2 text-left min-w-[250px]">
                     Product
                   </th>
                   <th className="border px-3 py-2 text-left">Company</th>
@@ -329,9 +329,9 @@ const BillDetailPage = (props) => {
                   <th className="border px-3 py-2 text-left">HSN</th>
                   <th className="border px-3 py-2 text-left">MRP</th>
                   <th className="border px-3 py-2 text-left">Rate</th>
-                  {/* <th className="border px-3 py-2 text-left">Dis.</th>
+                  <th className="border px-3 py-2 text-left">Dis.</th>
                   <th className="border px-3 py-2 text-left">SGST</th>
-                  <th className="border px-3 py-2 text-left">CGST</th> */}
+                  <th className="border px-3 py-2 text-left">CGST</th>
                   <th className="border px-3 py-2 text-left">Amount</th>
                 </tr>
               </thead>
@@ -343,10 +343,10 @@ const BillDetailPage = (props) => {
                     {/* <td className="px-3 pb-1 text-right">{t.free}</td> */}
                     <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.packing}</td>
                     <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.strips}</td>
-                    <td className="px-3 pb-1 min-w-[280px]" style={{paddingBottom:"4px"}}>{t.name}</td>
+                    <td className="px-3 pb-1 min-w-[250px]" style={{paddingBottom:"4px"}}>{t.name}</td>
                     <td className="px-3 pb-1  min-w-[10px]" style={{paddingBottom:"4px"}}>{t.company}</td>
                     <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.batch}</td>
-                    <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.mg==="NA"?"-":t.mg}</td>
+                    <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.mg==="NA"?"-":t?.mg?.split(" ")[0]+t?.mg?.split(" ")[1]}</td>
                     <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.expiry}</td>
                     <td className="px-3 pb-1" style={{paddingBottom:"4px"}}>{t.hsm}</td>
                     <td className="px-3 pb-1 text-right font-mono" style={{paddingBottom:"4px"}}>
@@ -355,11 +355,11 @@ const BillDetailPage = (props) => {
                     <td className="px-3 pb-1 text-right font-mono" style={{paddingBottom:"4px"}}>
                       {Number(t.price)}
                     </td>
-                    {/* <td className="px-3 pb-1 text-right font-mono">
+                    <td className="px-3 pb-1 text-right font-mono">
                       {Number(t.discount).toFixed(2)}
                     </td>
                     <td className="px-3 pb-1">{t.sgst||"6"}</td>
-                    <td className="px-3 pb-1">{t.cgst||"6"}</td> */}
+                    <td className="px-3 pb-1">{t.cgst||"6"}</td>
                     <td className="px-3 pb-1 text-right font-mono">
                       {Number(t.total).toFixed(2)}
                     </td>
