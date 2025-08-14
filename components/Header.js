@@ -404,7 +404,7 @@ const Header=({isLoggedStatus})=> {
             </div>}
             {(checkLoginType==="admin")&&<div className="space-y-2 py-6">
               <a
-                href="/admin/manage-stock"
+                href="/admin/product-list"
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
                 Product List
