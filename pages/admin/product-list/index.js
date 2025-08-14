@@ -107,12 +107,11 @@ const ProductList = (props) => {
   function downloadPDF(data) {
     setLoadingBtn("download");
     const doc = new jsPDF();
-    const columns = ["Product Name", "MRP", "Rate", "Discount"];
+    const columns = ["Product Name", "MRP", "Rate"];
     const rows = (data || []).map((p) => [
       p.name,
       p.mrp,
-      p.rate,
-      p.discount,
+      p.rate
     ]);
 
     autoTable(doc, {
