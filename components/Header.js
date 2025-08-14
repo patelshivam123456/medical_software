@@ -50,6 +50,7 @@ const Header=({isLoggedStatus})=> {
     { name: 'Sell Return',  href: '/admin/return', icon: CursorArrowRaysIcon },
     { name: 'Online Order Bill',  href: '/admin/mark-delivery', icon: FingerPrintIcon },
     { name: 'Add Client',  href: '/admin/client', icon: SquaresPlusIcon },
+    { name: 'Product List',  href: '/admin/product-list', icon: SquaresPlusIcon },
     // { name: 'Login Access',  href: '/admin/accesstype', icon: ArrowPathIcon },
     // { name: 'User Login/Signup Details',  href: '/admin/register-person', icon: ArrowPathIcon },
   ]
@@ -399,6 +400,14 @@ const Header=({isLoggedStatus})=> {
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
                 Check Stock
+              </a>
+            </div>}
+            {(checkLoginType==="admin")&&<div className="space-y-2 py-6">
+              <a
+                href="/admin/manage-stock"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Product List
               </a>
             </div>}
             
