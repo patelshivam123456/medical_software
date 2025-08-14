@@ -2,16 +2,16 @@
 import { connectToDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
 
-
 export default async function handler(req, res) {
- await connectToDB();
+  await connectToDB();
 
   const { method } = req;
   try {
     switch (method) {
-      // GET /api/products -> list with optional filters & pagination
+      // GET /api/products -> list with optional search filter
       case 'GET': {
-        const { q, page = 1, limit = 20 } = req.query;
+        const { q } = req.query;
+
         const filter = q
           ? {
               $or: [
@@ -22,19 +22,15 @@ export default async function handler(req, res) {
             }
           : {};
 
-        const skip = (Number(page) - 1) * Number(limit);
-        const [items, total] = await Promise.all([
-          Product.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
-          Product.countDocuments(filter),
-        ]);
+        const items = await Product.find(filter).sort({ createdAt: -1 });
 
-        return res.status(200).json({ success: true, items, total, page: Number(page), limit: Number(limit) });
+        return res.status(200).json({ success: true, items, total: items.length });
       }
 
       // POST /api/products -> create
       case 'POST': {
         const { name, company, salt, mrp, rate, discount = 0 } = req.body || {};
-        if (!name  || mrp == null || rate == null) {
+        if (!name || mrp == null || rate == null) {
           return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
 
