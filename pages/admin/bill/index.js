@@ -999,15 +999,15 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
           </button> */}
           <button
         onClick={() => setModalPaymentOpen(true)}
-        className="bg-yellow-600 text-white px-4 py-2 rounded cursor-pointer"
+        className="bg-yellow-600 text-white px-4 py-2 rounded cursor-pointer hidden lg:block"
       >
         View Ledger
       </button>
-          <div onClick={openModal} className="block lg:hidden"><PaperClipIcon className="w-6 h-6"/></div>
+          <div onClick={() => setModalPaymentOpen(true)} className="block lg:hidden"><PaperClipIcon className="w-6 h-6"/></div>
         </div>
         <form onSubmit={handleSubmit} className="mb-6 w-full max-w-7xl gap-5">
-          <div className="lg:flex justify-between lg:items-center">
-            <div className="w-full lg:w-[70%] flex items-center gap-3">
+          <div className="lg:flex lg:justify-between lg:items-center">
+            <div className="w-full lg:w-[70%] flex flex-wrap items-center gap-3">
             <div className="w-full md:w-[50%] lg:mb-6">
               <label>Invoice Date:</label>
               <input
