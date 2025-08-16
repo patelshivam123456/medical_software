@@ -24,7 +24,7 @@ export default async function handler(req, res) {
       }
 
        const latest = await Bill.findOne().sort({ billNo: -1 });
-       const nextBillNo = latest ? latest.billNo + 1 : 1;
+       const nextBillNo = latest ? latest.billNo + 58 : 1;
 
       // ✅ 2. Check if Bill Already Exists
       const existingBill = await Bill.findOne({ billNo: nextBillNo });

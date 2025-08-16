@@ -467,11 +467,27 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       strips:0
     });
   };
+  // const calculateGrandTotal = () => { 
+  //   return tablets.reduce((sum, tab) => sum + Number(tab.total || 0), 0);
+  // };
+
   const calculateGrandTotal = () => {
-    console.log(tablets,"jjjjjjj");
-    
-    return tablets.reduce((sum, tab) => sum + Number(tab.total || 0), 0);
+    // Step 1: Tablet-level calculations (each tablet’s total already includes its own gst/discount logic if set)
+    let total = tablets.reduce((sum, tab) => sum + Number(tab.total || 0), 0);
+  
+    // Step 2: Apply form-level discount (if any)
+    if (discount && !isNaN(discount) && Number(discount) > 0) {
+      total -= (total * Number(discount)) / 100;
+    }
+  
+    // Step 3: Apply form-level GST (if any)
+    if (gst && !isNaN(gst) && Number(gst) > 0) {
+      total += (total * Number(gst)) / 100;
+    }
+  
+    return Number(Math.ceil(total));
   };
+
   const handleSubmit = async (e) => {
     setIsLoading(true);
     e.preventDefault();

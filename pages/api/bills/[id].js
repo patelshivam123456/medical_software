@@ -59,49 +59,109 @@ export default async function handler(req, res) {
   }
 
   // ✏️ PUT Update Bill
-  if (req.method === 'PUT') {
-    try {
-      const updated = await Bill.findOneAndUpdate(
-        { billNo: Number(id) },
-        { $set: req.body },
-        { new: true }
+//   if (req.method === 'PUT') {
+//     try {
+//       const updated = await Bill.findOneAndUpdate(
+//         { billNo: Number(id) },
+//         { $set: req.body },
+//         { new: true }
+//       );
+
+//       if (!updated) {
+//         return res.status(404).json({ success: false, message: 'Bill not found to update' });
+//       }
+// for (const item of updated.tablets) {
+//                 const tablet = await Tablet.findOne({ batch: item.batch });
+              
+//                 if (!tablet) {
+//                   console.warn(`⚠️ Tablet not found for batch: ${item.batch}`);
+//                   continue;
+//                 }
+              
+//                 const newStrips = item.strips + item.free;
+//                 const stripDiff = newStrips - tablet.strips;
+//                 const qtyDiff = item.lessquantity - tablet.quantity;
+              
+//                 const result = await Tablet.updateOne(
+//                   { batch: item.batch },
+//                   {
+//                     $inc: {
+//                       strips: stripDiff,
+//                       quantity: qtyDiff,
+//                     },
+//                   }
+//                 );
+              
+//                 if (result.modifiedCount === 0) {
+//                   console.warn(`⚠️ Stock update skipped for: ${item.name} (${item.packing})`);
+//                 }
+//               }
+//       return res.status(200).json({ success: true, message: 'Bill updated successfully', bill: updated });
+//     } catch (err) {
+//       console.error("PUT Error:", err);
+//       return res.status(500).json({ success: false, message: 'Failed to update bill' });
+//     }
+//   }
+
+if (req.method === 'PUT') {
+  try {
+    const existingBill = await Bill.findOne({ billNo: Number(id) });
+    if (!existingBill) {
+      return res.status(404).json({ success: false, message: 'Bill not found to update' });
+    }
+
+    const oldItems = existingBill.tablets || [];
+    const newItems = req.body.tablets || [];
+
+    // 1️⃣ Revert old stock changes
+    for (const item of oldItems) {
+      await Tablet.updateOne(
+        { batch: item.batch },
+        {
+          $inc: {
+            strips: +(item.strips + item.free), // add back old strips
+            quantity: +item.lessquantity        // add back old qty
+          },
+        }
+      );
+    }
+
+    // 2️⃣ Apply new stock changes
+    for (const item of newItems) {
+      const result = await Tablet.updateOne(
+        { batch: item.batch },
+        {
+          $inc: {
+            strips: -(item.strips + item.free), // subtract new strips
+            quantity: -item.lessquantity        // subtract new qty
+          },
+        }
       );
 
-      if (!updated) {
-        return res.status(404).json({ success: false, message: 'Bill not found to update' });
+      if (result.modifiedCount === 0) {
+        console.warn(`⚠️ Stock update skipped for: ${item.name} (${item.packing})`);
       }
-for (const item of updated.tablets) {
-                const tablet = await Tablet.findOne({ batch: item.batch });
-              
-                if (!tablet) {
-                  console.warn(`⚠️ Tablet not found for batch: ${item.batch}`);
-                  continue;
-                }
-              
-                const newStrips = item.strips + item.free;
-                const stripDiff = newStrips - tablet.strips;
-                const qtyDiff = item.lessquantity - tablet.quantity;
-              
-                const result = await Tablet.updateOne(
-                  { batch: item.batch },
-                  {
-                    $inc: {
-                      strips: stripDiff,
-                      quantity: qtyDiff,
-                    },
-                  }
-                );
-              
-                if (result.modifiedCount === 0) {
-                  console.warn(`⚠️ Stock update skipped for: ${item.name} (${item.packing})`);
-                }
-              }
-      return res.status(200).json({ success: true, message: 'Bill updated successfully', bill: updated });
-    } catch (err) {
-      console.error("PUT Error:", err);
-      return res.status(500).json({ success: false, message: 'Failed to update bill' });
     }
+
+    // 3️⃣ Save updated bill
+    const updated = await Bill.findOneAndUpdate(
+      { billNo: Number(id) },
+      { $set: req.body },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Bill updated successfully',
+      bill: updated,
+    });
+
+  } catch (err) {
+    console.error("PUT Error:", err);
+    return res.status(500).json({ success: false, message: 'Failed to update bill' });
   }
+}
+
 
   // ⛔ Unsupported Method
   return res.status(405).json({ success: false, message: 'Method Not Allowed' });

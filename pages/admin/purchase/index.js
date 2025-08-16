@@ -267,9 +267,27 @@ const handleAddTablet = () => {
     setTablets(updated);
   };
 
+  // const calculateGrandTotal = () => {
+  //   return tablets.reduce((sum, tab) => sum + Number(tab.total || 0), 0);
+  // };
+
   const calculateGrandTotal = () => {
-    return tablets.reduce((sum, tab) => sum + Number(tab.total || 0), 0);
+    // Step 1: Tablet-level calculations (each tablet’s total already includes its own gst/discount logic if set)
+    let total = tablets.reduce((sum, tab) => sum + Number(tab.total || 0), 0);
+  
+    // Step 2: Apply form-level discount (if any)
+    if (form.discount && !isNaN(form.discount) && Number(form.discount) > 0) {
+      total -= (total * Number(form.discount)) / 100;
+    }
+  
+    // Step 3: Apply form-level GST (if any)
+    if (form.gst && !isNaN(form.gst) && Number(form.gst) > 0) {
+      total += (total * Number(form.gst)) / 100;
+    }
+  
+    return Number(Math.ceil(total));
   };
+  
 
   const submitPurchase = async () => {
     const requiredFields = [

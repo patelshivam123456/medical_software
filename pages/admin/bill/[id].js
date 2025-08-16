@@ -319,7 +319,7 @@ const BillDetailPage = (props) => {
               </thead>
               <tbody>
                 {billdata.tablets.map((t, i) => (
-                  <tr key={t._id || i}>
+                  <tr key={t._id || i} className={t.strips === 0 ? "no-print" : ""}>
                     <td className="px-3 pb-1">{i + 1}</td>
                     <td className="px-3 pb-1">{t.packing}</td>
                     <td className="px-3 pb-1">{t.strips}</td>
@@ -763,6 +763,12 @@ const BillDetailPage = (props) => {
                   billdata.gst === 28
                     ? "00"
                     : "00"}
+                </div>
+              </div>
+              <div className="flex justify-between px-7 text-sm " style={{}}>
+                <div className="font-medium">Discount(%)</div>
+                <div>
+                  {billdata.discount?billdata.discount:"00"}
                 </div>
               </div>
               <div
