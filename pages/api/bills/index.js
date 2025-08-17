@@ -62,12 +62,12 @@ if (!tablet) {
   });
 }
 
-if (tablet.quantity < (item.lessquantity + item.free)) {
-  return res.status(400).json({
-    success: false,
-    message: `Insufficient stock for ${tablet.name} (Batch: ${item.batch}). Available: ${tablet.quantity}, Required: ${item.lessquantity + item.free}`,
-  });
-}
+// if (tablet.quantity < (item.lessquantity + item.free)) {
+//   return res.status(400).json({
+//     success: false,
+//     message: `Insufficient stock for ${tablet.name} (Batch: ${item.batch}). Available: ${tablet.quantity}, Required: ${item.lessquantity + item.free}`,
+//   });
+// }
       }
 
       // ✅ 4. Create Bill

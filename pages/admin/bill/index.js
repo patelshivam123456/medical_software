@@ -1007,7 +1007,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         </div>
         <form onSubmit={handleSubmit} className="mb-6 w-full max-w-7xl gap-5">
           <div className="lg:flex lg:justify-between lg:items-center">
-            <div className="w-full lg:w-[70%] flex flex-wrap items-center gap-3">
+            <div className="w-full lg:w-[70%] flex flex-wrap lg:flex lg:flex-nowrap items-center gap-3">
             <div className="w-full md:w-[50%] lg:mb-6">
               <label>Invoice Date:</label>
               <input
