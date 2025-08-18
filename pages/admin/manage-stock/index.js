@@ -55,7 +55,8 @@ const ManageStockPage = (props) => {
   const [saveId,setSaveId]= useState('')
   const [confirmDeleteId,setConfirmDeleteId] = useState(false)
   const [loading,setLoading]= useState(false)
-  const tabletsPerPage = 5;
+  const [showModal,setShowModal] = useState(false)
+  const tabletsPerPage = 30;
 
   const [filters, setFilters] = useState({
     expiry: "",
@@ -232,7 +233,7 @@ const ManageStockPage = (props) => {
         salt,
         mg,
         strips:Number(strips),
-        quantity: Number(quantity),
+        quantity: Number(strips*packaging?.split("*")[1])||0,
         price: Number(price),
         purchase: Number(purchase),
         mrp: Number(mrp),
@@ -246,10 +247,12 @@ const ManageStockPage = (props) => {
         setEditId(null);
         setIsLoading(false);
         toast.success("Product Update SuccessFully");
+        setShowModal(false)
       } else {
         await axios.post("/api/tablets/create", payload);
         toast.success("Product Add SuccessFully");
         setIsLoading(false);
+        setShowModal(false)
       }
 
       setName("");
@@ -449,10 +452,12 @@ const ManageStockPage = (props) => {
 
   return (
     <>
-     <Header isLoggedStatus={checkStatus}/>
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center">
+    {showModal && (
+         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white w-full max-w-5xl rounded-2xl shadow-xl p-4 md:p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold mb-4">Purchase</h2>
+        <div className="text-sm font-semibold text-red-600 cursor-pointer" onClick={()=>setShowModal(false)}>Close</div>
       </div>
       <form onSubmit={handleSubmit} className="mb-6 w-full max-w-7xl gap-5">
         <div className="flex flex-wrap -mx-3 mb-6">
@@ -631,7 +636,7 @@ const ManageStockPage = (props) => {
             <div className="pb-1 text-base">Quantity</div>
             <input
               type="number"
-              value={quantity}
+              value={(strips*packaging?.split("*")[1])||0}
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="Quantity"
               className="block w-full text-black bg-gray-200 border border-red-500 rounded py-3 px-4 mb-3 focus:outline-none focus:bg-white"
@@ -729,7 +734,17 @@ const ManageStockPage = (props) => {
           </div>
         </div>
       </form>
-      <div className="border p-6 mt-10">
+            </div>
+          </div>
+        )}
+     <Header isLoggedStatus={checkStatus}/>
+    <div className="p-6 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center">
+      <div className="text-lg font-semibold">Stock List</div>
+      <div className="text-base font-semibold text-green-500 hover:text-green-600 cursor-pointer"
+      onClick={()=>setShowModal(true)}>Add Stock</div>
+      </div>
+      <div className="mt-3">
         <div className="mb-4 flex justify-between items-center">
           <input
             type="text"
@@ -750,22 +765,22 @@ const ManageStockPage = (props) => {
           <table className="w-full border mb-4">
             <thead className="bg-gray-100">
               <tr>
-                <th className="border p-2 text-black">Sr. NO.</th>
-                <th className="border p-2 text-black">Expiry</th>
-                <th className="border p-2 text-black">Name</th>
-                <th className="border p-2 text-black">Packing</th>
-                <th className="border p-2 text-black">Category</th>
-                <th className="border p-2 text-black">Company</th>
-                <th className="border p-2 text-black">Salt</th>
-                <th className="border p-2 text-black">Mg</th>
-                <th className="border p-2 text-black">Strips</th>
-                <th className="border p-2 text-black">Quantity</th>
-                <th className="border p-2 text-black">MRP</th>
-                <th className="border p-2 text-black">Purchase Price</th>
-                <th className="border p-2 text-black">Sell Price</th>
-                <th className="border p-2 text-black">Created date</th>
-                <th className="border p-2 text-black">Updated date</th>
-                <th className="border p-2 text-black">Actions</th>
+                <th className="border p-2 min-w-[100px] text-black">Sr. NO.</th>
+                <th className="border p-2 min-w-[100px] text-black">Expiry</th>
+                <th className="border p-2 min-w-[240px] text-black">Name</th>
+                <th className="border p-2 min-w-[100px] text-black">Packing</th>
+                <th className="border p-2 min-w-[240px] text-black">Category</th>
+                <th className="border p-2 min-w-[240px] text-black">Company</th>
+                <th className="border p-2 min-w-[240px] text-black">Salt</th>
+                <th className="border p-2 min-w-[100px] text-black">Mg</th>
+                <th className="border p-2 min-w-[120px] text-black">Strips</th>
+                <th className="border p-2 min-w-[120px] text-black">Quantity</th>
+                <th className="border p-2 min-w-[120px] text-black">MRP</th>
+                <th className="border p-2 min-w-[120px] text-black">Purchase Price</th>
+                <th className="border p-2 min-w-[120px] text-black">Sell Price</th>
+                <th className="border p-2 min-w-[130px] text-black">Created date</th>
+                <th className="border p-2 min-w-[130px] text-black">Updated date</th>
+                <th className="border p-2 min-w-[100px] text-black">Actions</th>
               </tr>
               <tr>
                 <td className="border p-1"></td>
@@ -910,7 +925,7 @@ const ManageStockPage = (props) => {
                   </td>
                   <td className="border p-2 text-center">
                     <button
-                      onClick={() => handleEdit(tab)}
+                      onClick={() => {handleEdit(tab);setShowModal(true)}}
                       className="text-yellow-600 font-semibold lg:text-green-600 mr-4 cursor-pointer"
                     >
                       <PencilSquareIcon className="h-4 w-4" />

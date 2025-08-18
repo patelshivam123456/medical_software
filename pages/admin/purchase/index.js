@@ -261,32 +261,80 @@ const handleAddTablet = () => {
     setTablets(updated);
   };
 
+  // const updateTabletField = (index, field, value) => {
+  //   const updated = [...tablets];
+  //   updated[index][field] = value;
+  //   setTablets(updated);
+  // };
+
   const updateTabletField = (index, field, value) => {
-    const updated = [...tablets];
-    updated[index][field] = value;
-    setTablets(updated);
+    setTablets((prev) => {
+      const newTablets = [...prev];
+      newTablets[index] = {
+        ...newTablets[index],
+        [field]: value,
+      };
+  
+      const strips = parseInt(newTablets[index].strips || 0, 10);
+      const free = parseInt(newTablets[index].free || 0, 10);
+      const price = parseFloat(newTablets[index].price || 0);
+  
+      // ✅ Quantity calculation
+      const packing = newTablets[index].packing || "0*1";
+      const multiplier = parseInt(packing.split("*")[1] || 1, 10);
+      newTablets[index].quantity = (strips + free) * multiplier;
+  
+      // ✅ Total calculation
+      newTablets[index].total = strips * price;
+  
+      return newTablets;
+    });
   };
+  
 
   // const calculateGrandTotal = () => {
   //   return tablets.reduce((sum, tab) => sum + Number(tab.total || 0), 0);
   // };
 
+  // const calculateGrandTotal = () => {
+  //   // Step 1: Tablet-level calculations (each tablet’s total already includes its own gst/discount logic if set)
+  //   let total = tablets.reduce((sum, tab) => sum + Number(tab.total || 0), 0);
+  
+  //   // Step 2: Apply form-level discount (if any)
+  //   if (form.discount && !isNaN(form.discount) && Number(form.discount) > 0) {
+  //     total -= (total * Number(form.discount)) / 100;
+  //   }
+  
+  //   // Step 3: Apply form-level GST (if any)
+  //   if (form.gst && !isNaN(form.gst) && Number(form.gst) > 0) {
+  //     total += (total * Number(form.gst)) / 100;
+  //   }
+  
+  //   return Number(Math.ceil(total));
+  // };
+
   const calculateGrandTotal = () => {
-    // Step 1: Tablet-level calculations (each tablet’s total already includes its own gst/discount logic if set)
-    let total = tablets.reduce((sum, tab) => sum + Number(tab.total || 0), 0);
+    // ✅ Step 1: Tablet-level total (already calculated in updateTabletField)
+    let total = tablets.reduce((sum, tab) => {
+      return sum + (Number(tab.total) || 0);
+    }, 0);
   
-    // Step 2: Apply form-level discount (if any)
-    if (form.discount && !isNaN(form.discount) && Number(form.discount) > 0) {
-      total -= (total * Number(form.discount)) / 100;
+    // ✅ Step 2: Apply form-level discount
+    const discount = Number(form.discount) || 0;
+    if (discount > 0) {
+      total -= (total * discount) / 100;
     }
   
-    // Step 3: Apply form-level GST (if any)
-    if (form.gst && !isNaN(form.gst) && Number(form.gst) > 0) {
-      total += (total * Number(form.gst)) / 100;
+    // ✅ Step 3: Apply form-level GST
+    const gst = Number(form.gst) || 0;
+    if (gst > 0) {
+      total += (total * gst) / 100;
     }
   
-    return Number(Math.ceil(total));
+    // ✅ Final rounded value
+    return Math.ceil(total);
   };
+  
   
 
   const submitPurchase = async () => {
@@ -862,7 +910,7 @@ const handleAddTablet = () => {
       </div>
 
       {/* Tablet Table */}
-      <div className="overflow-x-auto mb-6">
+      {/* <div className="overflow-x-auto mb-6">
         <table className="min-w-[1200px] border text-sm">
           <thead>
             <tr className="bg-gray-200">
@@ -913,7 +961,60 @@ const handleAddTablet = () => {
             ))}
           </tbody>
         </table>
-      </div>
+      </div> */}
+      <div className="overflow-x-auto mb-6">
+  <table className="table-auto border text-sm min-w-max">
+    <thead>
+      <tr className="bg-gray-200">
+        {Object.keys(initialTablet).map((field) => (
+          <th key={field} className="border p-2 whitespace-nowrap">
+            {field}
+          </th>
+        ))}
+        <th className="border p-2">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {tablets.map((tab, index) => (
+        <tr key={index}>
+          {Object.keys(initialTablet).map((field) => (
+            <td key={field} className="border p-1 whitespace-nowrap">
+              <input
+                className="border p-1 min-w-[120px] max-w-xs w-full overflow-x-auto"
+                type={
+                  typeof initialTablet[field] === "number"
+                    ? "number"
+                    : "text"
+                }
+                value={tab[field]}
+                onChange={(e) =>
+                  updateTabletField(index, field, e.target.value)
+                }
+              />
+            </td>
+          ))}
+          <td className="border text-center space-x-2">
+            <button
+              onClick={() => handleEditTablet(index)}
+              className="text-blue-600"
+              title="Edit"
+            >
+              ✏️
+            </button>
+            <button
+              onClick={() => removeTablet(index)}
+              className="text-red-600"
+              title="Delete"
+            >
+              🗑
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
 
       {/* Submit */}
       <div className="flex justify-between items-center">
