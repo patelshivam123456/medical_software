@@ -30,7 +30,6 @@ const PaymentClientModal=({ isOpen, onClose,handleEdit,handleDelete,setBillNoDel
   };
 
   const filterBills = (data, term, status) => {
-    console.log(data,"kkkkkkkkkkkkkkkkk");
     
     const filtered = data.filter(
       (bill) =>
@@ -100,6 +99,12 @@ const PaymentClientModal=({ isOpen, onClose,handleEdit,handleDelete,setBillNoDel
                 Pending
               </button>
               <button
+                className={`px-4 py-2 rounded ${activeTab === "Online" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+                onClick={() => setActiveTab("Online")}
+              >
+                Online
+              </button>
+              <button
                 className={`px-4 py-2 rounded ${activeTab === "Cash" ? "bg-green-600 text-white" : "bg-gray-200"}`}
                 onClick={() => setActiveTab("Cash")}
               >
@@ -149,14 +154,14 @@ const PaymentClientModal=({ isOpen, onClose,handleEdit,handleDelete,setBillNoDel
                       <td className="border p-2">{bill.clientName}</td>
                       <td className="border p-2">{bill.mobile}</td>
                       <td className="border p-2">₹{(bill.grandtotal).toFixed(2)}</td>
-                     {bill.ordertype === "Cash"? <td className="border p-2">₹{(bill.grandtotal).toFixed(2)}</td>:<td className="border p-2">₹{(bill.amountPaid).toFixed(2)}</td>}
-                     {bill.ordertype === "Pending"? <td className="border p-2">₹{(bill?.grandtotal-bill?.amountPaid).toFixed(2)}</td>:
+                     {bill.ordertype === "Cash"? <td className="border p-2">₹{(bill?.grandtotal).toFixed(2)}</td>:<td className="border p-2">₹{(bill?.amountPaid).toFixed(2)}</td>}
+                     {(bill.ordertype === "Pending"||bill.ordertype === "Online")? <td className="border p-2">₹{(bill?.grandtotal-bill?.amountPaid).toFixed(2)}</td>:
                      <td className="border p-2 text-green-600 italic font-semibold">No Dues</td>}
                       <td className="border p-2 capitalize">{bill.ordertype}</td>
                       <td className="border p-2 capitalize">{!bill?.paymentDate&&bill.ordertype === "Cash"?
                       new Date().toISOString().slice(0, 10):bill.paymentDate?bill?.paymentDate?.split("T")[0]:"-"}</td>
                       <td>
-                        {bill.ordertype === "Pending" ? (
+                        {(bill.ordertype === "Pending"||bill.ordertype === "Online") ? (
                             <div className="flex items-center gap-4 p-2">
                           <button
                             className="bg-blue-600 text-white px-4 py-2 rounded text-sm cursor-pointer"

@@ -103,6 +103,26 @@ console.log(orderId,"jhjkk");
       total: item.total,
     })),
   };
+
+  const calculateGrandTotal = () => {
+    // Step 1: Tablet-level totals
+    let total = (billdata.tablets || []).reduce(
+      (sum, tab) => sum + Number(tab.total || 0),
+      0
+    );
+  
+    // Step 2: Apply discount
+    if (billdata.discount && !isNaN(billdata.discount) && Number(billdata.discount) > 0) {
+      total -= (total * Number(billdata.discount)) / 100;
+    }
+  
+    // Step 3: Apply GST
+    if (billdata.gst && !isNaN(billdata.gst) && Number(billdata.gst) > 0) {
+      total += (total * Number(billdata.gst)) / 100;
+    }
+  
+    return Math.ceil(total);
+  };
   
   // ✅ API POST with ONLY the requested keys
   // const sendBillData = async () => {
@@ -143,6 +163,7 @@ console.log(orderId,"jhjkk");
     try {
       const payload = {
         salesperson: billdata.salesperson,
+        invoiceDate:new Date().toISOString().slice(0, 10),
         paymenttype: billdata.paymenttype,
         ordertype: billdata.ordertype,
         orderid: billdata.orderid,
@@ -161,6 +182,9 @@ console.log(orderId,"jhjkk");
         state: billdata.state,
         title: billdata.title,
         mobile: billdata.mobile,
+        grandtotal:calculateGrandTotal(),
+        paymentDate:date,
+      amountPaid:0,
       };
   
       const response = await axios.post("/api/bills", payload);
