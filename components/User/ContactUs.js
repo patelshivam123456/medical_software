@@ -54,7 +54,7 @@ const ContactUs=()=> {
                 <h2 class="mt-4 text-lg font-medium text-gray-800 ">Phone</h2>
                 <p class="mt-2 text-gray-500 dark:text-gray-600">Mon-Sun from 10am to 8pm.</p>
                 <div className='flex gap-12'>
-                <p class="mt-2 text-blue-500 dark:text-blue-400">+91-<a href='tel:8707868591'>8707868591</a></p>
+                <p class="mt-2 text-blue-500 dark:text-blue-400">+91-<a href='tel:9211037182'>9211037182</a></p>
                 <p class="mt-2 text-gray-500 dark:text-gray-600">+91-9211037182</p>
                 </div>
             </div>

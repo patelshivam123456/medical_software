@@ -204,7 +204,7 @@ const BillDetailPage = (props) => {
                 Keshav Nagar, Fazullaganj
               </div>
               <div className="text-sm">Lucknow,Uttar Pradesh-226020</div>
-              <div className="text-sm">Mobile Number: +91-8707868591</div>
+              <div className="text-sm">Mobile Number: +91-9211037182</div>
               <div className="text-sm">Email: <span style={{color:"blue"}}>shrijienterprise352@gmail.com</span></div>
             </div>
             <div className="w-1/2">

@@ -134,7 +134,7 @@ const totalInWords = toWords(roundedGrandTotal);
             </div>
             <div style={{marginTop:"-5px"}}>Keshav Nagar, Fazullaganj</div>
             <div>Lucknow,Uttar Pradesh-226020</div>
-            <div className="text-base">Mobile Number: +91-8707868591</div>
+            <div className="text-base">Mobile Number: +91-9211037182</div>
           </div>
           <div className="w-1/2">
             <div className="text-lg" style={{fontWeight:"bold"}}>

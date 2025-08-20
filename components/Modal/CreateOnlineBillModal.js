@@ -111,7 +111,7 @@ const CreateOnlineBillModal = ({ data,onClick,date }) => {
                 </div>
                 <div>Keshav Nagar, Fazullaganj</div>
                 <div>Lucknow, Uttar Pradesh - 226020</div>
-                <div className="text-base">Mobile: +91-8707868591</div>
+                <div className="text-base">Mobile: +91-9211037182</div>
               </div>
 
               {/* Client Info */}

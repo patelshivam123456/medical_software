@@ -240,7 +240,7 @@ export default function MyOrdersModal({ mobile, onClose, orderRefresh }) {
 
             <div className="mt-6 text-sm text-gray-700">
               <p className="font-semibold">Help:</p>
-              For any product-related inquiries, contact <strong className="text-blue-600">+91-8707868591</strong>
+              For any product-related inquiries, contact <strong className="text-blue-600">+91-9211037182</strong>
             </div>
           </>
         ) : (
