@@ -347,7 +347,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       mg:mg.trim(),
       expiry: expiry.trim(),
       price: Number(price),
-      discount: gst==="5"?Number("4.76"):gst==="12"?Number("10.71"):gst==="18"?Number("15.25"):0	,
+      discount: (gst==="5"||gst===5)?Number("4.76"):(gst==="12"||gst===12)?Number("10.71"):(gst==="18"||gst===18)?Number("15.25"):0	,
       rate: Number(rate),
       sgst: Number(gst) / 2,
       cgst: Number(gst) / 2,
@@ -1314,11 +1314,12 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
               <div className="w-full md:w-[8%] ">
                 <label>Discount %</label>
                 <input
+                  disabled
                   value={(formFields.gst==="5"||formFields.gst===5)?"4.76":(formFields.gst==="12"||formFields.gst===12)?"10.71":(formFields.gst==="18"||formFields.gst===18)?"15.25":"0"}
                   onChange={(e) =>
                     setFormFields({ ...formFields, discount: e.target.value })
                   }
-                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  className="border p-2 w-full bg-gray-300 text-black outline-none rounded-sm"
                 />
               </div>
               <div className="w-full md:w-[5%] ">
@@ -1335,7 +1336,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                   <option value="5">5</option>
                   <option value="12">12</option>
                   <option value="18">18</option>
-                  <option value="28">28</option>
+                  {/* <option value="28">28</option> */}
                 </select>
               </div>
               <div className="w-full md:w-[5%] ">
