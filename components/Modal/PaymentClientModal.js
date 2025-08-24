@@ -85,10 +85,10 @@ const PaymentClientModal=({ isOpen, onClose,handleEdit,handleDelete,setBillNoDel
 
   return (
     <>
-      <Dialog open={isOpen} onClose={onClose} className="fixed z-30 inset-0">
+      <Dialog open={isOpen} onClose={onClose} className="fixed z-100 inset-0">
         <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white max-w-5xl w-full rounded shadow p-6 overflow-auto max-h-[80vh]">
+          <Dialog.Panel className="bg-white max-w-7xl w-full rounded shadow p-6 max-h-[90vh]">
             <Dialog.Title className="text-xl font-semibold mb-4">Payments</Dialog.Title>
 
             <div className="flex mb-4 space-x-4">

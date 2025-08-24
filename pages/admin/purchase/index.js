@@ -292,9 +292,9 @@ const handleAddTablet = () => {
   };
   
 
-  // const calculateGrandTotal = () => {
-  //   return tablets.reduce((sum, tab) => sum + Number(tab.total || 0), 0);
-  // };
+  const calculateGrandTotal = () => {
+    return tablets.reduce((sum, tab) => sum + Number(tab.total || 0), 0);
+  };
 
   // const calculateGrandTotal = () => {
   //   // Step 1: Tablet-level calculations (each tablet’s total already includes its own gst/discount logic if set)
@@ -313,7 +313,7 @@ const handleAddTablet = () => {
   //   return Number(Math.ceil(total));
   // };
 
-  const calculateGrandTotal = () => {
+  const calculateGstGrandTotal = () => {
     // ✅ Step 1: Tablet-level total (already calculated in updateTabletField)
     let total = tablets.reduce((sum, tab) => {
       return sum + (Number(tab.total) || 0);
@@ -368,6 +368,7 @@ const handleAddTablet = () => {
       tablets,
       dispatchDate: form.dispatchDate || null,
       grandtotal: calculateGrandTotal(),
+      gstgrandtotal:calculateGstGrandTotal(),
       paymentDate:form.ordertype === "CASH"
       ? new Date().toISOString().slice(0, 10) // "YYYY-MM-DD"
       : "",

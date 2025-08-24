@@ -146,10 +146,12 @@ const BillDetailPage = (props) => {
   
       // Add Page number below invoice number (only on continued pages)
       const invoiceEl = clone.querySelector(".invoice-number");
-      if (invoiceEl && totalPages > 1 && pageIndex > 0) {
+      if (invoiceEl && totalPages > 1) {
         const pageEl = document.createElement("div");
         pageEl.style.fontSize = "20px";
+        pageEl.style.textAlign = "right";
         pageEl.style.marginTop = "2px";
+        pageEl.style.marginBottom = "2px";
         pageEl.style.fontWeight = "bold";
         pageEl.textContent = `Page No...${pageIndex + 1}`;
         invoiceEl.insertAdjacentElement("afterend", pageEl);
@@ -168,7 +170,7 @@ const BillDetailPage = (props) => {
       // Handle continuation pages
       if (pageIndex !== totalPages - 1) {
         const fillerRow = document.createElement("tr");
-        fillerRow.style.height = "120px";
+        fillerRow.style.height = "100px";
   
         const totalCols = tableClone.querySelector("thead tr").children.length;
   
@@ -244,20 +246,20 @@ const BillDetailPage = (props) => {
     setDownloading(false);
   };
   
-  const calculateStrips = (packing, quantity) => {
-    if (!packing || !quantity) return "0";
+  // const calculateStrips = (packing, quantity) => {
+  //   if (!packing || !quantity) return "0";
   
-    const parts = packing.split("*");
-    if (parts.length !== 2) return "0";
+  //   const parts = packing.split("*");
+  //   if (parts.length !== 2) return "0";
   
-    const multiplier = parseInt(parts[1], 10);
-    if (isNaN(multiplier) || multiplier === 0) return "0";
+  //   const multiplier = parseInt(parts[1], 10);
+  //   if (isNaN(multiplier) || multiplier === 0) return "0";
   
-    const fullStrips = Math.floor(quantity / multiplier);
-    const remaining = quantity % multiplier;
+  //   const fullStrips = Math.floor(quantity / multiplier);
+  //   const remaining = quantity % multiplier;
   
-    return remaining === 0 ? `${fullStrips}` : `${fullStrips}*${remaining}`;
-  };
+  //   return remaining === 0 ? `${fullStrips}` : `${fullStrips}*${remaining}`;
+  // };
 
   return (
     <>
@@ -280,7 +282,7 @@ const BillDetailPage = (props) => {
           className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10 pointer-events-none select-none w-[300px]"
           style={{ zIndex: 10 }}
         />
-        <div className="mb-6 mt-6 no-print relative z-10 flex gap-3 justify-end">
+        <div className="mb-6 mt-6 no-print relative z-10 flex gap-3 justify-end invoice-number">
         <div>
           <input
           type="checkbox"
@@ -356,7 +358,7 @@ const BillDetailPage = (props) => {
           <div className="flex  gap-2 border mt-2 px-3">
             <div className="w-[35%]">
               <div className="text-sm">
-                Payment: {billdata.paymenttype==="cod"?"Cash on Delivery":billdata.paymenttype}
+                PAYMENT - {billdata.paymenttype==="cod"?"Cash on Delivery":billdata.paymenttype}
               </div>
               {billdata.orderid&&<div className="text-sm">
                 Order_Id: {billdata.orderid}
@@ -365,13 +367,13 @@ const BillDetailPage = (props) => {
             <div className="w-[65%] flex gap-4 ">
               <div
                 className="w-[35%] text-xl font-semibold text-center pb-4 pt-2 px-2"
-                style={{ backgroundColor: "skyblue",border:"1px solid skyblue" }}
+                style={{ backgroundColor: "#cfecf7" }}
               >
                 GST INVOICE
               </div>
               <div className="w-[65%] flex  justify-between pb-4 ">
                 <div>
-                  <div className="text-sm invoice-number">
+                  <div className="text-sm">
                     Invoice No.: SJ000{billdata.billNo}
                   </div>
                   {/* <div className="text-sm">
@@ -422,7 +424,7 @@ const BillDetailPage = (props) => {
           <div
   className="relative border"
   style={{
-    minHeight: "150px",
+    minHeight: "180px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "flex-start",
@@ -431,21 +433,21 @@ const BillDetailPage = (props) => {
   id="bill-table"
 >
   <table className="min-w-full text-sm border-collapse">
-    <thead style={{ backgroundColor: "lightgray", color: "black" }}>
+    <thead style={{ backgroundColor:"#cfecf7", color: "black" }}>
       <tr>
-        <th className="border-r border-b px-3 py-2 text-left">Sn.</th>
-        <th className="border-r border-b px-3 py-2 text-left">Pack</th>
-        <th className="border-r border-b px-3 py-2 text-left">Qty</th>
-        <th className="border-r border-b px-3 py-2 text-left min-w-[250px]">Product</th>
-        <th className="border-r border-b px-3 py-2 text-left">Batch</th>
-        <th className="border-r border-b px-3 py-2 text-left">Mg</th>
-        <th className="border-r border-b px-3 py-2 text-left">Exp.</th>
-        <th className="border-r border-b px-3 py-2 text-left">HSN</th>
-        <th className="border-r border-b px-3 py-2 text-left">DIS.(%)</th>
-        <th className="border-r border-b px-3 py-2 text-left">GST(%)</th>
-        <th className="border-r border-b px-3 py-2" style={{textAlign:"right"}}>MRP</th>
-        <th className="border-r border-b px-3 py-2" style={{textAlign:"right"}}>Rate</th>
-        <th className="border-r border-b px-3 py-2 w-[100px]" style={{textAlign:"right"}}>Amount</th>
+        <th className="border-r border-b px-3 pb-4 text-left">Sn.</th>
+        <th className="border-r border-b px-3 pb-4 text-left">Pack</th>
+        <th className="border-r border-b px-3 pb-4 text-left">Qty</th>
+        <th className="border-r border-b px-3 pb-4 text-left min-w-[250px]">Product</th>
+        <th className="border-r border-b px-3 pb-4 text-left">Batch</th>
+        <th className="border-r border-b px-3 pb-4 text-left">Mg</th>
+        <th className="border-r border-b px-3 pb-4 text-left">Exp.</th>
+        <th className="border-r border-b px-3 pb-4 text-left">HSN</th>
+        <th className="border-r border-b px-3 pb-4 text-left">DIS.(%)</th>
+        <th className="border-r border-b px-3 pb-4 text-left">GST(%)</th>
+        <th className="border-r border-b px-3 pb-4" style={{textAlign:"right"}}>MRP</th>
+        <th className="border-r border-b px-3 pb-4" style={{textAlign:"right"}}>Rate</th>
+        <th className="border-r border-b px-3 pb-4 w-[100px]" style={{textAlign:"right"}}>Amount</th>
       </tr>
     </thead>
 
@@ -507,39 +509,39 @@ const BillDetailPage = (props) => {
               //   justifyContent: "flex-start",
               // }}
             >
-              <table className=" min-w-full border pb-60 text-sm mt-3">
+              <table className=" min-w-full border pb-60 text-sm mt-4">
                 <thead className="">
                   <tr>
-                    <th className="border px-3 py-2 text-left">CLASS</th>
-                    <th className="border px-3 py-2 text-left">TOTAL</th>
-                    <th className="border px-3 py-2 text-left">SCH.</th>
-                    <th className="border px-3 py-2 text-left">DISC.</th>
-                    <th className="border px-3 py-2 text-left">CGST</th>
-                    <th className="border px-3 py-2 text-left">SGST</th>
-                    <th className="border px-3 py-2 text-left">TOTAL GST</th>
+                    <th className="border px-3 pb-3 text-left">CLASS</th>
+                    <th className="border px-3 pb-3 text-left">TOTAL</th>
+                    <th className="border px-3 pb-3 text-left">SCH.</th>
+                    <th className="border px-3 pb-3 text-left">DISC.</th>
+                    <th className="border px-3 pb-3 text-left">CGST</th>
+                    <th className="border px-3 pb-3 text-left">SGST</th>
+                    <th className="border px-3 pb-3 text-left">TOTAL GST</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr key={1} className="">
-                    <td className="border px-3 pt-1 pb-2 font-semibold">
+                    <td className="border px-3  pb-3 font-semibold">
                       {"GST 5.00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 5
                         ? billdata.discount
                           ? grandTotal.toFixed(2)
                           : grandTotal.toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">{"00"}</td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">{"00"}</td>
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 5
                         ? billdata.discount
                           ? ((grandTotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 5
                         ? (
                             ((grandTotal -
@@ -551,7 +553,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 5
                         ? (
                             ((grandTotal -
@@ -563,7 +565,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 5
                         ? (
                             ((grandTotal -
@@ -577,25 +579,25 @@ const BillDetailPage = (props) => {
                     </td>
                   </tr>
                   <tr key={2} className="">
-                    <td className="border px-3 pt-1 pb-2 font-semibold">
+                    <td className="border px-3  pb-3 font-semibold">
                       {"GST 12.00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 12
                         ? billdata.discount
                           ? grandTotal.toFixed(2)
                           : grandTotal.toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">{"00"}</td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">{"00"}</td>
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 12
                         ? billdata.discount
                           ? ((grandTotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 12
                         ? (
                             ((grandTotal -
@@ -607,7 +609,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 12
                         ? (
                             ((grandTotal -
@@ -619,7 +621,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 12
                         ? (
                             ((grandTotal -
@@ -633,25 +635,25 @@ const BillDetailPage = (props) => {
                     </td>
                   </tr>
                   <tr key={3} className="">
-                    <td className="border px-3 pt-1 pb-2 font-semibold">
+                    <td className="border px-3  pb-3 font-semibold">
                       {"GST 18.00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 18
                         ? billdata.discount
                           ? grandTotal.toFixed(2)
                           : grandTotal.toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">{"00"}</td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">{"00"}</td>
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 18
                         ? billdata.discount
                           ? ((grandTotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 18
                         ? (
                             ((grandTotal -
@@ -663,7 +665,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 18
                         ? (
                             ((grandTotal -
@@ -675,7 +677,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 18
                         ? (
                             ((grandTotal -
@@ -689,25 +691,25 @@ const BillDetailPage = (props) => {
                     </td>
                   </tr>
                   <tr key={4} className="">
-                    <td className="border px-3 pt-1 pb-2 font-semibold">
+                    <td className="border px-3  pb-3 font-semibold">
                       {"GST 28.00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 28
                         ? billdata.discount
                           ? grandTotal.toFixed(2)
                           : grandTotal.toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">{"00"}</td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">{"00"}</td>
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 28
                         ? billdata.discount
                           ? ((grandTotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 28
                         ? (
                             ((grandTotal -
@@ -719,7 +721,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 28
                         ? (
                             ((grandTotal -
@@ -731,7 +733,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3 pt-1 pb-2">
+                    <td className="border px-3  pb-3">
                       {billdata.gst === 28
                         ? (
                             ((grandTotal -
@@ -745,10 +747,10 @@ const BillDetailPage = (props) => {
                     </td>
                   </tr>
                   <tr key={5} className="">
-                    <td className="border-r px-3 pt-1 pb-2 font-semibold" style={{backgroundColor:"lightgray"}}>
+                    <td className="border-r px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {"TOTAL"}
                     </td>
-                    <td className="border-r border-l px-3 pt-1 pb-2 font-semibold" style={{backgroundColor:"lightgray"}}>
+                    <td className="border-r border-l px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {billdata.gst === 5 ||
                       billdata.gst === 12 ||
                       billdata.gst === 18 ||
@@ -758,10 +760,10 @@ const BillDetailPage = (props) => {
                           : grandTotal.toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border-r border-l px-3 pt-1 pb-2 font-semibold" style={{backgroundColor:"lightgray"}}>
+                    <td className="border-r border-l px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {"00"}
                     </td>
-                    <td className="border-r border-l px-3 pt-1 pb-2 font-semibold" style={{backgroundColor:"lightgray"}}>
+                    <td className="border-r border-l px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {billdata.gst === 5 ||
                       billdata.gst === 12 ||
                       billdata.gst === 18 ||
@@ -771,7 +773,7 @@ const BillDetailPage = (props) => {
                           : "00"
                         : "00"}
                     </td>
-                    <td className="border-r border-l px-3 pt-1 pb-2 font-semibold" style={{backgroundColor:"lightgray"}}>
+                    <td className="border-r border-l px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {billdata.gst === 5 ||
                       billdata.gst === 12 ||
                       billdata.gst === 18 ||
@@ -786,7 +788,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border-r border-l px-3 pt-1 pb-2 font-semibold" style={{backgroundColor:"lightgray"}}>
+                    <td className="border-r border-l px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {billdata.gst === 5 ||
                       billdata.gst === 12 ||
                       billdata.gst === 18 ||
@@ -801,7 +803,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border-r border-l px-3 pt-1 pb-2 font-semibold" style={{backgroundColor:"lightgray"}}>
+                    <td className="border-r border-l px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {billdata.gst === 5 ||
                       billdata.gst === 12 ||
                       billdata.gst === 18 ||
@@ -921,15 +923,15 @@ const BillDetailPage = (props) => {
               </div> */}
               <div
                 className="w-[101.7%] flex justify-between items-center font-bold text-white bg-black px-4 py-[11px] "
-                style={{ backgroundColor: "lightgray",borderTop:"1px solid black",borderRight:"1px solid black",borderBottom:"1px solid black" }}
+                style={{ backgroundColor: "#cfecf7",borderTop:"1px solid black",borderRight:"1px solid black",borderBottom:"1px solid black" }}
               >
-                <div style={{ marginTop: "-14px", color: "black" }}>
+                <div style={{ marginTop: "-14px", color: "black",paddingLeft:"10px" }}>
                   GRAND TOTAL
                 </div>
                 <div
                   style={{
                     marginTop: "-14px",
-                    paddingRight: "8px",
+                    paddingRight: "19px",
                     color: "black",
                   }}
                 >

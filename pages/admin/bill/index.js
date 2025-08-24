@@ -1220,34 +1220,34 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                   <option value={"3004"}>
                     {`3004` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
-                  <option value={"3004"}>
+                  <option value={"30042096"}>
                     {`30042096` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
-                  <option value={"3004"}>
+                  <option value={"30049049"}>
                     {`30049049` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
-                  <option value={"3004"}>
+                  <option value={"300439"}>
                     {`300439` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
-                  <option value={"3004"}>
+                  <option value={"30045090"}>
                     {`30045090` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
-                  <option value={"3004"}>
+                  <option value={"4015"}>
                     {`4015` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
-                  <option value={"3004"}>
+                  <option value={"300290"}>
                     {`300290` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
-                  <option value={"3004"}>
+                  <option value={"300690"}>
                     {`300690` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
-                  <option value={"3004"}>
+                  <option value={"6210"}>
                     {`6210` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
-                  <option value={"3004"}>
+                  <option value={"902000000"}>
                     {`902000000` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
-                  <option value={"3004"}>
+                  <option value={"30049099"}>
                     {`30049099` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
                 </select>

@@ -55,6 +55,7 @@ const newPurchaseSchema = new mongoose.Schema({
   accountIfscCode:{type:String},
   gstIn:{type:String},
   grandtotal: { type: Number, required: true },
+  gstgrandtotal: { type: Number, required: true },
 
   // ✅ Payment tracking
   amountPaid: { type: Number, default: null },

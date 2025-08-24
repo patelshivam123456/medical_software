@@ -81,13 +81,14 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
       toast.error("Failed to update payment");
     }
   };
+  
 
   return (
     <>
-      <Dialog open={isOpen} onClose={onClose} className="fixed z-30 inset-0">
+      <Dialog open={isOpen} onClose={onClose} className="fixed z-100 inset-0">
         <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white max-w-5xl w-full rounded shadow p-6 overflow-auto max-h-[80vh]">
+        <div className="fixed inset-0 flex items-center justify-center p-4 mt-10 max-h-[90vh]">
+          <Dialog.Panel className="bg-white max-w-7xl w-full rounded shadow p-6">
             <Dialog.Title className="text-xl font-semibold mb-4">Payments</Dialog.Title>
 
             <div className="flex mb-4 space-x-4">
@@ -127,7 +128,7 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
 
             <div className="overflow-auto">
               <table className="w-full border text-sm">
-                <thead className="bg-gray-100">
+                <thead className="bg-gray-100 sticky top-0">
                   <tr>
                     <th className="border p-2">Bill Invoice No</th>
                     <th className="border p-2">Client</th>
@@ -140,15 +141,15 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
                     <th className="border p-2">Action</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="overflow-auto">
                   {filteredBills.map((bill) => (
                     <tr key={bill._id}>
                       <td className="border p-2">{bill.oldbillNo}</td>
                       <td className="border p-2">{bill.clientName}</td>
                       <td className="border p-2">{bill.mobile}</td>
-                      <td className="border p-2">₹{(bill.grandtotal).toFixed(2)}</td>
-                     {bill.ordertype === "CASH"? <td className="border p-2">₹{(bill.grandtotal).toFixed(2)}</td>:<td className="border p-2">₹{(bill.amountPaid).toFixed(2)}</td>}
-                     {bill.ordertype === "pending"? <td className="border p-2">₹{(bill?.grandtotal-bill?.amountPaid).toFixed(2)}</td>:
+                      <td className="border p-2">₹{(bill?.gstgrandtotal)?.toFixed(2)}</td>
+                     {bill.ordertype === "CASH"? <td className="border p-2">₹{(bill?.gstgrandtotal)?.toFixed(2)}</td>:<td className="border p-2">₹{(bill.amountPaid).toFixed(2)}</td>}
+                     {bill.ordertype === "pending"? <td className="border p-2">₹{(bill?.gstgrandtotal-bill?.amountPaid).toFixed(2)}</td>:
                      <td className="border p-2 text-green-600 italic font-semibold">No Dues</td>}
                       <td className="border p-2 capitalize">{bill.ordertype}</td>
                       <td className="border p-2 capitalize">{!bill?.paymentDate&&bill.ordertype === "CASH"?
