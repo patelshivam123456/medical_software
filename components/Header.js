@@ -196,6 +196,9 @@ const Header=({isLoggedStatus})=> {
               
             </PopoverPanel>
           </Popover></>}
+          {(checkLoginType==="sales"||checkLoginType==="stockiest"||checkLoginType==="admin")&& <a href="/admin/gst-calculator" className="text-sm/6 font-semibold text-gray-900">
+            Calculator
+          </a>}
            {checkLoginType==="sales"&& <a href="/admin/bill" className="text-sm/6 font-semibold text-gray-900">
             Create Bill
           </a>}
@@ -401,6 +404,14 @@ const Header=({isLoggedStatus})=> {
                 className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
               >
                 Check Stock
+              </a>
+            </div>}
+            {(checkLoginType==="admin"||checkLoginType==="sales"||checkLoginType==="stockiest")&&<div className="space-y-2 py-6">
+              <a
+                href="/admin/gst-calculator"
+                className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Calculator
               </a>
             </div>}
             {(checkLoginType==="admin")&&<div className="space-y-2 py-6">

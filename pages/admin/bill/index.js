@@ -66,11 +66,11 @@ const Index = (props) => {
     expiry: "",
     price: "",
     rate: "",
-    discount: 10,
+    discount: 0,
     sgst: 0,
     cgst: 0,
     total: 0,
-    gst: 12,
+    gst: 0,
     lessquantity: 0,
     category: "",
     free: 0,
@@ -325,7 +325,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       !price ||
       !rate ||
       !total ||
-      !gst ||
+      // !gst ||
        
       !category||!strips
     ) {
@@ -347,7 +347,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       mg:mg.trim(),
       expiry: expiry.trim(),
       price: Number(price),
-      discount: Number(discount),
+      discount: gst==="5"?Number("4.76"):gst==="12"?Number("10.71"):gst==="18"?Number("15.25"):0	,
       rate: Number(rate),
       sgst: Number(gst) / 2,
       cgst: Number(gst) / 2,
@@ -926,10 +926,10 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       mg:'',
       expiry: "",
       price: 0,
-      discount: 10,
+      discount: 0,
       rate: 0,
       total: 0.0,
-      gst: 12,
+      gst: 0,
       lessquantity: 0,
       category: "",
       free: 0,
@@ -1136,9 +1136,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                             rate: "",
                             company: t.company,
                             salt: t.salt,
-                            discount: 10,
-                            cgst: 6,
-                            sgst: 6,
+                            discount: 0,
+                            cgst: 0,
+                            sgst: 0,
                             batch: t.batch,
                             mg:t.mg,
                             expiry: t.expiry,
@@ -1220,6 +1220,36 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                   <option value={"3004"}>
                     {`3004` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
+                  <option value={"3004"}>
+                    {`30042096` + "   " + `12.00` + "   " + `6+6+12 G`}
+                  </option>
+                  <option value={"3004"}>
+                    {`30049049` + "   " + `12.00` + "   " + `6+6+12 G`}
+                  </option>
+                  <option value={"3004"}>
+                    {`300439` + "   " + `12.00` + "   " + `6+6+12 G`}
+                  </option>
+                  <option value={"3004"}>
+                    {`30045090` + "   " + `12.00` + "   " + `6+6+12 G`}
+                  </option>
+                  <option value={"3004"}>
+                    {`4015` + "   " + `12.00` + "   " + `6+6+12 G`}
+                  </option>
+                  <option value={"3004"}>
+                    {`300290` + "   " + `12.00` + "   " + `6+6+12 G`}
+                  </option>
+                  <option value={"3004"}>
+                    {`300690` + "   " + `12.00` + "   " + `6+6+12 G`}
+                  </option>
+                  <option value={"3004"}>
+                    {`6210` + "   " + `12.00` + "   " + `6+6+12 G`}
+                  </option>
+                  <option value={"3004"}>
+                    {`902000000` + "   " + `12.00` + "   " + `6+6+12 G`}
+                  </option>
+                  <option value={"3004"}>
+                    {`30049099` + "   " + `12.00` + "   " + `6+6+12 G`}
+                  </option>
                 </select>
               </div>
 
@@ -1284,7 +1314,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
               <div className="w-full md:w-[8%] ">
                 <label>Discount %</label>
                 <input
-                  value={formFields.discount}
+                  value={(formFields.gst==="5"||formFields.gst===5)?"4.76":(formFields.gst==="12"||formFields.gst===12)?"10.71":(formFields.gst==="18"||formFields.gst===18)?"15.25":"0"}
                   onChange={(e) =>
                     setFormFields({ ...formFields, discount: e.target.value })
                   }
@@ -1370,7 +1400,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                     })
                   }
                   className="border p-2 w-full bg-white text-black outline-none rounded-sm"
-                  required
+                  // required
                 />
               </div>
 
