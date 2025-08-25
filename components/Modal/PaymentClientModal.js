@@ -91,7 +91,7 @@ const PaymentClientModal=({ isOpen, onClose,handleEdit,handleDelete,setBillNoDel
           <Dialog.Panel className="bg-white max-w-7xl w-full rounded shadow p-6 max-h-[90vh]">
             <Dialog.Title className="text-xl font-semibold mb-4">Payments</Dialog.Title>
 
-            <div className="flex mb-4 space-x-4">
+            <div className="flex flex-wrap mb-4 gap-4">
               <button
                 className={`px-4 py-2 rounded ${activeTab === "Pending" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
                 onClick={() => setActiveTab("Pending")}
@@ -111,7 +111,7 @@ const PaymentClientModal=({ isOpen, onClose,handleEdit,handleDelete,setBillNoDel
                 Done
               </button>
               <input
-                className="border p-2 ml-auto rounded w-1/3"
+                className="border p-2 ml-auto rounded lg:w-1/3"
                 placeholder="Search by client name or bill no"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -132,12 +132,12 @@ const PaymentClientModal=({ isOpen, onClose,handleEdit,handleDelete,setBillNoDel
 </div>
 
 
-            <div className="overflow-auto">
+<div className="overflow-auto max-h-[56vh]">
               <table className="w-full border text-sm">
-                <thead className="bg-gray-100">
+                <thead className="bg-gray-100 sticky top-0">
                   <tr>
                     <th className="border p-2">Bill Invoice No</th>
-                    <th className="border p-2">Client</th>
+                    <th className="border p-2 min-w-[220px]">Client</th>
                     <th className="border p-2">Mobile</th>
                     <th className="border p-2">Total Amount</th>
                     <th className="border p-2">Amount paid</th>

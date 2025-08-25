@@ -596,18 +596,18 @@ const handleAddTablet = () => {
     <>
     <Header isLoggedStatus={isLoggedCheck}/>
     <div className="max-w-[1400px] mx-auto p-4">
-        <div className="flex justify-between items-center">
-      <h1 className="text-2xl font-bold mb-4">Create New Purchase</h1>
+        <div className="flex justify-between items-center border-b-2 pb-3 mb-2">
+      <h1 className="text-lg font-bold">Create New Purchase</h1>
       <button
         onClick={() => setModalOpen(true)}
-        className="bg-yellow-600 text-white px-4 py-2 rounded cursor-pointer"
+        className="bg-yellow-600 text-white px-4 text-sm py-2 rounded cursor-pointer"
       >
         View Ledger
       </button>
       </div>
 
       {/* General Info */}
-      <div className="grid grid-cols-4 gap-3 mb-3">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-3">
       {Object.keys(initialForm)
   .filter((k) => k !== "grandtotal")
   .map((field) => (
@@ -717,7 +717,7 @@ const handleAddTablet = () => {
 
       {/* Add Tablet */}
       <h2 className="text-lg font-semibold mb-2">Add Tablet</h2>
-      <div className="grid grid-cols-4 gap-3 mb-4">
+      <div className="space-y-3 lg:space-y-0 gap-3 lg:grid lg:grid-cols-4 mb-4">
        
        {Object.keys(initialTablet).map((field) => {
           const isError = errors[field];
@@ -896,7 +896,7 @@ const handleAddTablet = () => {
                 value={tabletForm[field]}
                 onChange={handleTabletChange}
                 placeholder={field}
-                className={`border p-2 ${isError ? "border-red-500" : ""}`}
+                className={`border p-2 w-full ${isError ? "border-red-500" : ""}`}
               />
             </div>
           );
@@ -910,59 +910,7 @@ const handleAddTablet = () => {
 </button>
       </div>
 
-      {/* Tablet Table */}
-      {/* <div className="overflow-x-auto mb-6">
-        <table className="min-w-[1200px] border text-sm">
-          <thead>
-            <tr className="bg-gray-200">
-              {Object.keys(initialTablet).map((field) => (
-                <th key={field} className="border p-2">
-                  {field}
-                </th>
-              ))}
-              <th className="border p-2">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tablets.map((tab, index) => (
-              <tr key={index}>
-                {Object.keys(initialTablet).map((field) => (
-                  <td key={field} className="border p-1">
-                    <input
-                      className="w-full border p-1"
-                      type={
-                        typeof initialTablet[field] === "number"
-                          ? "number"
-                          : "text"
-                      }
-                      value={tab[field]}
-                      onChange={(e) =>
-                        updateTabletField(index, field, e.target.value)
-                      }
-                    />
-                  </td>
-                ))}
-                <td className="border text-center space-x-2">
-  <button
-    onClick={() => handleEditTablet(index)}
-    className="text-blue-600"
-    title="Edit"
-  >
-    ✏️
-  </button>
-  <button
-    onClick={() => removeTablet(index)}
-    className="text-red-600"
-    title="Delete"
-  >
-    🗑
-  </button>
-</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div> */}
+     
       <div className="overflow-x-auto mb-6">
   <table className="table-auto border text-sm min-w-max">
     <thead>

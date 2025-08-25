@@ -126,19 +126,19 @@ export default function PaymentsModal({ isOpen, onClose,handleEdit,handleDelete,
 </div>
 
 
-            <div className="overflow-auto">
+            <div className="overflow-auto max-h-[58vh]">
               <table className="w-full border text-sm">
                 <thead className="bg-gray-100 sticky top-0">
                   <tr>
                     <th className="border p-2">Bill Invoice No</th>
-                    <th className="border p-2">Client</th>
+                    <th className="border p-2 min-w-[220px]">Client</th>
                     <th className="border p-2">Mobile</th>
                     <th className="border p-2">Total Amount</th>
                     <th className="border p-2">Amount paid</th>
                     <th className="border p-2">Due Amount</th>
                     <th className="border p-2">Payment Status</th>
                     <th className="border p-2">Payment Date</th>
-                    <th className="border p-2">Action</th>
+                    <th className="border p-2 min-w-[220px]">Action</th>
                   </tr>
                 </thead>
                 <tbody className="overflow-auto">
