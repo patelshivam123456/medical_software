@@ -140,10 +140,88 @@ const BillDetailPage = (props) => {
     const rowsPerPage = 14; // rows per page
     const totalPages = Math.ceil(totalRows / rowsPerPage);
   
+    // const generatePageClone = (pageIndex) => {
+    //   const clone = content.cloneNode(true);
+    //   clone.id = `clone-page-${pageIndex + 1}`;
+  
+    //   // Add Page number below invoice number (only on continued pages)
+    //   const invoiceEl = clone.querySelector(".invoice-number");
+    //   if (invoiceEl && totalPages > 1) {
+    //     const pageEl = document.createElement("div");
+    //     pageEl.style.fontSize = "20px";
+    //     pageEl.style.textAlign = "right";
+    //     pageEl.style.marginTop = "2px";
+    //     pageEl.style.marginBottom = "2px";
+    //     pageEl.style.fontWeight = "bold";
+    //     pageEl.textContent = `Page No...${pageIndex + 1}`;
+    //     invoiceEl.insertAdjacentElement("afterend", pageEl);
+    //   }
+  
+    //   const tableClone = clone.querySelector("table");
+    //   const bodyRows = tableClone.querySelectorAll("tbody tr");
+  
+    //   // Keep only the rows for this page
+    //   bodyRows.forEach((row, i) => {
+    //     const startIndex = pageIndex * rowsPerPage;
+    //     const endIndex = startIndex + rowsPerPage;
+    //     if (i < startIndex || i >= endIndex) row.remove();
+    //   });
+  
+    //   // Handle continuation pages
+    //   if (pageIndex !== totalPages - 1) {
+    //     const fillerRow = document.createElement("tr");
+    //     fillerRow.style.height = "100px";
+  
+    //     const totalCols = tableClone.querySelector("thead tr").children.length;
+  
+    //     for (let c = 0; c < totalCols; c++) {
+    //       const fillerCell = document.createElement("td");
+  
+    //       // Last two cells → only top & bottom border
+    //       if (c >= totalCols - 2) {
+    //         fillerCell.style.borderTop = "1px solid black";
+    //         fillerCell.style.borderBottom = "1px solid black";
+    //         fillerCell.style.borderLeft = "none";
+    //         fillerCell.style.borderRight = "none";
+    //         fillerCell.style.textAlign = "right";
+  
+    //         // Put continued text in last cell
+    //         if (c === totalCols - 1) {
+    //           // fillerCell.style.verticalAlign = "top";
+    //           fillerCell.style.textAlign = "right";
+    //           fillerCell.style.fontSize = "16px";
+    //           fillerCell.style.fontWeight = "bold";
+    //           fillerCell.style.marginTop = "50px";
+    //           fillerCell.style.paddingRight = "20px";
+    //           fillerCell.innerText = `Continued...${pageIndex + 2}`;
+    //         } else {
+    //           fillerCell.innerHTML = "&nbsp;";
+    //         }
+    //       } else {
+    //         // Normal cells → full border
+    //         fillerCell.style.borderTop = "1px solid black";
+    //         fillerCell.style.borderLeft = "none";
+    //         fillerCell.style.borderRight = "1px solid black";
+    //         fillerCell.style.borderBottom = "1px solid black";
+    //         fillerCell.innerHTML = "&nbsp;";
+    //       }
+  
+    //       fillerRow.appendChild(fillerCell);
+    //     }
+  
+    //     tableClone.querySelector("tbody").appendChild(fillerRow);
+  
+    //     // remove bottom content so it only appears on last page
+    //     clone.querySelectorAll(".bottom-content").forEach((el) => el.remove());
+    //   }
+  
+    //   document.body.appendChild(clone);
+    //   return clone;
+    // };
     const generatePageClone = (pageIndex) => {
       const clone = content.cloneNode(true);
       clone.id = `clone-page-${pageIndex + 1}`;
-  
+    
       // Add Page number below invoice number (only on continued pages)
       const invoiceEl = clone.querySelector(".invoice-number");
       if (invoiceEl && totalPages > 1) {
@@ -156,38 +234,70 @@ const BillDetailPage = (props) => {
         pageEl.textContent = `Page No...${pageIndex + 1}`;
         invoiceEl.insertAdjacentElement("afterend", pageEl);
       }
-  
+      else {
+        const pageEl = document.createElement("div");
+        pageEl.style.fontSize = "20px";
+        pageEl.style.textAlign = "right";
+        pageEl.style.marginTop = "2px";
+        pageEl.style.marginBottom = "2px";
+        pageEl.style.fontWeight = "bold";
+        pageEl.textContent = `Page No...${pageIndex + 1}`;
+        invoiceEl.insertAdjacentElement("afterend", pageEl);
+      }
+    
       const tableClone = clone.querySelector("table");
       const bodyRows = tableClone.querySelectorAll("tbody tr");
-  
+    
       // Keep only the rows for this page
       bodyRows.forEach((row, i) => {
         const startIndex = pageIndex * rowsPerPage;
         const endIndex = startIndex + rowsPerPage;
         if (i < startIndex || i >= endIndex) row.remove();
       });
-  
+    
+      // ✅ add filler row for min height only from 2nd page onward
+      if (pageIndex > 0) {
+        const tbody = tableClone.querySelector("tbody");
+        const fillerRow = document.createElement("tr");
+        const totalCols = tableClone.querySelector("thead tr").children.length;
+      
+        for (let c = 0; c < totalCols; c++) {
+          const fillerCell = document.createElement("td");
+          fillerCell.style.height = "180px";
+          fillerCell.innerHTML = "&nbsp;";
+      
+          // All columns except last get borderRight
+          if (c < totalCols - 1) {
+            fillerCell.style.borderRight = "1px solid black";
+          } else {
+            fillerCell.style.borderRight = "none";
+          }
+      
+          fillerRow.appendChild(fillerCell);
+        }
+      
+        tbody.appendChild(fillerRow);
+      }
+      
+    
       // Handle continuation pages
       if (pageIndex !== totalPages - 1) {
         const fillerRow = document.createElement("tr");
-        fillerRow.style.height = "100px";
-  
+        fillerRow.style.height = "150px";
+    
         const totalCols = tableClone.querySelector("thead tr").children.length;
-  
+    
         for (let c = 0; c < totalCols; c++) {
           const fillerCell = document.createElement("td");
-  
-          // Last two cells → only top & bottom border
+    
           if (c >= totalCols - 2) {
             fillerCell.style.borderTop = "1px solid black";
             fillerCell.style.borderBottom = "1px solid black";
             fillerCell.style.borderLeft = "none";
             fillerCell.style.borderRight = "none";
             fillerCell.style.textAlign = "right";
-  
-            // Put continued text in last cell
+    
             if (c === totalCols - 1) {
-              // fillerCell.style.verticalAlign = "top";
               fillerCell.style.textAlign = "right";
               fillerCell.style.fontSize = "16px";
               fillerCell.style.fontWeight = "bold";
@@ -198,27 +308,26 @@ const BillDetailPage = (props) => {
               fillerCell.innerHTML = "&nbsp;";
             }
           } else {
-            // Normal cells → full border
             fillerCell.style.borderTop = "1px solid black";
             fillerCell.style.borderLeft = "none";
             fillerCell.style.borderRight = "1px solid black";
             fillerCell.style.borderBottom = "1px solid black";
             fillerCell.innerHTML = "&nbsp;";
           }
-  
+    
           fillerRow.appendChild(fillerCell);
         }
-  
+    
         tableClone.querySelector("tbody").appendChild(fillerRow);
-  
+    
         // remove bottom content so it only appears on last page
         clone.querySelectorAll(".bottom-content").forEach((el) => el.remove());
       }
-  
+    
       document.body.appendChild(clone);
       return clone;
     };
-  
+    
     const generateImageFromElement = async (element) => {
       const canvas = await html2canvas(element, {
         scale: 2,
@@ -279,7 +388,7 @@ const BillDetailPage = (props) => {
         <img
           src="/sriji.png"
           alt="Watermark"
-          className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10 pointer-events-none select-none w-[300px]"
+          className="absolute top-[52%] left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10 pointer-events-none select-none w-[300px]"
           style={{ zIndex: 10 }}
         />
         <div className="mb-6 mt-6 no-print relative z-10 flex gap-3 justify-end invoice-number">
@@ -366,7 +475,7 @@ const BillDetailPage = (props) => {
             </div>
             <div className="w-[65%] flex gap-4 ">
               <div
-                className="w-[35%] text-xl font-semibold text-center pb-4 pt-2 px-2"
+                className="w-[35%] text-xl font-semibold text-center pb-4 pt-0 px-2"
                 style={{ backgroundColor: "#cfecf7" }}
               >
                 GST INVOICE
@@ -394,7 +503,7 @@ const BillDetailPage = (props) => {
                           hour: "2-digit",
                           minute: "2-digit",
                           hour12: true,
-                        })
+                        }).toUpperCase()
                         }
                         </>
                       : ""}
@@ -422,7 +531,7 @@ const BillDetailPage = (props) => {
             </div>
           </div>
           <div
-  className="relative border"
+  className="relative border-l border-r border-b"
   style={{
     minHeight: "180px",
     display: "flex",
@@ -454,31 +563,31 @@ const BillDetailPage = (props) => {
     <tbody>
       {billdata.tablets.map((t, i) => (
         <tr key={t._id || i} className={t.strips === 0 ? "no-print" : ""}>
-          <td className="border-r px-3 pb-2 text-sm">{i + 1}</td>
-          <td className="border-r px-3 pb-2 text-sm">{t.packing}</td>
-          <td className="border-r px-3 pb-2 text-sm">{t.strips}</td>
-          <td className="border-r px-3 pb-2 min-w-[250px] text-sm">
+          <td className="border-r px-3 pb-1 text-sm">{i + 1}</td>
+          <td className="border-r px-3 pb-1 text-sm">{t.packing}</td>
+          <td className="border-r px-3 pb-1 text-sm">{t.strips}</td>
+          <td className="border-r px-3 pb-1 min-w-[250px] text-sm">
             {t.category === "INJ"
               ? t.category + " " + t?.name?.toUpperCase()
               : t?.name?.toUpperCase()}
           </td>
-          <td className="border-r px-3 pb-2 text-sm">{t.batch}</td>
-          <td className="border-r px-3 pb-2 text-sm">
+          <td className="border-r px-3 pb-1 text-sm">{t.batch}</td>
+          <td className="border-r px-3 pb-1 text-sm">
             {t?.mg === "NA"
               ? "-"
               : t?.mg?.split(" ")[0] + t?.mg?.split(" ")[1]}
           </td>
-          <td className="border-r px-3 pb-2 text-sm">{t.expiry}</td>
-          <td className="border-r px-3 pb-2 text-sm">{t.hsm}</td>
-          <td className="border-r px-3 pb-2 text-sm">{t.discount}</td>
-          <td className="border-r px-3 pb-2 text-sm">{t.gst}</td>
-          <td className="border-r px-3 pb-2 text-right font-mono text-sm">
+          <td className="border-r px-3 pb-1 text-sm">{t.expiry}</td>
+          <td className="border-r px-3 pb-1 text-sm">{t.hsm}</td>
+          <td className="border-r px-3 pb-1 text-sm">{t.discount}</td>
+          <td className="border-r px-3 pb-1 text-sm">{t.gst}</td>
+          <td className="border-r px-3 pb-1 text-right font-mono text-sm">
             {Number(t.price).toFixed(2)}
           </td>
-          <td className="border-r px-3 pb-2 text-right font-mono text-sm">
+          <td className="border-r px-3 pb-1 text-right font-mono text-sm">
             {Number(t.rate).toFixed(2)}
           </td>
-          <td className=" px-3 pb-2 text-right font-mono text-sm w-[100px]">
+          <td className=" px-3 pb-1 text-right font-mono text-sm w-[100px]">
             {Number(t.total).toFixed(2)}
           </td>
         </tr>
@@ -512,36 +621,36 @@ const BillDetailPage = (props) => {
               <table className=" min-w-full border pb-60 text-sm mt-4">
                 <thead className="">
                   <tr>
-                    <th className="border px-3 pb-3 text-left">CLASS</th>
-                    <th className="border px-3 pb-3 text-left">TOTAL</th>
-                    <th className="border px-3 pb-3 text-left">SCH.</th>
-                    <th className="border px-3 pb-3 text-left">DISC.</th>
-                    <th className="border px-3 pb-3 text-left">CGST</th>
-                    <th className="border px-3 pb-3 text-left">SGST</th>
-                    <th className="border px-3 pb-3 text-left">TOTAL GST</th>
+                    <th className="border-r border-b px-3 pb-3 text-left">CLASS</th>
+                    <th className="border-r border-b px-3 pb-3" style={{textAlign:"right"}}>TOTAL</th>
+                    <th className="border-r border-b px-3 pb-3" style={{textAlign:"right"}}>SCH.</th>
+                    <th className="border-r border-b px-3 pb-3" style={{textAlign:"right"}}>DISC.</th>
+                    <th className="border-r border-b px-3 pb-3" style={{textAlign:"right"}}>CGST</th>
+                    <th className="border-r border-b px-3 pb-3" style={{textAlign:"right"}}>SGST</th>
+                    <th className="border-r border-b px-3 pb-3" style={{textAlign:"right"}}>TOTAL GST</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr key={1} className="">
-                    <td className="border px-3  pb-3 font-semibold">
+                    <td className="border-r border-b px-3  pb-3 font-black">
                       {"GST 5.00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 5
                         ? billdata.discount
                           ? grandTotal.toFixed(2)
                           : grandTotal.toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">{"00"}</td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">{"00"}</td>
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 5
                         ? billdata.discount
                           ? ((grandTotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 5
                         ? (
                             ((grandTotal -
@@ -553,7 +662,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 5
                         ? (
                             ((grandTotal -
@@ -565,7 +674,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 5
                         ? (
                             ((grandTotal -
@@ -579,25 +688,25 @@ const BillDetailPage = (props) => {
                     </td>
                   </tr>
                   <tr key={2} className="">
-                    <td className="border px-3  pb-3 font-semibold">
+                    <td className="border-r border-b px-3  pb-3 font-black">
                       {"GST 12.00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 12
                         ? billdata.discount
                           ? grandTotal.toFixed(2)
                           : grandTotal.toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">{"00"}</td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">{"00"}</td>
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 12
                         ? billdata.discount
                           ? ((grandTotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 12
                         ? (
                             ((grandTotal -
@@ -609,7 +718,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 12
                         ? (
                             ((grandTotal -
@@ -621,7 +730,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 12
                         ? (
                             ((grandTotal -
@@ -635,25 +744,25 @@ const BillDetailPage = (props) => {
                     </td>
                   </tr>
                   <tr key={3} className="">
-                    <td className="border px-3  pb-3 font-semibold">
+                    <td className="border-r border-b px-3  pb-3 font-black">
                       {"GST 18.00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 18
                         ? billdata.discount
                           ? grandTotal.toFixed(2)
                           : grandTotal.toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">{"00"}</td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">{"00"}</td>
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 18
                         ? billdata.discount
                           ? ((grandTotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 18
                         ? (
                             ((grandTotal -
@@ -665,7 +774,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 18
                         ? (
                             ((grandTotal -
@@ -677,7 +786,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 18
                         ? (
                             ((grandTotal -
@@ -691,25 +800,25 @@ const BillDetailPage = (props) => {
                     </td>
                   </tr>
                   <tr key={4} className="">
-                    <td className="border px-3  pb-3 font-semibold">
+                    <td className="border-r border-b px-3  pb-3 font-black">
                       {"GST 28.00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 28
                         ? billdata.discount
                           ? grandTotal.toFixed(2)
                           : grandTotal.toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">{"00"}</td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">{"00"}</td>
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 28
                         ? billdata.discount
                           ? ((grandTotal * billdata.discount) / 100).toFixed(2)
                           : "00"
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 28
                         ? (
                             ((grandTotal -
@@ -721,7 +830,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 28
                         ? (
                             ((grandTotal -
@@ -733,7 +842,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border px-3  pb-3">
+                    <td className="border-r border-b text-right px-3  pb-3">
                       {billdata.gst === 28
                         ? (
                             ((grandTotal -
@@ -750,7 +859,7 @@ const BillDetailPage = (props) => {
                     <td className="border-r px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {"TOTAL"}
                     </td>
-                    <td className="border-r border-l px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
+                    <td className="border-r text-right  px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {billdata.gst === 5 ||
                       billdata.gst === 12 ||
                       billdata.gst === 18 ||
@@ -760,10 +869,10 @@ const BillDetailPage = (props) => {
                           : grandTotal.toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border-r border-l px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
+                    <td className="border-r text-right  px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {"00"}
                     </td>
-                    <td className="border-r border-l px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
+                    <td className="border-r text-right  px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {billdata.gst === 5 ||
                       billdata.gst === 12 ||
                       billdata.gst === 18 ||
@@ -773,7 +882,7 @@ const BillDetailPage = (props) => {
                           : "00"
                         : "00"}
                     </td>
-                    <td className="border-r border-l px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
+                    <td className="border-r text-right  px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {billdata.gst === 5 ||
                       billdata.gst === 12 ||
                       billdata.gst === 18 ||
@@ -788,7 +897,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border-r border-l px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
+                    <td className="border-r text-right  px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {billdata.gst === 5 ||
                       billdata.gst === 12 ||
                       billdata.gst === 18 ||
@@ -803,7 +912,7 @@ const BillDetailPage = (props) => {
                           ).toFixed(2)
                         : "00"}
                     </td>
-                    <td className="border-r border-l px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
+                    <td className="border-r text-right  px-3  pb-3 font-semibold" style={{backgroundColor:"#cfecf7"}}>
                       {billdata.gst === 5 ||
                       billdata.gst === 12 ||
                       billdata.gst === 18 ||
