@@ -288,6 +288,132 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
   };
 
  
+  // const addMoreTablet = () => {
+  //   const {
+  //     name,
+  //     company,
+  //     salt,
+  //     quantity,
+  //     packing,
+  //     batch,
+  //     mg,
+  //     expiry,
+  //     price,
+  //     discount,
+  //     rate,
+  //     gst,
+  //     lessquantity,
+  //     category,
+  //     free,
+  //     hsm,
+  //     strips,
+  //   } = formFields;
+
+  
+  //   // const total = (parseFloat(rate || 0) / parseFloat(lessquantity || 0)).toFixed(2);
+
+  //   const total= (Number(rate)*(Number(strips))).toFixed(2)
+  
+  //   if (
+  //     !name ||
+  //     !company ||
+  //     !salt ||
+  //     !packing ||
+  //     !batch ||
+  //     !mg||
+  //     !expiry ||
+  //     !price ||
+  //     !rate ||
+  //     !total ||
+  //     // !gst ||
+       
+  //     !category||!strips
+  //   ) {
+  //     toast.error("Please fill all fields before adding.");
+  //     return;
+  //   }
+  
+  //   // ✅ Calculate strips
+  //   const strip = calculateStrips(packing, parseInt(lessquantity));
+  //   const quantityCount= Number(packing?.split("*")[1])*(Number(strips)+Number(free))
+  
+  //   const newTablet = {
+  //     name: name.trim(),
+  //     company: company.trim(),
+  //     salt: salt.trim(),
+  //     quantity: Number(quantity),
+  //     packing: packing.trim(),
+  //     batch: batch.trim(),
+  //     mg:mg.trim(),
+  //     expiry: expiry.trim(),
+  //     price: Number(price),
+  //     discount: (gst==="5"||gst===5)?Number("4.76"):(gst==="12"||gst===12)?Number("10.71"):(gst==="18"||gst===18)?Number("15.25"):0	,
+  //     rate: Number(rate),
+  //     sgst: Number(gst) / 2,
+  //     cgst: Number(gst) / 2,
+  //     total: Number(total),
+  //     gst: Number(gst),
+  //     lessquantity: Number(quantityCount),
+  //     category: category.trim(),
+  //     free: Number(free),
+  //     hsm: hsm.trim(),
+  //     strips:Number(strips),
+  //   };
+  
+  //   const isDuplicate = tablets.some((tablet, index) => {
+  //     if (editingIndex !== null && editingIndex === index) return false;
+  //     return (
+  //       tablet.name === newTablet.name &&
+  //       tablet.company === newTablet.company &&
+  //       tablet.salt === newTablet.salt &&
+  //       tablet.batch === newTablet.batch &&
+  //       tablet.mg===newTablet.mg&&
+  //       tablet.category === newTablet.category &&
+  //       tablet.expiry === newTablet.expiry &&
+  //       tablet.packing === newTablet.packing &&
+  //       tablet.quantity === newTablet.quantity &&
+  //       tablet.price === newTablet.price
+  //     );
+  //   });
+  
+  //   if (isDuplicate) {
+  //     toast.error("Duplicate tablet details found. Please modify the entry.");
+  //     return;
+  //   }
+  
+  //   if (editingIndex !== null) {
+  //     const updatedTablets = [...tablets];
+  //     updatedTablets[editingIndex] = newTablet;
+  //     setTablets(updatedTablets);
+  //     setEditingIndex(null);
+  //   } else {
+  //     setTablets([...tablets, newTablet]);
+  //   }
+  
+  //   setFormFields({
+  //     name: "",
+  //     company: "",
+  //     salt: "",
+  //     quantity: 0,
+  //     packing: "",
+  //     batch: "",
+  //     mg:"",
+  //     expiry: "",
+  //     price: 0,
+  //     discount: Number(formFields.discount),
+  //     rate: 0,
+  //     total: 0.0,
+  //     gst: Number(formFields.gst),
+  //     lessquantity: 0,
+  //     category: "",
+  //     free: 0,
+  //     hsm: "",
+  //     strips:0
+  //   });
+  
+  //   setShowSuggestions(false);
+  // };
+  
   const addMoreTablet = () => {
     const {
       name,
@@ -308,11 +434,6 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       hsm,
       strips,
     } = formFields;
-
-  
-    // const total = (parseFloat(rate || 0) / parseFloat(lessquantity || 0)).toFixed(2);
-
-    const total= (Number(rate)*(Number(strips))).toFixed(2)
   
     if (
       !name ||
@@ -320,22 +441,33 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       !salt ||
       !packing ||
       !batch ||
-      !mg||
+      !mg ||
       !expiry ||
       !price ||
       !rate ||
-      !total ||
-      // !gst ||
-       
-      !category||!strips
+      !category ||
+      !strips
     ) {
       toast.error("Please fill all fields before adding.");
       return;
     }
   
-    // ✅ Calculate strips
-    const strip = calculateStrips(packing, parseInt(lessquantity));
-    const quantityCount= Number(packing?.split("*")[1])*(Number(strips)+Number(free))
+    // ✅ Calculate total quantity count
+    const quantityCount =
+      Number(packing?.split("*")[1]) * (Number(strips) + Number(free));
+  
+    // ✅ Calculate base total (rate × strips)
+    let baseTotal = Number(rate) * Number(strips);
+  
+    // Apply discount
+    if (discount) {
+      baseTotal = baseTotal - (baseTotal * Number(discount) / 100);
+    }
+  
+    // Apply GST
+    if (gst) {
+      baseTotal = baseTotal + (baseTotal * Number(gst) / 100);
+    }
   
     const newTablet = {
       name: name.trim(),
@@ -344,22 +476,23 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       quantity: Number(quantity),
       packing: packing.trim(),
       batch: batch.trim(),
-      mg:mg.trim(),
+      mg: mg.trim(),
       expiry: expiry.trim(),
       price: Number(price),
-      discount: (gst==="5"||gst===5)?Number("4.76"):(gst==="12"||gst===12)?Number("10.71"):(gst==="18"||gst===18)?Number("15.25"):0	,
+      discount: Number(discount),
       rate: Number(rate),
       sgst: Number(gst) / 2,
       cgst: Number(gst) / 2,
-      total: Number(total),
+      total: Number(baseTotal.toFixed(2)), // ✅ Final total
       gst: Number(gst),
       lessquantity: Number(quantityCount),
       category: category.trim(),
       free: Number(free),
       hsm: hsm.trim(),
-      strips:Number(strips),
+      strips: Number(strips),
     };
   
+    // ✅ Prevent duplicates
     const isDuplicate = tablets.some((tablet, index) => {
       if (editingIndex !== null && editingIndex === index) return false;
       return (
@@ -367,7 +500,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
         tablet.company === newTablet.company &&
         tablet.salt === newTablet.salt &&
         tablet.batch === newTablet.batch &&
-        tablet.mg===newTablet.mg&&
+        tablet.mg === newTablet.mg &&
         tablet.category === newTablet.category &&
         tablet.expiry === newTablet.expiry &&
         tablet.packing === newTablet.packing &&
@@ -390,6 +523,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       setTablets([...tablets, newTablet]);
     }
   
+    // ✅ Reset form
     setFormFields({
       name: "",
       company: "",
@@ -397,18 +531,18 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
       quantity: 0,
       packing: "",
       batch: "",
-      mg:"",
+      mg: "",
       expiry: "",
       price: 0,
-      discount: Number(formFields.discount),
+      discount: 0,
       rate: 0,
       total: 0.0,
-      gst: Number(formFields.gst),
+      gst: 0,
       lessquantity: 0,
       category: "",
       free: 0,
       hsm: "",
-      strips:0
+      strips: 0,
     });
   
     setShowSuggestions(false);
@@ -982,7 +1116,19 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
     return remaining === 0 ? `${fullStrips}` : `${fullStrips}*${remaining}`;
   };
 
+  const calculateTotal=(rate, strips, discount = 0, gst = 0)=> {
+    let total = Number(rate) * Number(strips);
   
+    if (discount > 0) {
+      total = total - (total * discount / 100);
+    }
+  
+    if (gst > 0) {
+      total = total + (total * gst / 100);
+    }
+  
+    return total.toFixed(2);
+  }
   
   
   return (
@@ -1314,12 +1460,13 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
               <div className="w-full md:w-[8%] ">
                 <label>Discount %</label>
                 <input
-                  disabled
-                  value={(formFields.gst==="5"||formFields.gst===5)?"4.76":(formFields.gst==="12"||formFields.gst===12)?"10.71":(formFields.gst==="18"||formFields.gst===18)?"15.25":"0"}
+                  // disabled
+                  value={formFields.discount}
+                  // value={(formFields.gst==="5"||formFields.gst===5)?"4.76":(formFields.gst==="12"||formFields.gst===12)?"10.71":(formFields.gst==="18"||formFields.gst===18)?"15.25":"0"}
                   onChange={(e) =>
                     setFormFields({ ...formFields, discount: e.target.value })
                   }
-                  className="border p-2 w-full bg-gray-300 text-black outline-none rounded-sm"
+                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
                 />
               </div>
               <div className="w-full md:w-[5%] ">
@@ -1534,7 +1681,9 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
   </td>
               <td className="p-2 text-center">{t.price}</td>
               <td className="p-2 text-center">{t.rate}</td>
-              <td className="p-2 text-center">{t.total}</td>
+              <td className="p-2 text-center">
+          {calculateTotal(t.rate, t.strips, t.discount, t.gst)}
+        </td>
               <td className="p-2 flex items-center justify-center gap-2">
                 <div className="cursor-pointer" onClick={() => handleEdit(t, index)} title="Edit">
                   <PencilSquareIcon className="h-5 w-5 text-blue-600 hover:text-blue-800" />

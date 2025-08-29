@@ -351,7 +351,7 @@ const BillDetailPage = (props) => {
       pageClone.remove();
     }
   
-    pdf.save(`Invoice-SJ000${billdata.billNo}.pdf`);
+    pdf.save(`${billdata.clientName}.pdf`);
     setDownloading(false);
   };
   
@@ -483,7 +483,7 @@ const BillDetailPage = (props) => {
               <div className="w-[65%] flex  justify-between pb-4 ">
                 <div>
                   <div className="text-sm">
-                    Invoice No.: SJ000{billdata.billNo}
+                    Invoice No.: SJ000{billdata.billNo-46}
                   </div>
                   {/* <div className="text-sm">
                     Sales man: {billdata.salesperson}
