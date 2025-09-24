@@ -1348,7 +1348,16 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
               </div>
               <div className="w-full md:w-[14%] ">
                 <label>HSM</label>
-                <select
+                <input
+                  type="text"
+                  value={formFields.hsm}
+                  onChange={(e) =>
+                    setFormFields({ ...formFields, hsm: e.target.value })
+                  }
+                  className="border p-2 w-full bg-white text-black outline-none rounded-sm"
+                  required
+                />
+                {/* <select
                   type="number"
                   value={formFields.hsm}
                   onChange={(e) =>
@@ -1396,7 +1405,7 @@ const [customDateRange, setCustomDateRange] = useState({ from: "", to: "" });
                   <option value={"30049099"}>
                     {`30049099` + "   " + `12.00` + "   " + `6+6+12 G`}
                   </option>
-                </select>
+                </select> */}
               </div>
 
               <div className="w-full md:w-[12%] ">
