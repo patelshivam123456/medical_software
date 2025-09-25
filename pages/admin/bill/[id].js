@@ -547,13 +547,14 @@ const BillDetailPage = (props) => {
         <th className="border-r border-b px-3 pb-4 text-left">Sn.</th>
         <th className="border-r border-b px-3 pb-4 text-left">Pack</th>
         <th className="border-r border-b px-3 pb-4 text-left">Qty</th>
-        <th className="border-r border-b px-3 pb-4 text-left min-w-[250px]">Product</th>
+        <th className="border-r border-b px-3 pb-4 text-left min-w-[220px]">Product</th>
         <th className="border-r border-b px-3 pb-4 text-left">Batch</th>
         <th className="border-r border-b px-3 pb-4 text-left">Mg</th>
         <th className="border-r border-b px-3 pb-4 text-left">Exp.</th>
         <th className="border-r border-b px-3 pb-4 text-left">HSN</th>
         <th className="border-r border-b px-3 pb-4 text-left">DIS.(%)</th>
-        <th className="border-r border-b px-3 pb-4 text-left">GST(%)</th>
+        <th className="border-r border-b px-3 pb-4 text-left" style={{textAlign:"right"}}>CGST(%)</th>
+        <th className="border-r border-b px-3 pb-4 text-left" style={{textAlign:"right"}}>SGST(%)</th>
         <th className="border-r border-b px-3 pb-4" style={{textAlign:"right"}}>MRP</th>
         <th className="border-r border-b px-3 pb-4" style={{textAlign:"right"}}>Rate</th>
         <th className="border-r border-b px-3 pb-4 w-[100px]" style={{textAlign:"right"}}>Amount</th>
@@ -566,7 +567,7 @@ const BillDetailPage = (props) => {
           <td className="border-r px-3 pb-1 text-sm">{i + 1}</td>
           <td className="border-r px-3 pb-1 text-sm">{t.packing}</td>
           <td className="border-r px-3 pb-1 text-sm">{t.strips}</td>
-          <td className="border-r px-3 pb-1 min-w-[250px] text-sm">
+          <td className="border-r px-3 pb-1 min-w-[220px] text-sm">
             {t.category === "INJ"
               ? t.category + " " + t?.name?.toUpperCase()
               : t?.name?.toUpperCase()}
@@ -579,8 +580,9 @@ const BillDetailPage = (props) => {
           </td>
           <td className="border-r px-3 pb-1 text-sm">{t.expiry}</td>
           <td className="border-r px-3 pb-1 text-sm">{t.hsm}</td>
-          <td className="border-r px-3 pb-1 text-sm">{t.discount}</td>
-          <td className="border-r px-3 pb-1 text-sm">{t.gst}</td>
+          <td className="border-r px-3 pb-1 text-sm text-right">{t.discount}</td>
+          <td className="border-r px-3 pb-1 text-sm text-right">{t.cgst}</td>
+          <td className="border-r px-3 pb-1 text-sm text-right">{t.sgst}</td>
           <td className="border-r px-3 pb-1 text-right font-mono text-sm">
             {Number(t.price).toFixed(2)}
           </td>
@@ -597,7 +599,7 @@ const BillDetailPage = (props) => {
       {billdata.tablets.length < 14 &&
     Array.from({ length: 14 - billdata.tablets.length }).map((_, idx) => (
       <tr key={"empty-" + idx}>
-        {Array.from({ length: 12 }).map((_, colIdx) => (
+        {Array.from({ length: 13 }).map((_, colIdx) => (
           <td key={colIdx} className="border-r px-3">&nbsp;</td>
         ))}
       </tr>
